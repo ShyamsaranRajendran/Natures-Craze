@@ -15,10 +15,60 @@ function generateOTP() {
 }
 
 // Route for user registration
+// router.post("/register", async function (req, res) {
+//   try {
+//     const { name, email, username, password, phoneNumber, confirm_password } =
+//       req.body;
+
+//     // Password match check
+//     if (password !== confirm_password) {
+//       return res.status(400).json({ error: 'Passwords do not match' });
+//     }
+
+//     // Check if the username already exists
+//     const existingUser = await User.findOne({ username: username });
+//     if (existingUser) {
+//       return res.status(400).json({ error: 'Username already exists, choose another' });
+//     }
+
+//     // Hash password before saving
+//     const salt = await bcrypt.genSalt(10);
+//     const hash = await bcrypt.hash(password, salt);
+
+//     const newUser = new User({
+//       name: name,
+//       email: email,
+//       username: username,
+//       password: hash,
+//       phoneNumber: phoneNumber,
+//       admin: 0,
+//     });
+
+//     await newUser.save();
+
+//     // Send a welcome email
+//     await mailer(
+//       email,
+//       "reg",
+//       "Welcome to Raattai and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
+//     );
+
+//     res.json({ success: "You will receive an email notification." });
+//   } catch (error) {
+//     console.error("Error registering user:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 router.post("/register", async function (req, res) {
   try {
-    const { name, email, username, password, phoneNumber, confirm_password } =
-      req.body;
+    console.log("Request Body:", req.body); // Debugging request body
+
+    const { name, email, username, password, phoneNumber, confirm_password, address } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !username || !password || !confirm_password || !phoneNumber) {
+      return res.status(400).json({ error: 'All fields are required except address' });
+    }
 
     // Password match check
     if (password !== confirm_password) {
@@ -41,17 +91,18 @@ router.post("/register", async function (req, res) {
       username: username,
       password: hash,
       phoneNumber: phoneNumber,
-      admin: 0,
+      admin: 0, // Assuming admin is by default 0 (non-admin)
+      address: address || '', // Optional address field
     });
 
     await newUser.save();
 
-    // Send a welcome email
-    await mailer(
-      email,
-      "reg",
-      "Welcome to Raattai and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
-    );
+    // // Send a welcome email
+    // await mailer(
+    //   email,
+    //   "reg",
+    //   "Welcome to Raattai and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
+    // );
 
     res.json({ success: "You will receive an email notification." });
   } catch (error) {
@@ -61,30 +112,70 @@ router.post("/register", async function (req, res) {
 });
 
 // Route for user login
-router.post("/login", function (req, res, next) {
-  passport.authenticate("local", function (err, user, info) {
-    if (err) {
-      return res.status(500).json({ error: "Error authenticating user" });
-    }
-    if (!user) {
-      return res.status(400).json({ error: "Invalid username or password" });
-    }
-    req.logIn(user, function (err) {
-      if (err) {
-        return res.status(500).json({ error: "Error logging in user" });
-      }
+router.post('/login', async (req, res, next) => {
+  const { username, password } = req.body;
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-        expiresIn: "1h",
-      });
-      return res.json({
-        message: "Login successful",
-        user: req.user,
-        token: token,
-      });
+  try {
+    // Step 1: Find the user by username (or email, depending on your schema)
+    const user = await User.findOne({ username }); // Use email if you're validating by email
+
+    // Step 2: Check if user exists
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    // Step 3: Check if the password is correct
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    // Step 4: Generate JWT token upon successful login
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: '1h', // Set expiration time for the token
     });
-  })(req, res, next);
+
+    // Step 5: Send a success response with the token and user info
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+      token, // Include the generated token in the response
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error logging in user' });
+  }
 });
+
+// router.post("/login", function (req, res, next) {
+//   passport.authenticate("local", function (err, user, info) {
+//     if (err) {
+//       return res.status(500).json({ error: "Error authenticating user" });
+//     }
+//     if (!user) {
+//       return res.status(400).json({ error: "Invalid username or password" });
+//     }
+//     req.logIn(user, function (err) {
+//       if (err) {
+//         return res.status(500).json({ error: "Error logging in user" });
+//       }
+
+//       const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+//         expiresIn: "1h",
+//       });
+//       return res.json({
+//         message: "Login successful",
+//         user: req.user,
+//         token: token,
+//       });
+//     });
+//   })(req, res, next);
+// });
 
 // Route to logout (removes JWT from client)
 router.get("/logout", function (req, res) {

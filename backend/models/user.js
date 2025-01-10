@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 
 // userSchema
 var userSchema = mongoose.Schema({
-
     name: {
         type: String,
         required: true
@@ -24,9 +23,13 @@ var userSchema = mongoose.Schema({
         required: true
     },
     admin: {
-        type: Number
+        type: Number,
+        default: 0 // Non-admin by default
     },
-    cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' }
+    address: {
+        type: String,  // Optional field for the address
+        default: ''    // Default value to empty string if not provided
+    }
 });
 
 var User = module.exports = mongoose.model('User', userSchema);

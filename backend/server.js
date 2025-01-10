@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const db = mongoose.connection;
@@ -16,18 +15,22 @@ db.once('open', function () {
 
 const app = express();
 
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false })); 
-app.use(bodyParser.json()); 
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:3000', // Allows only React app to access this API
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+}));
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 const user = require('./routes/user');
 app.use('/auth/', user);
 
-
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
