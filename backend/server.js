@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const user = require('./routes/user');
-app.use('/auth/', user);
+app.use('/auth', user);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

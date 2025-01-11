@@ -14,51 +14,6 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-// Route for user registration
-// router.post("/register", async function (req, res) {
-//   try {
-//     const { name, email, username, password, phoneNumber, confirm_password } =
-//       req.body;
-
-//     // Password match check
-//     if (password !== confirm_password) {
-//       return res.status(400).json({ error: 'Passwords do not match' });
-//     }
-
-//     // Check if the username already exists
-//     const existingUser = await User.findOne({ username: username });
-//     if (existingUser) {
-//       return res.status(400).json({ error: 'Username already exists, choose another' });
-//     }
-
-//     // Hash password before saving
-//     const salt = await bcrypt.genSalt(10);
-//     const hash = await bcrypt.hash(password, salt);
-
-//     const newUser = new User({
-//       name: name,
-//       email: email,
-//       username: username,
-//       password: hash,
-//       phoneNumber: phoneNumber,
-//       admin: 0,
-//     });
-
-//     await newUser.save();
-
-//     // Send a welcome email
-//     await mailer(
-//       email,
-//       "reg",
-//       "Welcome to Raattai and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
-//     );
-
-//     res.json({ success: "You will receive an email notification." });
-//   } catch (error) {
-//     console.error("Error registering user:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 router.post("/register", async function (req, res) {
   try {
     console.log("Request Body:", req.body); // Debugging request body
@@ -101,7 +56,7 @@ router.post("/register", async function (req, res) {
     // await mailer(
     //   email,
     //   "reg",
-    //   "Welcome to Raattai and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
+    //   "Welcome to curcumin and happy purchasing. Please confirm your registration by logging in at http://3.6.184.48:3000/login"
     // );
 
     res.json({ success: "You will receive an email notification." });
@@ -113,11 +68,11 @@ router.post("/register", async function (req, res) {
 
 // Route for user login
 router.post('/login', async (req, res, next) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
     // Step 1: Find the user by username (or email, depending on your schema)
-    const user = await User.findOne({ username }); // Use email if you're validating by email
+    const user = await User.findOne({ email }); // Use email if you're validating by email
 
     // Step 2: Check if user exists
     if (!user) {
@@ -152,31 +107,6 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// router.post("/login", function (req, res, next) {
-//   passport.authenticate("local", function (err, user, info) {
-//     if (err) {
-//       return res.status(500).json({ error: "Error authenticating user" });
-//     }
-//     if (!user) {
-//       return res.status(400).json({ error: "Invalid username or password" });
-//     }
-//     req.logIn(user, function (err) {
-//       if (err) {
-//         return res.status(500).json({ error: "Error logging in user" });
-//       }
-
-//       const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-//         expiresIn: "1h",
-//       });
-//       return res.json({
-//         message: "Login successful",
-//         user: req.user,
-//         token: token,
-//       });
-//     });
-//   })(req, res, next);
-// });
-
 // Route to logout (removes JWT from client)
 router.get("/logout", function (req, res) {
   try {
@@ -193,33 +123,37 @@ router.get("/logout", function (req, res) {
 });
 
 // Route to initiate password reset
-router.post("/forgot-password", async (req, res) => {
+router.post('/forgot', async (req, res) => {
   try {
+    console.log('Request Body:', req.body); 
     const { email } = req.body;
+    const allUsers = await User.find({});
+console.log('All Users:', allUsers);
 
     // Find user by email
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email });
+    console.log(User.find({}));
+    console.log('User Found:', user);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     const OTP = generateOTP();
-    // Send OTP to user's email
     await mailer(
       email,
-      "Password Reset OTP",
+      'Password Reset OTP',
       `Your OTP for password reset is: ${OTP}`,
       `Your OTP for password reset is: <b>${OTP}</b>`
     );
 
-    // Generate JWT token with email and OTP
-    const token = jwt.sign({ email, OTP }, JWT_SECRET, { expiresIn: "15m" });
+    const token = jwt.sign({ email, OTP }, JWT_SECRET, { expiresIn: '15m' });
     res.json({ token });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error sending email" });
+    res.status(500).json({ error: 'Error sending email' });
   }
 });
+
 
 // Route to verify OTP during password reset
 router.post("/verify-otp", authenticate, async (req, res) => {

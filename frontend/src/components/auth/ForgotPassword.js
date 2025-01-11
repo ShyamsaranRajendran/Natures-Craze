@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${backendURL}/auth/forgot-password`, { email });
+      const response = await axios.post(`${backendURL}/auth/forgot`, { email });
       setMessage('OTP sent to your email');
       setError(''); // Clear any previous error
       setTimeout(() => {
@@ -22,7 +22,7 @@ const ForgotPassword = () => {
       }, 1500); // Delay the redirect to show success message for 1.5 seconds
     } catch (error) {
       setError('Error sending OTP');
-      setMessage(''); // Clear any success message
+      setMessage(''); 
     }
   };
 

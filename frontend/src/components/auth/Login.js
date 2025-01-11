@@ -6,21 +6,21 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Eye icons for showing and
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Change username to email
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [error, setError] = useState('');
-const navigate = useNavigate({ startTransition: true });
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${backendURL}/auth/login`, { username, password });
+      const response = await axios.post(`${backendURL}/auth/login`, { email, password });
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {
-      setError('Invalid username or password');
+      setError('Invalid email or password');
     }
   };
 
@@ -39,10 +39,10 @@ const navigate = useNavigate({ startTransition: true });
         )}
         <form onSubmit={handleLogin} className="space-y-4">
           <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email" // Change input type to email
+            placeholder="Email"
+            value={email} // Bind email state
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
           />
           
