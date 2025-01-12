@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify'; // Import react-toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import the toast CSS
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const ResetPassword = () => {
@@ -9,39 +13,52 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  const navigate = useNavigate(); // Initialize the navigate function
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
       setError("Passwords don't match");
+      toast.error("Passwords don't match");
       return;
     }
 
     try {
       const token = localStorage.getItem('token'); // Get JWT from localStorage
-      await axios.post(`${backendURL}/auth/reset-password`, {
-        OTP,
-        newPassword,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        `${backendURL}/auth/reset-password`,
+        {
+          OTP,
+          newPassword,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Handle success
       setMessage('Password reset successfully');
+      setError('');
+      toast.success('Password reset successfully!');
+
+      // Navigate to the login page
+      navigate('/login');
     } catch (error) {
       setError('Error resetting password');
+      toast.error('Error resetting password');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-500 px-4 sm:px-6 md:px-8">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-96">
-        <h2 className="text-3xl font-bold text-center text-black mb-6">Reset Password</h2>
-        
-        {error && <p className="text-red-500 text-sm text-center mb-4 animate-pulse">{error}</p>}
-        {message && <p className="text-green-500 text-sm text-center mb-4 animate-pulse">{message}</p>}
-        
-        <form onSubmit={handleResetPassword} className="space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-200">
+      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center text-orange-500">Reset Password</h1>
+        {error && <p className="text-red-500 text-sm text-center mt-2 animate-pulse">{error}</p>}
+        {message && <p className="text-green-500 text-sm text-center mt-2 animate-pulse">{message}</p>}
+        <form className="mt-6" onSubmit={handleResetPassword}>
           {/* OTP Input: 6 digits */}
-          <div className="flex space-x-2 justify-center">
+          <div className="flex justify-center space-x-2 mb-4">
             {[...Array(6)].map((_, index) => (
               <input
                 key={index}
@@ -56,33 +73,35 @@ const ResetPassword = () => {
                     return newOTP.join('');
                   });
                 }}
-                className="w-12 h-12 text-center text-2xl font-bold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                className="w-12 h-12 text-center text-2xl font-bold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             ))}
           </div>
-          
           {/* New Password */}
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">New Password</label>
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
           {/* Confirm Password */}
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-
-          {/* Reset Button */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-black font-semibold py-2 rounded-md hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 transition transform hover:scale-105"
+            className="w-full bg-orange-500 text-white py-2 rounded-lg mt-4 hover:bg-orange-600"
           >
             Reset Password
           </button>

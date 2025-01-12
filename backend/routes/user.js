@@ -125,18 +125,19 @@ router.get("/logout", function (req, res) {
 // Route to initiate password reset
 router.post('/forgot', async (req, res) => {
   try {
+      console.log("Forgot password route hit");
+
     console.log('Request Body:', req.body); 
     const { email } = req.body;
     const allUsers = await User.find({});
 console.log('All Users:', allUsers);
 
     // Find user by email
-    const user = await User.findOne({ email });
-    console.log(User.find({}));
-    console.log('User Found:', user);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+   const user = await User.findOne({ email });
+if (!user) {
+  console.log('User with this email does not exist.');
+  return res.status(404).json({ error: 'User not found' });
+}
 
     const OTP = generateOTP();
     await mailer(
@@ -184,9 +185,12 @@ router.post("/verify-otp", authenticate, async (req, res) => {
 });
 
 // Route to reset password after OTP verification
-router.post("/reset-password", authenticate, async (req, res) => {
+router.post('/reset-password', authenticate, async (req, res) => {
   try {
+    console.log("Reset password route hit");
+    console.log("Request Body:", req.body);
     const { newPassword } = req.body;
+    
     const user = await User.findOne({ email: req.email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });

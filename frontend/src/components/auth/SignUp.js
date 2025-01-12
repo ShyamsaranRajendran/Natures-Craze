@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -34,7 +34,7 @@ const SignUp = () => {
         password,
         confirm_password: confirmPassword,
         phoneNumber,
-        address,  // Send the address field even if it's empty
+        address,
       });
       navigate('/login');
     } catch (error) {
@@ -51,105 +51,114 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-500 px-4 sm:px-6 md:px-8">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-96">
-        <h2 className="text-3xl font-bold text-center text-black mb-6">Sign Up</h2>
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4 animate-pulse">
-            {error}
-          </p>
-        )}
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          <input
-            type="text"
-            placeholder="Phone Number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          <input
-            type="text"
-            placeholder="Address (optional)"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
-          {/* Password Input */}
-          <div className="relative">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-200">
+      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center text-orange-500">Sign Up</h1>
+        <p className="text-center mt-2 text-gray-500">Create your account</p>
+        {error && <div className="text-red-500 text-sm text-center mt-2">{error}</div>}
+        <form className="mt-6" onSubmit={handleSignUp}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
             <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              type="text"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-            <span
-              onClick={togglePasswordVisibility}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-            >
-              {showPassword ? (
-                <FaEyeSlash className="text-gray-600" />
-              ) : (
-                <FaEye className="text-gray-600" />
-              )}
-            </span>
           </div>
-
-          {/* Confirm Password Input */}
-          <div className="relative">
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
             <input
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="example@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <span
-              onClick={toggleConfirmPasswordVisibility}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
-            >
-              {showConfirmPassword ? (
-                <FaEyeSlash className="text-gray-600" />
-              ) : (
-                <FaEye className="text-gray-600" />
-              )}
-            </span>
           </div>
-
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="123-456-7890"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Address (optional)</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div
+                className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="********"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <div
+                className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+                onClick={toggleConfirmPasswordVisibility}
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
+            </div>
+          </div>
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-black font-semibold py-2 rounded-md hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 transition transform hover:scale-105"
+            className="w-full bg-orange-500 text-white py-2 rounded-lg mt-4 hover:bg-orange-600"
           >
             Sign Up
           </button>
         </form>
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <div className="mt-4 text-center text-sm text-gray-500">
           Already have an account?{' '}
-          <a href="/login" className="text-yellow-500 hover:underline">
-            Login
-          </a>
-        </p>
+          <span
+            className="text-orange-500 cursor-pointer"
+            onClick={() => navigate('/login')}
+          >
+            Log In
+          </span>
+        </div>
       </div>
     </div>
   );

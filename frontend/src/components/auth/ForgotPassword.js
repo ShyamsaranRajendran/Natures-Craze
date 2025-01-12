@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const ForgotPassword = () => {
@@ -27,34 +28,36 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-500 px-4 sm:px-6 md:px-8">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-96">
-        <h2 className="text-3xl font-bold text-center text-black mb-6">Forgot Password</h2>
-        {error && <p className="text-red-500 text-sm text-center mb-4 animate-pulse">{error}</p>}
-        {message && <p className="text-green-500 text-sm text-center mb-4 animate-pulse">{message}</p>}
-        
-        <form onSubmit={handleForgotPassword} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
-          />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-200">
+      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center text-orange-500">Forgot Password</h1>
+        <p className="text-center mt-2 text-gray-500">We'll send you an OTP</p>
+        {error && <div className="text-red-500 text-sm text-center mt-2">{error}</div>}
+        {message && <div className="text-green-500 text-sm text-center mt-2">{message}</div>}
+        <form className="mt-6" onSubmit={handleForgotPassword}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="example@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-black font-semibold py-2 rounded-md hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 transition transform hover:scale-105"
+            className="w-full bg-orange-500 text-white py-2 rounded-lg mt-4 hover:bg-orange-600"
           >
             Send OTP
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <div className="mt-4 text-center text-sm text-gray-500">
           Remember your password?{' '}
-          <a href="/login" className="text-yellow-500 hover:underline">
+          <a href="/login" className="text-orange-500 hover:underline">
             Login here
           </a>
-        </p>
+        </div>
       </div>
     </div>
   );

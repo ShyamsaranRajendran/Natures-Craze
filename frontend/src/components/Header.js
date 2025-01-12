@@ -1,18 +1,21 @@
+import React from "react";
+import Logo from "../assets/logo.svg";
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+const Header = () => {
+  return (
+    <header className="bg-white shadow-md fixed top-0 w-full z-50 hover:bg-opacity-10 transition-all duration-300">
+      <div className="flex items-center justify-between px-4 py-3">
+        <h1 className="text-xl font-bold text-yellow-600">Turmeric World</h1>
+        <div className="flex items-center space-x-4">
+          <img
+            src={Logo}
+            alt="Logo"
+            className="text-gray-500 bg-black w-5 h-5 cursor-pointer hover:text-yellow-600 transition-colors"
+          />
+        </div>
+      </div>
+    </header>
+  );
+};
 
-const Header = () => (
-  <header className="bg-yellow-600 text-white p-4 shadow-md">
-    <div className="container mx-auto flex justify-between items-center">
-      <h1 className="text-xl font-bold">Turmeric Bliss</h1>
-      <nav>
-        <ul className="flex space-x-4">
-          <li><Link to="/" className="hover:text-yellow-200">Home</Link></li>
-          <li><Link to="/products" className="hover:text-yellow-200">Products</Link></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-);
+export default Header;

@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes heroSlide {
+  0% {
+    background-image: url('../src//assets/turmeric_1.jpg');
+  }
+  33% {
+    background-image: url('../src/assets/turmeric_2.webp');
+  }
+  66% {
+    background-image: url('../src/assets/turmeric_3.jpg');
+  }
+  100% {
+    background-image: url('../src/assets/turmeric_4.webp');
+  }
+}
+
+.animate-hero-section {
+  animation: heroSlide 15s ease-in-out infinite;
+}
+
+/* Ensure close button has enough contrast and click area */
+.button190 {
+  z-index: 9999; /* Keep it above modal content */
+  cursor: pointer;
+}
