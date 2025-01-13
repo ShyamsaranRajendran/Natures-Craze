@@ -1,42 +1,71 @@
-import React from 'react';
-import { Home, Heart, User, PlusCircle } from 'lucide-react';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { Home, Phone, Info, ShoppingBag } from "lucide-react";
 
 const BottomNavigation = () => {
   return (
     <div className="relative mt-20">
       {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 w-full bg-white shadow-lg py-4 flex items-center justify-around">
+      <div className="fixed bottom-0 w-full bg-white shadow-xl py-4 flex items-center justify-around z-10 border-t-2 border-gray-300">
         {/* Home Button */}
-        <button className="group flex flex-col items-center">
-          <Home className="w-6 h-6 text-gray-500 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 group-hover:text-orange-500 transition-all duration-300" />
-          <span className="text-gray-500 text-xs group-hover:text-orange-500 transition-colors duration-300">
-            Home
-          </span>
-        </button>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `group flex flex-col items-center ${
+              isActive ? "text-orange-500" : "text-gray-500"
+            }`
+          }
+        >
+          <Home
+            className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
+          />
+          <span className="text-xs transition-colors duration-300">Home</span>
+        </NavLink>
 
-        {/* Add Button */}
-        <button className="group flex flex-col items-center">
-          <PlusCircle className="w-6 h-6 text-gray-500 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 group-hover:text-green-500 transition-all duration-300" />
-          <span className="text-gray-500 text-xs group-hover:text-green-500 transition-colors duration-300">
-            Add
-          </span>
-        </button>
+        {/* Products Button */}
+        <NavLink
+          to="/products"
+          className={({ isActive }) =>
+            `group flex flex-col items-center ${
+              isActive ? "text-red-500" : "text-gray-500"
+            }`
+          }
+        >
+          <ShoppingBag
+            className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
+          />
+          <span className="text-xs transition-colors duration-300">Products</span>
+        </NavLink>
 
-        {/* User Button */}
-        <button className="group flex flex-col items-center">
-          <User className="w-6 h-6 text-gray-500 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 group-hover:text-blue-500 transition-all duration-300" />
-          <span className="text-gray-500 text-xs group-hover:text-blue-500 transition-colors duration-300">
-            Profile
-          </span>
-        </button>
+        {/* About Button */}
+        <NavLink
+          to="/about"
+          className={({ isActive }) =>
+            `group flex flex-col items-center ${
+              isActive ? "text-blue-500" : "text-gray-500"
+            }`
+          }
+        >
+          <Info
+            className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
+          />
+          <span className="text-xs transition-colors duration-300">About</span>
+        </NavLink>
 
-        {/* Favorite Button */}
-        <button className="group flex flex-col items-center">
-          <Heart className="w-6 h-6 text-gray-500 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 group-hover:text-red-500 transition-all duration-300" />
-          <span className="text-gray-500 text-xs group-hover:text-red-500 transition-colors duration-300">
-            Favorites
-          </span>
-        </button>
+        {/* Contact Button */}
+        <NavLink
+          to="/contact"
+          className={({ isActive }) =>
+            `group flex flex-col items-center ${
+              isActive ? "text-green-500" : "text-gray-500"
+            }`
+          }
+        >
+          <Phone
+            className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
+          />
+          <span className="text-xs transition-colors duration-300">Contact</span>
+        </NavLink>
       </div>
     </div>
   );

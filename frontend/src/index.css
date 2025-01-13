@@ -4,7 +4,7 @@
 
 @keyframes heroSlide {
   0% {
-    background-image: url('../src//assets/turmeric_1.jpg');
+    background-image: url('../src/assets/turmeric_1.jpg');
   }
   33% {
     background-image: url('../src/assets/turmeric_2.webp');
@@ -21,8 +21,30 @@
   animation: heroSlide 15s ease-in-out infinite;
 }
 
+/* Global Font Family */
+body {
+  font-family: 'Roboto', sans-serif; /* Set Roboto as the default for body */
+}
+
+/* Heading Font Style */
+h1, h2, h3, h4, h5 {
+  font-family: 'Poppins', sans-serif; /* Use Poppins for all headings */
+}
+
 /* Ensure close button has enough contrast and click area */
 .button190 {
   z-index: 9999; /* Keep it above modal content */
   cursor: pointer;
+}
+
+/* Example styling for links with hover effects */
+a {
+  font-family: 'Roboto', sans-serif;
+  text-decoration: none;
+  color: #1a202c; /* Dark text color */
+  transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+  color: #e53e3e; /* Change color to red on hover */
 }

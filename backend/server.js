@@ -28,6 +28,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const user = require('./routes/user');
+const prod = require('./routes/users/products');
+app.use('/prod', prod);
 app.use('/auth', user);
 
 const port = process.env.PORT || 5000;
