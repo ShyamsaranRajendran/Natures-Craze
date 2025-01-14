@@ -17,7 +17,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000','http://192.168.183.209:3000'], // Allows only React app to access this API
+  origin: ['http://localhost:3000','http://192.168.183.209:3000',"https://turmeric-pi.vercel.ap/"], // Allows only React app to access this API
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
 }));
