@@ -114,9 +114,11 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="spinner border-t-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
-        <p className="ml-4 text-xl">Loading...</p>
+      <div className="flex items-center justify-center h-screen bg-customYellow">
+        <div
+          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+          aria-label="Loading..."
+        ></div>
       </div>
     );
   }
@@ -147,14 +149,18 @@ const ProductDetails = () => {
           alt={product.name}
           className="w-full h-48 object-cover mb-6 rounded-lg"
         />
-        <p className="text-lg mb-4">{product.description}</p>
+        <p className="text-gray-800 mb-4">{product.description}</p>
         <p className="text-2xl font-bold text-gray-900 mt-4">
           ₹{product.price}
         </p>
-        <p className="text-green-600 mt-2">Stock: {product.stock}</p>
-        <p className="text-yellow-500 mt-2">Rating: {product.rating}⭐</p>
+        <p className=" mt-2">
+          Stock : <span className="text-green-600">{product.stock}</span>
+        </p>
+        <p className=" mt-2">
+          Rating : <span className="text-yellow-500"> {product.rating}</span>⭐
+        </p>
 
-        <div className="flex justify-between items-center p-4 border-t border-gray-200">
+        <div className="flex justify-between items-center px-0 py-4 border-t border-gray-200">
           <button
             className="flex items-center text-blue-500"
             onClick={() => handleShare(product)}

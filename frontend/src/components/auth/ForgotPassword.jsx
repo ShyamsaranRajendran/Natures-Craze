@@ -28,15 +28,26 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-200">
-      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center text-orange-500">Forgot Password</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      <div className="bg-white shadow-lg rounded-lg px-6 py-8 max-w-md w-full mx-auto relative">
+        {" "}
+        <h1 className="text-2xl font-bold text-center text-orange-500">
+          Forgot Password
+        </h1>
         <p className="text-center mt-2 text-gray-500">We'll send you an OTP</p>
-        {error && <div className="text-red-500 text-sm text-center mt-2">{error}</div>}
-        {message && <div className="text-green-500 text-sm text-center mt-2">{message}</div>}
+        {error && (
+          <div className="text-red-500 text-sm text-center mt-2">{error}</div>
+        )}
+        {message && (
+          <div className="text-green-500 text-sm text-center mt-2">
+            {message}
+          </div>
+        )}
         <form className="mt-6" onSubmit={handleForgotPassword}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Email
+            </label>
             <input
               type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -53,7 +64,7 @@ const ForgotPassword = () => {
           </button>
         </form>
         <div className="mt-4 text-center text-sm text-gray-500">
-          Remember your password?{' '}
+          Remember your password?{" "}
           <a href="/login" className="text-orange-500 hover:underline">
             Login here
           </a>

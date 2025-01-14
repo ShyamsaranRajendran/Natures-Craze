@@ -12,6 +12,8 @@ const Products = () => {
   const [contact, setContact] = useState(null);
   const [showContactAgreement, setShowContactAgreement] = useState(false);
   const [currentProductId, setCurrentProductId] = useState(null);
+  const [userName, setUserName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,9 +34,14 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter((product) => {
+    const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex for matching
+    return (
+      regex.test(product.name) ||
+      (product.weight && regex.test(product.weight.toString())) // Check weight as a string
+    );
+  });
+
 
   const handleAddToCart = (product) => {
     setCart([...cart, product]);
@@ -82,42 +89,50 @@ const Products = () => {
     setCurrentProductId(product._id);
     setShowContactAgreement(true);
   };
+ const handleContactAgreement = async (response) => {
+   if (response === "agree") {
+     if (!userName || !mobileNumber) {
+       alert("Please provide both your name and mobile number.");
+       return;
+     }
 
-  const handleContactAgreement = async (response) => {
-    if (response === "agree") {
-      setContact("Thank you for agreeing! We will contact you.");
-      const productUrl = `http://localhost:3000/products/${currentProductId}`;
+     setContact("Thank you for agreeing! We will contact you.");
+     const productUrl = `http://localhost:3000/products/${currentProductId}`;
 
-      try {
-        const interestDetails = {
-          productId: currentProductId,
-          productUrl,
-          message: `User is interested in this product.`,
-        };
+     try {
+       const interestDetails = {
+         productId: currentProductId,
+         productUrl,
+         message: `User is interested in this product.`,
+         name: userName,
+         mobile: mobileNumber,
+       };
 
-        const res = await fetch(`${backendURL}/orders/interest`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(interestDetails),
-        });
+       const res = await fetch(`${backendURL}/orders/interest`, {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify(interestDetails),
+       });
 
-        if (!res.ok) throw new Error("Failed to send interest details.");
+       if (!res.ok) throw new Error("Failed to send interest details.");
+     } catch (err) {
+       console.error("Error sending contact agreement:", err);
+     }
+   } else {
+     setContact("You have disagreed.");
+   }
 
-      } catch (err) {
-        console.error("Error sending contact agreement:", err);
-      }
-    } else {
-      setContact("You have disagreed.");
-    }
+   setTimeout(() => {
+     setShowContactAgreement(false);
+     setContact(null);
+     setCurrentProductId(null);
+     setUserName("");
+     setMobileNumber("");
+   }, 2000);
+ };
 
-    setTimeout(() => {
-      setShowContactAgreement(false);
-      setContact(null);
-      setCurrentProductId(null);
-    }, 2000);
-  };
 
   if (loading) {
     return (
@@ -159,7 +174,7 @@ const Products = () => {
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
             Available Products
           </h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
               <div
                 key={product._id}
@@ -169,34 +184,43 @@ const Products = () => {
                   <img
                     src={product.image || DefaultImage}
                     alt={product.name}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-48 lg:h-60 object-cover"
                   />
                 </Link>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
+                <div className="p-4 flex flex-col space-y-2">
+                  <h3 className="font-semibold text-gray-800">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-gray-600 line-clamp-2">
                     {product.description}
                   </p>
-                  <p className="text-lg font-bold text-gray-900 mt-3">
-                    ₹{product.price}
+                  <p className="text-sm text-gray-500">
+                    Weight: {product.weight || "N/A"}
                   </p>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-sm text-green-600">
-                      Stock: {product.stock}
-                    </span>
-                    <span className="text-sm text-yellow-500">
-                      Rating: {product.rating}⭐
-                    </span>
+                  <p className="font-bold text-gray-900">₹{product.price}</p>
+                  <div className="flex justify-between text-sm text-gray-600 mt-2">
+                    <span>Stock: {product.stock}</span>
+                    <span>Rating: {product.rating}⭐</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center p-4 border-t border-gray-200">
+                <div className="p-4 flex justify-between items-center border-t">
                   <button
                     className="flex items-center text-blue-500"
                     onClick={() => handleShare(product)}
                   >
-                    <Share2 className="w-5 h-5 mr-2" /> Share
+                    <Share2 className="w-5 h-5 mr-1" /> Share
+                  </button>
+                  <button
+                    className="flex items-center text-red-500"
+                    onClick={handleCall}
+                  >
+                    <Phone className="w-5 h-5 mr-1" /> Call
+                  </button>
+                  <button
+                    className="flex items-center text-pink-500"
+                    onClick={() => handleInterest(product)}
+                  >
+                    <Heart className="w-5 h-5 mr-1" /> Interest
                   </button>
                   {/* <button
                     className="flex items-center text-green-500"
@@ -204,7 +228,7 @@ const Products = () => {
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
                   </button> */}
-                  <button
+                  {/* <button
                     className="flex items-center text-red-500"
                     onClick={handleCall}
                   >
@@ -215,7 +239,7 @@ const Products = () => {
                     onClick={() => handleInterest(product)}
                   >
                     <Heart className="w-5 h-5 mr-2" /> Interest
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))}
@@ -227,26 +251,67 @@ const Products = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Our team will contact you?
+              Our team will contact you. Please provide your details.
             </h2>
-            <div className="flex justify-center">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded-lg mr-4"
-                onClick={() => handleContactAgreement("agree")}
-              >
-                Agree
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                onClick={() => handleContactAgreement("disagree")}
-              >
-                Disagree
-              </button>
-            </div>
-            {contact && (
+            {contact ? (
               <p className="mt-4 text-lg font-medium text-gray-700">
                 {contact}
               </p>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleContactAgreement("agree");
+                }}
+              >
+                <div className="mb-4">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="mobile"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="mobile"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg mr-4"
+                  >
+                    Agree
+                  </button>
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                    onClick={() => handleContactAgreement("disagree")}
+                  >
+                    Disagree
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>

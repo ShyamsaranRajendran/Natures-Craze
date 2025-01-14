@@ -11,7 +11,6 @@ import plant4 from "../assets/plant-4.jpg";
 import Grinding from "../assets/grinding.jpg";
 
 const HomePage = () => {
-
   const [activeCategory, setActiveCategory] = useState(null);
 
   const toggleCategory = (index) => {
@@ -22,6 +21,15 @@ const HomePage = () => {
     }
   };
   
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if(!token) {
+      setIsLoggedIn(false);
+    }
+    else {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const images = [
     { src: image1, alt: "Image 1", price: "$6.00" },
@@ -35,6 +43,7 @@ const HomePage = () => {
   ];
 
   const [shuffledImages, setShuffledImages] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
 
   const shuffleImages = () => {
     const shuffled = [...images].sort(() => Math.random() - 0.5);
@@ -49,6 +58,15 @@ const HomePage = () => {
 
   const handleCategoryClick = (categoryId) => {
     navigate(`/category/${categoryId}`);
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
+  const handleLogoutClick = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
   };
 
   return (
@@ -67,12 +85,32 @@ const HomePage = () => {
             Discover the finest turmeric powders, plants, and more to enhance
             your health and cooking.
           </p>
-          <Link
-            to="/shop"
-            className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-yellow-600 transform hover:scale-105 transition-all"
-          >
-            Shop Now
-          </Link>
+          <div className="flex flex-row items-center space-x-4">
+            {/* Shop Now Button */}
+            <Link
+              to="/products"
+              className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-yellow-600 transform hover:scale-105 transition-all"
+            >
+              Shop Now
+            </Link>
+
+            {/* Login/Logout Button */}
+            {!isLoggedIn ? (
+              <button
+                onClick={handleLoginClick}
+                className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all"
+              >
+                Login
+              </button>
+            ) : (
+              <button
+                onClick={handleLogoutClick}
+                className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all"
+              >
+                Logout
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -82,7 +120,7 @@ const HomePage = () => {
           Main Categories
         </h3>
         <div className="flex justify-center">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl">
             {images.slice(0, 4).map((image, index) => (
               <div
                 key={index}
@@ -264,7 +302,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Call to Action */}
       <div className="text-center mt-8 px-4">
         <h2 className="text-lg md:text-2xl font-poppins font-bold text-gray-800">

@@ -67,7 +67,7 @@ router.post("/register", async function (req, res) {
 });
 
 // Route for user login
-router.post('/login', async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -123,7 +123,7 @@ router.get("/logout", function (req, res) {
 });
 
 // Route to initiate password reset
-router.post('/forgot', async (req, res) => {
+router.post("/forgot", async (req, res) => {
   try {
       console.log("Forgot password route hit");
 

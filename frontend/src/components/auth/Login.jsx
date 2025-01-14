@@ -37,13 +37,7 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
   return (
     <div className="flex items-center justify-center fixed inset-0 bg-gray-500 bg-opacity-50 z-50">
       <div className="bg-white shadow-lg rounded-lg px-6 py-8 max-w-md w-full mx-auto relative">
-        <button
-          type="button"
-          onClick={onClose} // Trigger the onClose function passed as a prop
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        >
-          <FaTimes size={20} />
-        </button>
+       
         <h1 className="text-2xl font-bold text-center text-orange-500">Log In</h1>
         <p className="text-center mt-2 text-gray-500">Welcome! Please log in to continue.</p>
         {error && (
