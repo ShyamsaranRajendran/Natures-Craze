@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
-
+import { Link } from "react-router-dom";
+import DefaultImage from "../assets/default-placeholder.png";
+const backendURL=process.env.REACT_APP_BACKEND_URL;
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState([]);
-  const [contact, setContact] = useState(null); // For contact agreement state
-  const [showContactAgreement, setShowContactAgreement] = useState(false); // For toggling the contact agreement modal
+  const [contact, setContact] = useState(null);
+  const [showContactAgreement, setShowContactAgreement] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/prod/all");
+        const response = await fetch(`${backendURL}/prod/all`);
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Fetched Products:", data.products);
-        setProducts(data.products || []);
+        setProducts(data || []);
       } catch (err) {
-        console.error("Error fetching products:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -41,18 +42,11 @@ const Products = () => {
   };
 
   const handleShare = (product) => {
-    const productUrl = window.location.href + `/product/${product._id}`;
-
-    // Use Clipboard API to copy the product URL
+    const productUrl = `${window.location.origin}/product/${product._id}`;
     navigator.clipboard
       .writeText(productUrl)
-      .then(() => {
-        alert(`Product link copied to clipboard: ${productUrl}`);
-      })
-      .catch((error) => {
-        console.error("Error copying to clipboard:", error);
-        alert("Failed to copy the product link.");
-      });
+      .then(() => alert(`Product link copied to clipboard: ${productUrl}`))
+      .catch(() => alert("Failed to copy the product link."));
   };
 
   const handleCall = () => {
@@ -60,52 +54,53 @@ const Products = () => {
   };
 
   const handleInterest = (product) => {
-    setShowContactAgreement(true); // Show contact agreement modal when user expresses interest
+    setCurrentProductId(product._id);
+    setShowContactAgreement(true);
   };
 
   const handleContactAgreement = async (response) => {
     if (response === "agree") {
       setContact("Thank you for agreeing! We will contact you.");
+      const productUrl = `http://localhost:3000/products/${currentProductId}`;
 
-      // Send the product link to the backend/admin
       try {
-        const productUrl = window.location.href;
-        const productDetails = {
-          message: "User agreed to contact. Here is the product link:",
+        const interestDetails = {
+          productId: currentProductId,
           productUrl,
+          message: `User is interested in this product.`,
         };
 
-        const response = await fetch(
-          "http://localhost:5000/contact-agreement",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(productDetails),
-          }
-        );
+        const res = await fetch(`${backendURL}/orders/interest`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(interestDetails),
+        });
 
-        if (!response.ok) {
-          throw new Error("Failed to send the link to the backend.");
-        }
+        if (!res.ok) throw new Error("Failed to send interest details.");
 
-        alert("The link has been sent to the admin.");
       } catch (err) {
         console.error("Error sending contact agreement:", err);
-        alert("Failed to send the link to the backend.");
       }
     } else {
-      setContact("You have disagreed. We won't contact you.");
+      setContact("You have disagreed.");
     }
 
-    setShowContactAgreement(false); // Close the modal after agreement
+    setTimeout(() => {
+      setShowContactAgreement(false);
+      setContact(null);
+      setCurrentProductId(null);
+    }, 3000);
   };
 
   if (loading) {
     return (
-      <div className="text-center text-lg font-medium text-gray-700 mt-10">
-        Loading products...
+      <div className="flex items-center justify-center h-screen bg-customYellow">
+        <div
+          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+          aria-label="Loading..."
+        ></div>
       </div>
     );
   }
@@ -145,11 +140,13 @@ const Products = () => {
                 key={product._id}
                 className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
-                <img
-                  src={product.imageURL}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
+                <Link to={`/product/${product._id}`} className="block">
+                  <img
+                    src={product.image || DefaultImage}
+                    alt={product.name}
+                    className="w-full h-48 object-cover"
+                  />
+                </Link>
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-gray-800">
                     {product.name}
@@ -158,7 +155,7 @@ const Products = () => {
                     {product.description}
                   </p>
                   <p className="text-lg font-bold text-gray-900 mt-3">
-                    ${product.price}
+                    ₹{product.price}
                   </p>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-sm text-green-600">
@@ -169,8 +166,6 @@ const Products = () => {
                     </span>
                   </div>
                 </div>
-
-                {/* Action Buttons */}
                 <div className="flex justify-between items-center p-4 border-t border-gray-200">
                   <button
                     className="flex items-center text-blue-500"
@@ -182,12 +177,12 @@ const Products = () => {
                     className="flex items-center text-green-500"
                     onClick={() => handleAddToCart(product)}
                   >
-                    <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+                    {/* <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
                   </button>
                   <button
                     className="flex items-center text-red-500"
                     onClick={handleCall}
-                  >
+                  > */}
                     <Phone className="w-5 h-5 mr-2" /> Call
                   </button>
                   <button
@@ -203,7 +198,6 @@ const Products = () => {
         </div>
       )}
 
-      {/* Contact Agreement Modal */}
       {showContactAgreement && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">

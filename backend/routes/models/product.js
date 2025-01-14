@@ -4,27 +4,21 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-     
       trim: true,
     },
     description: {
       type: String,
-     
       trim: true,
     },
     price: {
       type: Number,
-     
       min: 0,
     },
-    imageURL: {
-      type: String,
-     
-      trim: true,
+    image: {
+      type: Buffer,
     },
     stock: {
       type: Number,
-     
       min: 0,
     },
     createdAt: {
@@ -55,6 +49,7 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+// Update `updatedAt` field on document save
 productSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();

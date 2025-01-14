@@ -9,7 +9,7 @@ import ResetPassword from "./components/auth/ResetPassword";
 import Contact from "./components/Contact";
 import About from "./components/About";
 import Products from "./components/Products";
-
+import ProductDetails from "./components/ProductDetails";
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen">
     <h1 className="text-4xl font-bold text-red-500">404</h1>
@@ -59,6 +59,8 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="about" element={<About />} />
           <Route path="products" element={<Products />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
