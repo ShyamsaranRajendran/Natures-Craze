@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require("../models/product");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const multer = require("multer")
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
@@ -70,6 +71,80 @@ router.get("/:id", async (req, res) => {
     }
 
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+const storage = multer.memoryStorage(); // Store images as Buffer in memory
+const upload = multer({ storage });
+
+// Add Product Route
+router.post("/add", upload.single("image"), async (req, res) => {
+  try {
+    const { name, weight, description, price } = req.body;
+    const imageBuffer = req.file.buffer;
+
+    const newProduct = new Product({
+      name,
+      weight,
+      description,
+      price,
+      image: imageBuffer,
+    });
+
+    await newProduct.save();
+    res.status(201).json({ message: "Product added successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to add product." });
+  }
+});
+
+router.put("/update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, weight } = req.body;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    product.name = name || product.name;
+    product.weight = weight || product.weight;
+
+    if (req.files && req.files.image) {
+      product.image = req.files.image.data; // Assuming you're using express-fileupload
+    }
+
+    await product.save();
+    res.status(200).json({ message: "Product updated successfully!", product });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Failed to update the product." });
+  }
+});
+
+
+router.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Find the product by ID and delete it
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid product ID format." });
+    }
+
+    res.status(500).json({ message: "Failed to delete the product." });
   }
 });
 

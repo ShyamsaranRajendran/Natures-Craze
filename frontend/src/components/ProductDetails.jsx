@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
 import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
-
-const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+const backendURL = process.env.REACT_APP_BACKEND_URL ;
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,7 +12,9 @@ const ProductDetails = () => {
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+    const [cart, setCart] = useState([]);
+    const [userName, setUserName] = useState("");
+    const [mobileNumber, setMobileNumber] = useState("");
   const [contact, setContact] = useState(null);
   const [showContactAgreement, setShowContactAgreement] = useState(false);
 
@@ -35,11 +37,6 @@ const ProductDetails = () => {
 
     fetchProductDetails();
   }, [id]);
-
-  const handleBuyNow = () => {
-    // Redirect to the checkout page with product details
-    navigate(`/checkout/${id}`);
-  };
 
   const handleInterest = () => {
     setShowContactAgreement(true);
@@ -78,6 +75,47 @@ const ProductDetails = () => {
       setContact(null);
     }, 2000);
   };
+  
+   const handleCall = () => {
+     const phoneNumber = "+919698904457"; // International format for the phone number
+     window.location.href = `tel:${phoneNumber}`;
+   };
+
+const handleAddToCart = (product) => {
+  // Check if the product is already in the cart
+  const existingItem = cart.find(
+    (item) => item._id === product._id && item.volume === product.volume
+  );
+
+  if (existingItem) {
+    // If the product already exists, update the quantity
+    const updatedCart = cart.map((item) =>
+      item._id === product._id && item.volume === product.volume
+        ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
+        : item
+    );
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // Show toast notification
+    toast.success(`${product.name} quantity increased!`, {
+      position: "bottom-center",
+      autoClose: 3000,
+    });
+  } else {
+    // If the product doesn't exist, add it to the cart
+    const updatedCart = [...cart, { ...product, quantity: 1 }];
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // Show toast notification
+    toast.success(`${product.name} added to cart!`, {
+      position: "bottom-center",
+      autoClose: 3000,
+    });
+  }
+};
+
 
   const handleShare = (product) => {
     const productUrl = `${window.location.origin}/product/${product._id}`;
@@ -167,18 +205,22 @@ const ProductDetails = () => {
           >
             <Share2 className="w-5 h-5 mr-2" /> Share
           </button>
-          <button
+          {/* <button
             className="flex items-center text-pink-500"
             onClick={() => handleInterest(product)}
           >
             <Heart className="w-5 h-5 mr-2" /> Show Interest
-          </button>
-          <button
-            className="flex items-center text-green-500"
-            onClick={handleBuyNow}
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" /> Buy Now
-          </button>
+          </button> */}
+          <button className="flex items-center text-red-500"
+                              onClick={handleCall}
+                            >
+                              <Phone className="w-5 h-5 mr-1" /> Call
+                            </button>
+           <button className="flex items-center text-green-500"
+                              onClick={() => handleAddToCart(product)}
+                            >
+                              <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+                            </button>
         </div>
       </div>
 
@@ -208,34 +250,75 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {showContactAgreement && (
+      {/* {showContactAgreement && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Will our team contact you?
+              Our team will contact you. Please provide your details.
             </h2>
-            <div className="flex justify-center">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded-lg mr-4"
-                onClick={() => handleContactAgreement("agree")}
-              >
-                Agree
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                onClick={() => handleContactAgreement("disagree")}
-              >
-                Disagree
-              </button>
-            </div>
-            {contact && (
+            {contact ? (
               <p className="mt-4 text-lg font-medium text-gray-700">
                 {contact}
               </p>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleContactAgreement("agree");
+                }}
+              >
+                <div className="mb-4">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="mobile"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="mobile"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg mr-4"
+                  >
+                    Agree
+                  </button>
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                    onClick={() => handleContactAgreement("disagree")}
+                  >
+                    Disagree
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

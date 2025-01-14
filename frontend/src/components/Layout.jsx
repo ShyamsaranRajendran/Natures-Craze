@@ -3,8 +3,11 @@ import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "./Header";
 import Footer from "./Footer";
+import AdminFooter from "./AdminFooter"; // New footer for admin
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const Layout = () => {
+const Layout = ({ isAdmin }) => {
   const pageVariants = {
     initial: { opacity: 0, scale: 0.95 },
     in: { opacity: 1, scale: 1 },
@@ -17,6 +20,18 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ zIndex: 9999 }} // Bring ToastContainer to the top
+      />
       <Header />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
@@ -31,7 +46,8 @@ const Layout = () => {
           </motion.div>
         </AnimatePresence>
       </main>
-      <Footer />
+      {isAdmin ? <AdminFooter /> : <Footer />}{" "}
+      {/* Conditionally render footer */}
     </div>
   );
 };

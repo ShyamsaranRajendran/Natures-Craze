@@ -19,15 +19,34 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
     setError('');
 
     try {
-      const response = await axios.post(`${backendURL}/auth/login`, { email, password });
-      localStorage.setItem('token', response.data.token);
+      const response = await axios.post(`${backendURL}/auth/login`, {
+        email,
+        password,
+      });
+      localStorage.setItem("token", response.data.token);
+
       if (onLoginSuccess) onLoginSuccess(); // Close the modal
-      navigate('/'); // Redirect to the home page
+
+      // Check if the user data is available before accessing role
+      console.log(response.data.user.email);  
+      if (response.data.user.email === "curcumin138@gmail.com") {
+        navigate("/admin/dashboard");
+
+    window.location.reload();
+      } else {
+        navigate("/");
+
+    window.location.reload();
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      // Improved error handling to check if response data exists
+      const errorMessage =
+        err.response?.data?.message || "Invalid email or password";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
+
   };
 
   const togglePasswordVisibility = () => {

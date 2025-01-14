@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const backendURL=process.env.REACT_APP_BACKEND_URL;
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -42,11 +45,58 @@ const Products = () => {
     );
   });
 
+    useEffect(() => {
+      const storedCart = JSON.parse(localStorage.getItem("cart"));
+      if (storedCart) {
+        setCart(storedCart);
+      }
+    }, []);
 
-  const handleAddToCart = (product) => {
-    setCart([...cart, product]);
-    alert(`${product.name} added to cart!`);
-  };
+    // Handle adding a product to the cart
+    // const handleAddToCart = (product) => {
+    //   const updatedCart = [...cart, product];
+    //   setCart(updatedCart);
+
+    //   // Store the updated cart in localStorage
+    //   localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    //   // Show toast notification
+    //   toast.success(`${product.name} added to cart!`, {
+    //     position: "bottom-center",
+    //     autoClose: 3000,
+    //   });
+    // };
+
+
+ const handleAddToCart = (product) => {
+   // Check if the product is already in the cart
+   const existingItem = cart.find(
+     (item) => item._id === product._id && item.volume === product.volume
+   );
+
+   if (existingItem) {
+     // If the product already exists, update the quantity
+     const updatedCart = cart.map((item) =>
+       item._id === product._id && item.volume === product.volume
+         ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
+         : item
+     );
+     setCart(updatedCart);
+     localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+     // Show toast notification
+     toast.success(`${product.name} quantity increased!`);
+   } else {
+     // If the product doesn't exist, add it to the cart
+     const updatedCart = [...cart, { ...product, quantity: 1 }];
+     setCart(updatedCart);
+     localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+     // Show toast notification
+     toast.success(`${product.name} added to cart!`);
+   }
+ };
+
 
  const handleShare = (product) => {
    const productUrl = `${window.location.origin}/product/${product._id}`;
@@ -197,11 +247,11 @@ const Products = () => {
                   <p className="text-sm text-gray-500">
                     Weight: {product.weight || "N/A"}
                   </p>
-                  <p className="font-bold text-gray-900">₹{product.price}</p>
-                  <div className="flex justify-between text-sm text-gray-600 mt-2">
+                  <p className="font-bold text-gray-900">₹ {product.price}</p>
+                  {/* <div className="flex justify-between text-sm text-gray-600 mt-2">
                     <span>Stock: {product.stock}</span>
                     <span>Rating: {product.rating}⭐</span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="p-4 flex justify-between items-center border-t">
                   <button
@@ -216,30 +266,18 @@ const Products = () => {
                   >
                     <Phone className="w-5 h-5 mr-1" /> Call
                   </button>
-                  <button
+                  {/* <button
                     className="flex items-center text-pink-500"
                     onClick={() => handleInterest(product)}
                   >
                     <Heart className="w-5 h-5 mr-1" /> Interest
-                  </button>
-                  {/* <button
+                  </button> */}
+                  <button
                     className="flex items-center text-green-500"
                     onClick={() => handleAddToCart(product)}
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-                  </button> */}
-                  {/* <button
-                    className="flex items-center text-red-500"
-                    onClick={handleCall}
-                  >
-                    <Phone className="w-5 h-5 mr-2" /> Call
                   </button>
-                  <button
-                    className="flex items-center text-pink-500"
-                    onClick={() => handleInterest(product)}
-                  >
-                    <Heart className="w-5 h-5 mr-2" /> Interest
-                  </button> */}
                 </div>
               </div>
             ))}
@@ -247,7 +285,7 @@ const Products = () => {
         </div>
       )}
 
-      {showContactAgreement && (
+      {/* {showContactAgreement && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -315,7 +353,7 @@ const Products = () => {
             )}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

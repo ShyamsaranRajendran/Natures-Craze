@@ -8,11 +8,26 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const authenticate = require("../utils/ForgetAuth.js");
+const authenticateToken = require("../utils/AuthDecode.js");
 
-// Function to generate OTP
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000);
 }
+
+router.get("/role", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId); // Use `userId` from token
+   
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+ console.log("User:", user);
+    res.json({ user }); // Send the user's role
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.post("/register", async function (req, res) {
   try {
@@ -98,6 +113,7 @@ router.post("/login", async (req, res, next) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        admin: user.admin,
       },
       token, // Include the generated token in the response
     });
