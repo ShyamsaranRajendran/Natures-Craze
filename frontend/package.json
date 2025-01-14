@@ -55,7 +55,11 @@
       "react-app/jest"
     ]
   },
-  "proxy": "http://localhost:5000",
+  "engines": {
+  "node": ">=16.0.0",
+  "npm": ">=10.0.0"
+},
+  "proxy": "https://turmeric-pi.vercel.app/",
   "browserslist": {
     "production": [
       ">0.2%",

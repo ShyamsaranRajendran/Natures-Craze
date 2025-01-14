@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
+import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
+
 const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
 const ProductDetails = () => {
@@ -74,14 +76,40 @@ const ProductDetails = () => {
     setTimeout(() => {
       setShowContactAgreement(false);
       setContact(null);
-    }, 3000);
+    }, 2000);
   };
 
-  const handleShare = () => {
-    const shareURL = `${window.location.origin}/product/${id}`;
-    navigator.clipboard.writeText(shareURL).then(() => {
-      alert("Product link copied to clipboard!");
-    });
+  const handleShare = (product) => {
+    const productUrl = `${window.location.origin}/product/${product._id}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Use clipboard API if available
+      navigator.clipboard
+        .writeText(productUrl)
+        .then(() =>
+          console.log(`Product link copied to clipboard: ${productUrl}`)
+        )
+        .catch(() => alert("Failed to copy the product link."));
+    } else {
+      // Fallback for devices or browsers that do not support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = productUrl;
+      textArea.style.position = "fixed"; // Avoid scrolling to bottom
+      textArea.style.left = "-9999px"; // Hide from view
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        const successful = document.execCommand("copy");
+        const message = successful
+          ? "Product link copied to clipboard!"
+          : "Failed to copy the product link.";
+      } catch (err) {
+        alert("Your browser does not support clipboard copy.");
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    }
   };
 
   if (loading) {
@@ -126,24 +154,24 @@ const ProductDetails = () => {
         <p className="text-green-600 mt-2">Stock: {product.stock}</p>
         <p className="text-yellow-500 mt-2">Rating: {product.rating}⭐</p>
 
-        <div className="flex space-x-4 mt-6">
+        <div className="flex justify-between items-center p-4 border-t border-gray-200">
           <button
-            onClick={handleShare}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+            className="flex items-center text-blue-500"
+            onClick={() => handleShare(product)}
           >
-            Share
+            <Share2 className="w-5 h-5 mr-2" /> Share
           </button>
           <button
-            onClick={handleInterest}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+            className="flex items-center text-pink-500"
+            onClick={() => handleInterest(product)}
           >
-            Show Interest
+            <Heart className="w-5 h-5 mr-2" /> Show Interest
           </button>
           <button
+            className="flex items-center text-green-500"
             onClick={handleBuyNow}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
           >
-            Buy Now
+            <ShoppingCart className="w-5 h-5 mr-2" /> Buy Now
           </button>
         </div>
       </div>

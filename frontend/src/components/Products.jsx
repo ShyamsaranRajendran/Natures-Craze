@@ -41,17 +41,42 @@ const Products = () => {
     alert(`${product.name} added to cart!`);
   };
 
-  const handleShare = (product) => {
-    const productUrl = `${window.location.origin}/product/${product._id}`;
-    navigator.clipboard
-      .writeText(productUrl)
-      .then(() => alert(`Product link copied to clipboard: ${productUrl}`))
-      .catch(() => alert("Failed to copy the product link."));
-  };
+ const handleShare = (product) => {
+   const productUrl = `${window.location.origin}/product/${product._id}`;
 
-  const handleCall = () => {
-    alert("Dialing our customer service...");
-  };
+   if (navigator.clipboard && navigator.clipboard.writeText) {
+     // Use clipboard API if available
+     navigator.clipboard
+       .writeText(productUrl)
+       .then(() => console.log(`Product link copied to clipboard: ${productUrl}`))
+       .catch(() => alert("Failed to copy the product link."));
+   } else {
+     // Fallback for devices or browsers that do not support clipboard API
+     const textArea = document.createElement("textarea");
+     textArea.value = productUrl;
+     textArea.style.position = "fixed"; // Avoid scrolling to bottom
+     textArea.style.left = "-9999px"; // Hide from view
+     document.body.appendChild(textArea);
+     textArea.select();
+
+     try {
+       const successful = document.execCommand("copy");
+       const message = successful
+         ? "Product link copied to clipboard!"
+         : "Failed to copy the product link.";
+     } catch (err) {
+       alert("Your browser does not support clipboard copy.");
+     } finally {
+       document.body.removeChild(textArea);
+     }
+   }
+ };
+
+ const handleCall = () => {
+   const phoneNumber = "+919698904457"; // International format for the phone number
+   window.location.href = `tel:${phoneNumber}`;
+ };
+
 
   const handleInterest = (product) => {
     setCurrentProductId(product._id);
@@ -91,7 +116,7 @@ const Products = () => {
       setShowContactAgreement(false);
       setContact(null);
       setCurrentProductId(null);
-    }, 3000);
+    }, 2000);
   };
 
   if (loading) {
@@ -173,16 +198,16 @@ const Products = () => {
                   >
                     <Share2 className="w-5 h-5 mr-2" /> Share
                   </button>
-                  <button
+                  {/* <button
                     className="flex items-center text-green-500"
                     onClick={() => handleAddToCart(product)}
                   >
-                    {/* <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-                  </button>
+                    <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+                  </button> */}
                   <button
                     className="flex items-center text-red-500"
                     onClick={handleCall}
-                  > */}
+                  >
                     <Phone className="w-5 h-5 mr-2" /> Call
                   </button>
                   <button
@@ -202,7 +227,7 @@ const Products = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Will our team contact you?
+              Our team will contact you?
             </h2>
             <div className="flex justify-center">
               <button
