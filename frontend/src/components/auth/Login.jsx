@@ -54,11 +54,14 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
   };
 
   return (
-    <div className="flex items-center justify-center fixed inset-0 bg-gray-500 bg-opacity-50 z-50">
-      <div className="bg-white shadow-lg rounded-lg px-6 py-8 max-w-md w-full mx-auto relative">
-       
-        <h1 className="text-2xl font-bold text-center text-orange-500">Log In</h1>
-        <p className="text-center mt-2 text-gray-500">Welcome! Please log in to continue.</p>
+    <div className="flex items-center justify-center fixed inset-0 bg-gray-500 bg-opacity-50  ">
+      <div className="bg-white shadow-lg rounded-lg   px-6 py-8 max-w-md w-full mx-3 relative">
+        <h1 className="text-2xl font-bold text-center text-orange-500">
+          Log In
+        </h1>
+        <p className="text-center mt-2 text-gray-500">
+          Welcome! Please log in to continue.
+        </p>
         {error && (
           <div className="bg-red-100 text-red-600 border border-red-500 rounded-lg p-2 mt-4 text-center">
             {error}
@@ -66,7 +69,10 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
         )}
         <form className="mt-6" onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Email or Mobile Number
             </label>
             <input
@@ -80,13 +86,16 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Password
             </label>
             <div className="relative">
               <input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="********"
                 value={password}
@@ -111,15 +120,20 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
             type="submit"
             disabled={isSubmitting}
             className={`w-full py-2 rounded-lg mt-4 text-white ${
-              isSubmitting ? 'bg-orange-300 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
+              isSubmitting
+                ? "bg-orange-300 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
             }`}
           >
-            {isSubmitting ? 'Logging In...' : 'Log In'}
+            {isSubmitting ? "Logging In..." : "Log In"}
           </button>
         </form>
         <div className="mt-4 text-center text-sm text-gray-500">
-          Don't have an account?{' '}
-          <span className="text-orange-500 cursor-pointer hover:underline" onClick={() => navigate('/signup')}>
+          Don't have an account?{" "}
+          <span
+            className="text-orange-500 cursor-pointer hover:underline"
+            onClick={() => navigate("/signup")}
+          >
             Sign Up
           </span>
         </div>

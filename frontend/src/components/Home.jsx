@@ -66,6 +66,9 @@ const HomePage = () => {
 
   const handleLogoutClick = () => {
     localStorage.removeItem("token");
+
+    localStorage.removeItem("cart");
+    
     setIsLoggedIn(false);
     window.location.reload();
 

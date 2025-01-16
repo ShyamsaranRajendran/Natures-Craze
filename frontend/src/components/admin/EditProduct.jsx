@@ -12,6 +12,7 @@ function EditProduct() {
   const [product, setProduct] = useState({
     name: "",
     weight: "",
+    desc: "",
     image: "",
   });
   const [imageFile, setImageFile] = useState(null); // For the new image file
@@ -21,16 +22,28 @@ function EditProduct() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setLoading(true); // Start loading state
         const response = await fetch(`${backendURL}/prod/${id}`);
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch product details (status: ${response.status})`
+          );
         }
         const data = await response.json();
-        setProduct(data);
+        if (data.product) {
+          setProduct({
+            name: data.product.name || "",
+            weight: data.product.weight || "",
+            desc: data.product.description || "", // Autofill description
+            image: data.product.image || "",
+          });
+        } else {
+          throw new Error("Product not found.");
+        }
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading state
       }
     };
 
@@ -50,6 +63,7 @@ function EditProduct() {
     const formData = new FormData();
     formData.append("name", product.name);
     formData.append("weight", product.weight);
+    formData.append("desc", product.desc); // Append the description
 
     if (imageFile) {
       formData.append("image", imageFile); // Attach the image file if provided
@@ -65,15 +79,22 @@ function EditProduct() {
         toast.success("Product updated successfully!");
         navigate("/admin/products"); // Navigate back to the products list
       } else {
-        throw new Error("Failed to update product.");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update product.");
       }
     } catch (error) {
+      console.error("Error updating product:", error);
       toast.error(error.message);
     }
   };
 
-  if (loading) return <p>Loading product...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (loading) {
+    return <p className="text-gray-600">Loading product details...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">Error: {error}</p>;
+  }
 
   return (
     <div className="container mx-auto p-4 mt-20">
@@ -93,11 +114,20 @@ function EditProduct() {
         <div>
           <label className="block text-lg font-medium mb-2">Weight (g):</label>
           <input
-            type="number"
+            type="text"
             name="weight"
             value={product.weight}
             onChange={handleInputChange}
             className="border rounded-lg px-4 py-2 w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-lg font-medium mb-2">Description:</label>
+          <textarea
+            name="desc"
+            value={product.desc}
+            onChange={handleInputChange}
+            className="border rounded-lg px-4 py-2 w-full h-24"
           />
         </div>
         <div>
@@ -111,15 +141,18 @@ function EditProduct() {
           />
         </div>
         <div>
+          <label className="block text-lg font-medium mb-2">
+            Current Image:
+          </label>
           <img
             src={product.image || "https://via.placeholder.com/150"}
-            alt={product.name}
+            alt={product.name || "Product Image"}
             className="w-40 h-40 object-cover rounded-lg"
           />
         </div>
         <button
           onClick={handleUpdate}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           Update Product
         </button>

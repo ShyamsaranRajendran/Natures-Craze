@@ -29,6 +29,30 @@ router.get("/role", authenticateToken, async (req, res) => {
   }
 });
 
+// Get the total count of users
+router.get("/count", async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    res.status(200).json({ count: userCount });
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+    res.status(500).json({ message: "Failed to fetch user count." });
+  }
+});
+
+// Get the list of new registrations (e.g., users who registered in the last 7 days)
+router.get("/new-registrations", async (req, res) => {
+  try {
+    const newRegistrations = await User.find({
+      createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, 
+    }).sort({ createdAt: -1 });
+    res.status(200).json({ registrations: newRegistrations });
+  } catch (error) {
+    console.error("Error fetching new registrations:", error);
+    res.status(500).json({ message: "Failed to fetch new registrations." });
+  }
+});
+
 router.post("/register", async function (req, res) {
   try {
     console.log("Request Body:", req.body); // Debugging request body

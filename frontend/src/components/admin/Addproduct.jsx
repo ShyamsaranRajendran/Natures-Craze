@@ -77,8 +77,7 @@ const AddProduct = () => {
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Weight (kg)</label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             className="w-full border rounded-lg px-4 py-2"
             value={productWeight}
             onChange={(e) => setProductWeight(e.target.value)}

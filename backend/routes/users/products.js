@@ -148,4 +148,27 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
+router.get("/count", async (req, res) => {
+  try {
+    const productCount = await Product.countDocuments();
+    res.status(200).json({ count: productCount });
+  } catch (error) {
+    console.error("Error fetching product count:", error);
+    res.status(500).json({ message: "Failed to fetch product count." });
+  }
+});
+
+router.get("/recent", async (req, res) => {
+  try {
+    const recentProducts = await Product.find()
+      .sort({ updatedAt: -1 }) 
+      .limit(5); 
+    res.status(200).json({ products: recentProducts });
+  } catch (error) {
+    console.error("Error fetching recent products:", error);
+    res.status(500).json({ message: "Failed to fetch recent products." });
+  }
+});
+
+
 module.exports = router;

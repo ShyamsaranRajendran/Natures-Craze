@@ -51,8 +51,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-200">
-      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md w-full">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="bg-white shadow-md rounded-lg px-8 py-6 max-w-md  mx-3 w-full">
         <h1 className="text-2xl font-bold text-center text-orange-500">Reset Password</h1>
         {error && <p className="text-red-500 text-sm text-center mt-2 animate-pulse">{error}</p>}
         {message && <p className="text-green-500 text-sm text-center mt-2 animate-pulse">{message}</p>}
