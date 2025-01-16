@@ -1,8 +1,9 @@
 import React from "react";
 import { FaWhatsapp, FaInstagram, FaEnvelope } from "react-icons/fa";
-import pouring from "../assets/pouring.jpg"; // Make sure this path is correct
-
+import pouring from "../assets/pouring.jpg"; // Ensure the path to the image is correct
 import { Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "react-router-dom"; // Assuming React Router is being used
+
 const Contact = () => {
   return (
     <div
@@ -11,8 +12,8 @@ const Contact = () => {
         backgroundImage: `url(${pouring})`,
       }}
     >
-      <div className="w-full max-w-4xl bg-white bg-opacity-80 rounded-lg shadow-lg p-8 transition-all transform ">
-        <h2 className="text-3xl font-bold text-yellow-700 text-center mb-6 transition-transform transform ">
+      <div className="w-full max-w-4xl bg-white bg-opacity-80 rounded-lg shadow-lg p-8 transition-all transform">
+        <h2 className="text-3xl font-bold text-yellow-700 text-center mb-6 transition-transform transform">
           Get in Touch with Us
         </h2>
         <p className="text-gray-600 text-center mb-8 transition-opacity opacity-80 hover:opacity-100">
@@ -21,7 +22,7 @@ const Contact = () => {
         </p>
 
         {/* Contact Information Section */}
-        <div className="contact-info-container mb-12 p-6 rounded-lg shadow-md transition-all transform ">
+        <div className="contact-info-container mb-12 p-6 rounded-lg shadow-md transition-all transform">
           <h3 className="text-lg font-bold text-gray-800 mb-4">
             Contact Information
           </h3>
@@ -32,12 +33,11 @@ const Contact = () => {
               curcumin138@gamil.com
             </div>
             <div className="flex items-center">
-              <Phone className="w-5 h-5 mr-2 text-green-500" />{" "}
-              +91 96989 04457
+              <Phone className="w-5 h-5 mr-2 text-green-500" /> +91 96989 04457
             </div>
             <div className="flex items-center">
-              <MapPin className="w-5 h-5 mr-2 text-red-500" />{" "}
-              Perunduari, Erode, India
+              <MapPin className="w-5 h-5 mr-2 text-red-500" /> Perunduari,
+              Erode, India
             </div>
           </div>
 
@@ -54,16 +54,9 @@ const Contact = () => {
           <p className="text-gray-600">
             <strong>Sunday:</strong> Closed
           </p>
-          {/* General Inquiry */}
-          <h4 className="text-md font-semibold text-green-600 mt-6">
-            For General Inquiries
-          </h4>
-          <p className="text-gray-600">
-            Please feel free to reach out to our customer service team. For
-            specific department inquiries, refer to the department contacts
-            below.
-          </p>
-          <div className="flex justify-center items-center gap-8 mt-2">
+
+          {/* Social Media Links */}
+          <div className="flex justify-center items-center gap-8 mt-6">
             {/* WhatsApp */}
             <a
               href="https://wa.me/9698904457"
@@ -100,6 +93,45 @@ const Contact = () => {
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.9962934950386!2d77.71160931531163!3d11.341036091900853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f517dba65b3%3A0x2d539b5fae46f40a!2sErode%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1613996775709!5m2!1sen!2sin"
             loading="lazy"
           ></iframe>
+        </div>
+
+        {/* Policies Section */}
+        <div className="policies-section mt-8">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Policies</h3>
+          <ul className="list-disc list-inside text-gray-600 space-y-2">
+            <li>
+              <Link
+                to="/policy/privacy"
+                className="text-blue-500 hover:underline"
+              >
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/policy/terms"
+                className="text-blue-500 hover:underline"
+              >
+                Terms and Conditions
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/policy/refund"
+                className="text-blue-500 hover:underline"
+              >
+                Refund Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/policy/shipping"
+                className="text-blue-500 hover:underline"
+              >
+                Shipping Policy
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
     </div>

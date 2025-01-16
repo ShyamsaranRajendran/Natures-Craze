@@ -15,6 +15,10 @@ import AdminDashboard from "./components/admin/dashboard";
 import AdminProducts from "./components/admin/products";
 import AdminAddProducts from "./components/admin/Addproduct"
 import AdminEditProducts from "./components/admin/EditProduct"
+import Privacy from "./components/policy/privacy";
+import Terms from "./components/policy/terms"; 
+import Refund from "./components/policy/refund";
+import Shipping from "./components/policy/shipping";
 import Cart from "./components/cart";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const NotFound = () => (
@@ -141,7 +145,10 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
-
+          <Route path="/policy/privacy" element={<Privacy />} />
+          <Route path="/policy/terms" element={<Terms />} />
+          <Route path="/policy/refund" element={<Refund />} />
+          <Route path="/policy/shipping" element={<Shipping />} />
           {/* Protected Admin Routes */}
           <Route
             path="admin/dashboard"
