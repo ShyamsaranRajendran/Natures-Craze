@@ -150,11 +150,6 @@ const handleConfirmCheckout = async () => {
       requestData
     );
 
-    // Log the full API response
-    console.log("API Response:", response);
-
-    // Inspect response data and verify keys
-    console.log("API Response Data:", response.data);
 
     // Ensure Razorpay order details are present
     if (
@@ -166,11 +161,11 @@ const handleConfirmCheckout = async () => {
     }
 
     const { razorpayOrderId, amount } = response.data;
-
+    console.log(amount);
     // Razorpay payment options
     const options = {
       key_id: "rzp_test_814EkXmD14BWDD", // Replace with your live key
-      amount: amount, // Razorpay expects amount in paise (1 INR = 100 paise)
+      amount: amount, // Use the amount from the backend
       currency: "INR",
       name: "Your Store Name",
       description: "Order Payment",

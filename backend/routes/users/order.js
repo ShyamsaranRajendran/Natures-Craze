@@ -16,27 +16,50 @@ router.post('/create', async (req, res) => {
     const { Items, username, phoneNumber, address } = req.body;
 
     if (!Items || !Array.isArray(Items) || Items.length === 0) {
-      return res.status(400).json({ message: "Items must be a non-empty array." });
+      return res.status(400).json({ message: 'Items must be a non-empty array.' });
     }
 
-    // Process items and calculate total amount
-    let totalAmount = 0;
-    const processedItems = Items.map(item => {
-      if (!item._id || !item.name || !item.price || !item.quantity) {
-        throw new Error("Invalid cart item structure.");
+    const prices = {
+      '250g': 200,
+      '500g': 400,
+      '750g': 600,
+      '1000g': 1000,
+    };
+
+    // Calculate total amount
+    let totalAmount = Items.reduce((total, item) => {
+      const itemTotal = Object.entries(item.quantities || {}).reduce(
+        (subtotal, [weight, quantity]) => {
+          const pricePerWeight = prices[weight] || 0; // Default to 0 if weight is not in prices
+          return subtotal + pricePerWeight * quantity;
+        },
+        0
+      );
+      return total + itemTotal;
+    }, 0);
+
+    // Process items
+    const processedItems = Items.map((item) => {
+      if (!item._id || !item.name || !item.quantity || !item.quantities) {
+        throw new Error('Invalid cart item structure.');
       }
 
-      const totalPrice = item.quantity * item.price;
-      totalAmount += totalPrice;
+      const itemTotal = Object.entries(item.quantities).reduce(
+        (subtotal, [weight, quantity]) => {
+          const pricePerWeight = prices[weight] || 0;
+          return subtotal + pricePerWeight * quantity;
+        },
+        0
+      );
 
       return {
         productId: item._id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        weight: item.weight || "N/A",
-        description: item.description || "No description available",
-        totalPrice,
+        weight: item.weight || 'N/A',
+        description: item.description || 'No description available',
+        totalPrice: itemTotal,
       };
     });
 
@@ -58,7 +81,9 @@ router.post('/create', async (req, res) => {
       receipt: `receipt_${savedOrder._id}`,
       payment_capture: 1, // Enable auto capture of payment
     });
-    console.log(razorpayOrder.id);
+
+    console.log('Razorpay Order ID:', razorpayOrder.id);
+
     // Save the Razorpay order ID to the order document
     savedOrder.razorpayOrderId = razorpayOrder.id;
     await savedOrder.save();
@@ -78,9 +103,9 @@ router.post('/create', async (req, res) => {
         contact: phoneNumber, // Customer's phone number
       },
       theme: {
-        color: '#F37254', // Customize the theme color
+        color: '#F37254',
       },
-      callback_url: 'http:localhost:5000/success', // Redirect URL on payment success
+      callback_url: 'http://localhost:5000/success', // Redirect URL on payment success
       redirect: true, // Redirect to callback URL after payment
     };
 
@@ -91,7 +116,6 @@ router.post('/create', async (req, res) => {
       amount: totalAmount * 100,
       checkoutPayload: checkoutPayload,
     });
-
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500).json({ message: 'Error creating order', error: error.message });
