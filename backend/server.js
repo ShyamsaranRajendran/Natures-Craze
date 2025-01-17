@@ -4,7 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
-const fileUpload = require("express-fileupload");
+// const fileUpload = require("express-fileupload");
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -15,7 +15,7 @@ db.once('open', function () {
 });
 
 const app = express();
-
+app.use(express.json());
 // CORS configuration
 app.use(cors({
   origin: ['http://localhost:3000','http://192.168.183.209:3000',"https://turmeric-tau.vercel.app"], // Allows only React app to access this API
@@ -29,10 +29,12 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload());
+// app.use(fileUpload());
 
 const user = require('./routes/user');
 const prod = require('./routes/users/products');
+const order = require('./routes/users/order');
+app.use('/orders', order);
 app.use('/prod', prod);
 app.use('/auth', user);
 

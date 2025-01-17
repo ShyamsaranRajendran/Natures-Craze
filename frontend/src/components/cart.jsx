@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios"; 
 import { toast } from "react-toastify";
 import Razorpay from "razorpay";
 
+const backendURL = process.env.REACT_APP_BACKEND_URL;
 const Cart = () => {
   const [cart, setCart] = useState([]);
   const [packSize, setPackSize] = useState(""); // State for selected pack size
@@ -10,19 +12,55 @@ const Cart = () => {
     username: "",
     phoneNumber: "",
     address: "",
-  }); // State for user details
-
+  });
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const prices = {
     "250g": 200,
     "500g": 400,
     "750g": 600,
     "1000g": 1000,
   };
+  const [cartImg, setCartImg] = useState([]);
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
-  }, []);
+    const fetchProductImages = async () => {
+      try {
+        // Retrieve cart from local storage
+        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+        setCart(storedCart);
+
+        // Extract product IDs from the stored cart
+        const prodIds = storedCart.map((item) => item._id);
+
+        if (prodIds.length === 0) {
+          console.warn("No product IDs found in the cart");
+          return;
+        }
+
+        // Fetch images from the backend
+        const response = await fetch(`${backendURL}/prod/images`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: prodIds }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCartImg(data.images);
+        } else {
+          console.error(
+            "Error fetching product images:",
+            response.status,
+            response.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Error while fetching product images:", error);
+      }
+    };
+
+    fetchProductImages();
+  }, [backendURL]);
 
    const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -64,116 +102,167 @@ const Cart = () => {
   };
 
   const handleCheckout = async () => {
-    const isScriptLoaded = await loadRazorpayScript();
-    if (!isScriptLoaded) {
-      toast.error(
-        "Failed to load Razorpay SDK. Check your internet connection."
-      );
+
+    setShowCheckoutModal(true);
+    
+  };
+const handleConfirmCheckout = async () => {
+  const { username, phoneNumber, address } = userDetails;
+
+  // Check if required details are present
+  if (!username || !phoneNumber || !address) {
+    alert("Please fill in all the details!");
+    return;
+  }
+
+  // Load Razorpay script if not already loaded
+  const isScriptLoaded = await loadRazorpayScript();
+  if (!isScriptLoaded) {
+    toast.error("Failed to load Razorpay SDK.");
+    return;
+  }
+
+  try {
+    // Get cart items from localStorage
+    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      alert("Your cart is empty!");
       return;
     }
 
-    const totalAmount = calculateTotal();
-    const amountInPaise = totalAmount * 100; // Convert to smallest currency unit (paise)
+    // Log cart items to ensure they are correct
+    console.log("Cart Items:", cartItems);
 
+    // Prepare request data
+    const requestData = {
+      Items: cartItems,
+      username: username,
+      phoneNumber: phoneNumber,
+      address: address,
+    };
+
+    // Log the request data
+    console.log("Request Data:", requestData);
+
+    // Create order from backend
+    const response = await axios.post(
+      `${backendURL}/orders/create`,
+      requestData
+    );
+
+    // Log the full API response
+    console.log("API Response:", response);
+
+    // Inspect response data and verify keys
+    console.log("API Response Data:", response.data);
+
+    // Ensure Razorpay order details are present
+    if (
+      !response.data ||
+      !response.data.razorpayOrderId ||
+      !response.data.amount
+    ) {
+      throw new Error("Failed to create order. Please try again.");
+    }
+
+    const { razorpayOrderId, amount } = response.data;
+
+    // Razorpay payment options
     const options = {
-      key: "YOUR_KEY_ID", // Replace with your Razorpay Key ID
-      amount: amountInPaise,
+      key_id: "rzp_test_814EkXmD14BWDD", // Replace with your live key
+      amount: amount, // Razorpay expects amount in paise (1 INR = 100 paise)
       currency: "INR",
       name: "Your Store Name",
       description: "Order Payment",
-      image: "https://example.com/your_logo", // Replace with your logo URL
-      prefill: {
-        name: userDetails.username,
-        email: "user@example.com", // Optional
-        contact: userDetails.phoneNumber,
+      order_id: razorpayOrderId,
+      handler: async function (paymentResponse) {
+        console.log("Payment Response:", paymentResponse);
+        toast.success("Payment successful!");
+
+        // Handle backend verification of payment
+        try {
+          const paymentVerificationResponse = await axios.post(
+            `${backendURL}/orders/verify`,
+            {
+              paymentResponse, // Send the payment response to verify payment
+            }
+          );
+          if (paymentVerificationResponse.data.success) {
+            toast.success("Payment verified successfully!");
+          } else {
+            toast.error("Payment verification failed.");
+          }
+        } catch (verificationError) {
+          toast.error("Payment verification failed.");
+          console.error("Verification Error:", verificationError);
+        }
       },
-      notes: {
-        address: userDetails.address,
+      prefill: {
+        name: username,
+        contact: phoneNumber,
+        email: userDetails.email, // Optional: Add email if required
       },
       theme: {
-        color: "#3399cc",
-      },
-      handler: function (response) {
-        // Handle successful payment
-        toast.success("Payment successful!");
-        console.log("Payment ID:", response.razorpay_payment_id);
-        console.log("Order ID:", response.razorpay_order_id);
-        console.log("Signature:", response.razorpay_signature);
-
-        // Optionally, create an order in your backend
-        createOrder(response);
-      },
-      modal: {
-        ondismiss: () => {
-          toast.info("Payment cancelled.");
-        },
+        color: "#F37254", // Optional: Change the theme color to your brand's color
       },
     };
 
-    const rzp1 = new Razorpay(options);
-    rzp1.open();
-  };
+    // Open Razorpay payment gateway
+        const razorpay = new window.Razorpay(options);
+    // const razorpay = new Razorpay(options);
+    razorpay.open();
+  } catch (error) {
+    console.error("Checkout Error:", error);
+    toast.error(error.message || "Checkout failed.");
+  }
+};
 
-  const collectUserDetails = (orderId, paymentId, signature) => {
-    // Collect user details after payment
-    const { username, phoneNumber, address } = userDetails;
 
-    if (!username || !phoneNumber || !address) {
-      toast.warning("Please fill in your details.");
-      return;
-    }
 
-    // Proceed to create the order after collecting details
-    const cartItems = cart.map((item) => {
-      return {
-        productId: item._id,
-        quantity: item.quantity,
-        packSize: packSize,
-      };
-    });
 
-    // Send the order data to the backend
-    createOrder({
-      userId: "USER_ID", // Replace with the actual user ID
-      cartItems: cartItems,
-      orderId,
-      paymentId,
-      signature,
-      username,
-      phoneNumber,
-      address,
-    });
-  };
 
-  const createOrder = async (paymentResponse) => {
-    try {
-      const response = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: "USER_ID", // Replace with actual user ID
-          cartItems: cart,
-          totalAmount: calculateTotal(),
-          paymentDetails: paymentResponse,
-          shippingDetails: userDetails,
-        }),
-      });
 
-      const result = await response.json();
-      if (response.ok) {
-        toast.success("Order created successfully!");
-        // Optionally clear cart or redirect to confirmation page
-        setCart([]);
-        localStorage.removeItem("cart");
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error("Error creating order.");
-    }
-  };
+
+
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setUserDetails((prevDetails) => ({
+        ...prevDetails,
+        [name]: value,
+      }));
+    };
+
+
+  // const createOrder = async (paymentResponse) => {
+  //   try {
+  //     const response = await fetch(`${backendURL}/orders/create`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         userId: "USER_ID", // Replace with actual user ID
+  //         cartItems: cart,
+  //         totalAmount: calculateTotal(),
+  //         paymentDetails: paymentResponse,
+  //         shippingDetails: userDetails,
+  //       }),
+  //     });
+
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       toast.success("Order created successfully!");
+  //       // Optionally clear cart or redirect to confirmation page
+  //       setCart([]);
+  //       localStorage.removeItem("cart");
+  //     } else {
+  //       toast.error(result.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error creating order.");
+  //   }
+  // };
 
   const handleRemoveItem = (productId) => {
     const updatedCart = cart.filter((item) => item._id !== productId);
@@ -222,22 +311,28 @@ const Cart = () => {
         <p className="text-base text-gray-600">Your cart is empty.</p>
       ) : (
         <div className="space-y-6 max-h-[70vh] overflow-y-auto border-t border-gray-200 pt-4">
-          {cart.map((item) => (
+          {cart.map((item, index) => (
             <div
               key={item._id}
               className="p-4 border border-gray-300 rounded-lg shadow-sm bg-white flex flex-col md:flex-row items-start md:items-center justify-between"
             >
               {/* Product Image */}
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-24 h-24 object-cover rounded-md mb-4 md:mb-0 md:mr-6"
-              />
+              {cartImg[index] && (
+                <img
+                  src={cartImg[index]}
+                  alt={item.name}
+                  className="w-24 h-24 object-cover rounded-md mb-4 md:mb-0 md:mr-6"
+                />
+              )}
+              {/* <img src={item.image} alt={item.name} /> */}
               {/* Product Details */}
               <div className="flex-1">
                 <h4 className="text-lg font-semibold text-gray-800">
                   {item.name}
                 </h4>
+                <p className="text-sm text-gray-500">
+                  {item.description}
+                </p>
                 <div className="mt-3">
                   {/* Pack Size and Quantity Input */}
                   <div className="flex items-center space-x-3 mb-3">
@@ -320,6 +415,56 @@ const Cart = () => {
             >
               Checkout
             </button>
+          </div>
+        </div>
+      )}
+
+      {showCheckoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Enter Your Details
+            </h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                name="username"
+                value={userDetails.username}
+                onChange={handleInputChange}
+                placeholder="Enter your name"
+                className="w-full border px-3 py-2 rounded-lg text-gray-700"
+              />
+              <input
+                type="text"
+                name="phoneNumber"
+                value={userDetails.phoneNumber}
+                onChange={handleInputChange}
+                placeholder="Enter your phone number"
+                className="w-full border px-3 py-2 rounded-lg text-gray-700"
+              />
+              <textarea
+                name="address"
+                value={userDetails.address}
+                onChange={handleInputChange}
+                placeholder="Enter your address"
+                className="w-full border px-3 py-2 rounded-lg text-gray-700"
+                rows="3"
+              ></textarea>
+            </div>
+            <div className="flex justify-end mt-4 space-x-4">
+              <button
+                onClick={() => setShowCheckoutModal(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmCheckout}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Confirm & Checkout
+              </button>
+            </div>
           </div>
         </div>
       )}

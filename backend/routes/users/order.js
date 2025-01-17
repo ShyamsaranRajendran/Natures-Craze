@@ -1,97 +1,133 @@
 const express = require("express");
 const Razorpay = require("razorpay");
-const Order = require("../models/order");
-const Product = require("../models/Product"); // Assuming a Product model exists
+const Order = require("../../models/order");
+const Product = require("../../models/product"); // Assuming a Product model exists
 const router = express.Router();
 
 const razorpay = new Razorpay({
-  key_id: "YOUR_RAZORPAY_KEY",
-  key_secret: "YOUR_RAZORPAY_SECRET",
+  // key_id: process.env.RAZORPAY_KEY_ID,
+  key_id: "rzp_test_814EkXmD14BWDD",
+  // key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_secret: "tDGkmo8xCjbbEDG2kBSucvmB",
 });
 
-// Endpoint to create an order
-router.post("/create", async (req, res) => {
-  const { userId, cartItems, username, phoneNumber, address } = req.body;
-
+router.post('/create', async (req, res) => {
   try {
-    // Fetch product details to calculate the total amount securely
-    const productIds = cartItems.map(item => item.productId);
-    const products = await Product.find({ _id: { $in: productIds } });
+    const { Items, username, phoneNumber, address } = req.body;
 
+    if (!Items || !Array.isArray(Items) || Items.length === 0) {
+      return res.status(400).json({ message: "Items must be a non-empty array." });
+    }
+
+    // Process items and calculate total amount
     let totalAmount = 0;
-    cartItems.forEach(item => {
-      const product = products.find(prod => prod._id.toString() === item.productId);
-      if (product) {
-        totalAmount += item.quantity * product.price;
+    const processedItems = Items.map(item => {
+      if (!item._id || !item.name || !item.price || !item.quantity) {
+        throw new Error("Invalid cart item structure.");
       }
+
+      const totalPrice = item.quantity * item.price;
+      totalAmount += totalPrice;
+
+      return {
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        weight: item.weight || "N/A",
+        description: item.description || "No description available",
+        totalPrice,
+      };
     });
 
-    // Create a Razorpay order
-    const razorpayOrder = await razorpay.orders.create({
-      amount: totalAmount * 100, // Convert to smallest currency unit (e.g., paise)
-      currency: "INR",
-      receipt: `order_rcptid_${Date.now()}`,
-    });
-
+    // Save the order in the database
     const order = new Order({
-      userId,
-      cartItems,
-      razorpayOrderId: razorpayOrder.id,
       username,
       phoneNumber,
       address,
+      items: processedItems,
       totalAmount,
-      status: "created", // Initial order state
     });
 
-    await order.save();
+    const savedOrder = await order.save();
 
+    // Create Razorpay order
+    const razorpayOrder = await razorpay.orders.create({
+      amount: totalAmount * 100, // Convert to paise (smallest currency unit)
+      currency: 'INR',
+      receipt: `receipt_${savedOrder._id}`,
+      payment_capture: 1, // Enable auto capture of payment
+    });
+    console.log(razorpayOrder.id);
+    // Save the Razorpay order ID to the order document
+    savedOrder.razorpayOrderId = razorpayOrder.id;
+    await savedOrder.save();
+
+    // Prepare the payload for Razorpay Checkout
+    const checkoutPayload = {
+      key: 'rzp_test_814EkXmD14BWDD', // Your Razorpay Key ID
+      amount: totalAmount * 100, // Amount in smallest currency sub-unit (paise)
+      currency: 'INR', // Currency code
+      name: 'My Business', // Business name
+      description: 'Order Payment', // Description shown at checkout
+      image: 'https://turmeric-tau.vercel.app/static/media/logo.07e4fd23b7d4a6e60e95cab57f39536f.svg', // Business logo URL (optional)
+      order_id: razorpayOrder.id, // Razorpay order ID
+      prefill: {
+        name: username, // Customer's name
+        email: '', // Customer's email (optional)
+        contact: phoneNumber, // Customer's phone number
+      },
+      theme: {
+        color: '#F37254', // Customize the theme color
+      },
+      callback_url: 'http:localhost:5000/success', // Redirect URL on payment success
+      redirect: true, // Redirect to callback URL after payment
+    };
+
+    // Return the Razorpay order ID and checkout payload to frontend
     res.status(200).json({
-      message: "Order created successfully",
+      message: 'Order created successfully',
       razorpayOrderId: razorpayOrder.id,
-      totalAmount,
+      amount: totalAmount * 100,
+      checkoutPayload: checkoutPayload,
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Error creating order", error });
+    console.error('Error creating order:', error);
+    res.status(500).json({ message: 'Error creating order', error: error.message });
   }
 });
 
+
+
 // Endpoint to verify payment and update order status
-router.post("/verify-payment", async (req, res) => {
-  const { razorpayOrderId, paymentId, signature } = req.body;
+router.post("/verify", async (req, res) => {
+  const { razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
 
   try {
-    // Validate payment signature
-    const isValid = razorpay.validatePaymentSignature({
+    const isValid = razorpay.utils.verifyPaymentSignature({
       order_id: razorpayOrderId,
-      payment_id: paymentId,
-      signature,
+      payment_id: razorpayPaymentId,
+      signature: razorpaySignature,
     });
 
     if (!isValid) {
       return res.status(400).json({ message: "Invalid payment signature" });
     }
 
-    // Update order status to "paid"
-    const updatedOrder = await Order.findOneAndUpdate(
+    // Update order status in your database
+    await Order.findOneAndUpdate(
       { razorpayOrderId },
-      {
-        paymentId,
-        signature,
-        status: "paid",
-      },
-      { new: true }
+      { status: "paid" }
     );
 
-    if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    res.status(200).json({ message: "Payment verified and order updated", order: updatedOrder });
+    res.status(200).json({ message: "Payment verified successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error verifying payment", error });
+    console.error("Payment verification error:", error);
+    res.status(500).json({ message: "Error verifying payment", error: error.message });
   }
 });
+
 
 // Endpoint to get orders for a specific user
 router.get("/:userId", async (req, res) => {

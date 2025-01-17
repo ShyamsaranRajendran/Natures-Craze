@@ -68,34 +68,45 @@ const Products = () => {
     // };
 
 
- const handleAddToCart = (product) => {
-   // Check if the product is already in the cart
-   const existingItem = cart.find(
-     (item) => item._id === product._id && item.volume === product.volume
-   );
+const handleAddToCart = (product) => {
+  // Create a copy of the product without the image buffer
+  const { image, ...productWithoutImage } = product;
 
-   if (existingItem) {
-     // If the product already exists, update the quantity
-     const updatedCart = cart.map((item) =>
-       item._id === product._id && item.volume === product.volume
-         ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
-         : item
-     );
-     setCart(updatedCart);
-     localStorage.setItem("cart", JSON.stringify(updatedCart));
+  // Check if the product is already in the cart
+  const existingItem = cart.find(
+    (item) =>
+      item._id === productWithoutImage._id && item.volume === product.volume
+  );
 
-     // Show toast notification
-     toast.success(`${product.name} quantity increased!`);
-   } else {
-     // If the product doesn't exist, add it to the cart
-     const updatedCart = [...cart, { ...product, quantity: 1 }];
-     setCart(updatedCart);
-     localStorage.setItem("cart", JSON.stringify(updatedCart));
+  if (existingItem) {
+    // If the product already exists, update the quantity
+    const updatedCart = cart.map((item) =>
+      item._id === productWithoutImage._id && item.volume === product.volume
+        ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
+        : item
+    );
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-     // Show toast notification
-     toast.success(`${product.name} added to cart!`);
-   }
- };
+    // Show toast notification
+    toast.success(`${productWithoutImage.name} quantity increased!`, {
+      position: "bottom-center",
+      autoClose: 3000,
+    });
+  } else {
+    // If the product doesn't exist, add it to the cart without the image
+    const updatedCart = [...cart, { ...productWithoutImage, quantity: 1 }];
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // Show toast notification
+    toast.success(`${productWithoutImage.name} added to cart!`, {
+      position: "bottom-center",
+      autoClose: 3000,
+    });
+  }
+};
+
 
 
  const handleShare = (product) => {

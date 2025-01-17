@@ -1,15 +1,87 @@
 const express = require("express");
 const router = express.Router();
-const Product = require("../models/product");
+const Product = require("../../models/product");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const multer = require("multer")
+const multer = require("multer");
 const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!JWT_SECRET) {
-  console.error("Error: JWT_SECRET is not set in the environment variables");
-  process.exit(1);
-}
+
+const storage = multer.memoryStorage(); // Store image in memory as a buffer
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB size limit for images
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed."), false);
+    }
+    cb(null, true);
+  },
+});
+
+// Add Product Route
+router.post("/add", upload.single("image"), async (req, res) => {
+  try {
+    console.log("Request Body:", req.body);
+    console.log("Uploaded File:", req.file);
+
+    const { name, weight, description, price } = req.body;
+    const image = req.file;
+
+    // Validate required fields
+    if (!name || !weight || !price || !image) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Create a new product instance
+    const newProduct = new Product({
+      name,
+      weight,
+      description,
+      price,
+      image: image.buffer,
+    });
+
+    // Save the product to the database
+    await newProduct.save();
+
+    res.status(201).json({ message: "Product added successfully!", product: newProduct });
+  } catch (error) {
+    console.error("Error adding product:", error.message);
+    res.status(500).json({ message: "Failed to add product.", error: error.message });
+  }
+});
+
+router.post("/images", async (req, res) => {
+  try {
+    const { ids } = req.body;
+    
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "No product IDs provided" });
+    }
+
+    // Find products by IDs
+    const products = await Product.find({ _id: { $in: ids } });
+
+    // If no products are found, return an error
+    if (products.length === 0) {
+      return res.status(404).json({ error: "No products found for the given IDs" });
+    }
+
+    // Convert the image buffer into a base64 string for each product
+    const images = products.map(product => {
+      const imageBuffer = product.image; // Assuming image is a Buffer
+      const imageBase64 = imageBuffer.toString("base64"); // Convert the buffer to a base64 string
+      return `data:image/jpeg;base64,${imageBase64}`; // Add the correct image MIME type
+    });
+
+    // Send the base64 encoded images as the response
+    res.status(200).json({ images });
+  } catch (error) {
+    console.error("Error fetching product images:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // Utility to format products (e.g., convert image buffer to base64)
 const formatProduct = (product) => {
@@ -74,35 +146,11 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-const storage = multer.memoryStorage(); // Store images as Buffer in memory
-const upload = multer({ storage });
-
-// Add Product Route
-router.post("/add", upload.single("image"), async (req, res) => {
-  try {
-    const { name, weight, description, price } = req.body;
-    const imageBuffer = req.file.buffer;
-
-    const newProduct = new Product({
-      name,
-      weight,
-      description,
-      price,
-      image: imageBuffer,
-    });
-
-    await newProduct.save();
-    res.status(201).json({ message: "Product added successfully!" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to add product." });
-  }
-});
-
-router.put("/update/:id", async (req, res) => {
+// Update Product Route
+router.put("/update/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, weight } = req.body;
+    const { name, weight, description, price } = req.body;
 
     const product = await Product.findById(id);
     if (!product) {
@@ -111,9 +159,11 @@ router.put("/update/:id", async (req, res) => {
 
     product.name = name || product.name;
     product.weight = weight || product.weight;
+    product.description = description || product.description;
+    product.price = price || product.price;
 
-    if (req.files && req.files.image) {
-      product.image = req.files.image.data; // Assuming you're using express-fileupload
+    if (req.file) {
+      product.image = req.file.buffer; // Save the new image
     }
 
     await product.save();
@@ -124,12 +174,11 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
-
+// Delete Product Route
 router.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Find the product by ID and delete it
     const deletedProduct = await Product.findByIdAndDelete(id);
 
     if (!deletedProduct) {
@@ -139,15 +188,11 @@ router.delete("/delete/:id", async (req, res) => {
     res.status(200).json({ message: "Product deleted successfully." });
   } catch (error) {
     console.error("Error deleting product:", error);
-
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid product ID format." });
-    }
-
     res.status(500).json({ message: "Failed to delete the product." });
   }
 });
 
+// Get Product Count
 router.get("/count", async (req, res) => {
   try {
     const productCount = await Product.countDocuments();
@@ -158,6 +203,7 @@ router.get("/count", async (req, res) => {
   }
 });
 
+// Get Recent Products
 router.get("/recent", async (req, res) => {
   try {
     const recentProducts = await Product.find()
@@ -169,6 +215,5 @@ router.get("/recent", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch recent products." });
   }
 });
-
 
 module.exports = router;
