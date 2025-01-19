@@ -16,13 +16,11 @@ function generateOTP() {
 
 router.get("/role", authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId); // Use `userId` from token
-   
+    const user = await User.findById(req.userId); 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
- console.log("User:", user);
-    res.json({ user }); // Send the user's role
+    res.json({ user }); 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -55,7 +53,6 @@ router.get("/new-registrations", async (req, res) => {
 
 router.post("/register", async function (req, res) {
   try {
-    console.log("Request Body:", req.body); // Debugging request body
 
     const { name, email, username, password, phoneNumber, confirm_password, address } = req.body;
 
@@ -142,7 +139,6 @@ router.post("/login", async (req, res, next) => {
       token, // Include the generated token in the response
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Error logging in user' });
   }
 });

@@ -25,20 +25,38 @@ router.post("/add", upload.single("image"), async (req, res) => {
     console.log("Request Body:", req.body);
     console.log("Uploaded File:", req.file);
 
-    const { name, weight, description, price } = req.body;
+    const { name,description, prices } = req.body;
     const image = req.file;
 
     // Validate required fields
-    if (!name || !weight || !price || !image) {
+    if (!name || !prices || !image) {
       return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Parse prices if sent as a JSON string
+    let parsedPrices;
+    try {
+      parsedPrices = JSON.parse(prices); // Parse the prices field if it's sent as JSON
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid prices format. Ensure it's a valid JSON array." });
+    }
+
+    // Validate the parsed prices
+    if (!Array.isArray(parsedPrices) || parsedPrices.length === 0) {
+      return res.status(400).json({ message: "Prices must be a non-empty array." });
+    }
+
+    for (const priceObj of parsedPrices) {
+      if (!priceObj.packSize || !priceObj.price) {
+        return res.status(400).json({ message: "Each price must include 'packSize' and 'price' fields." });
+      }
     }
 
     // Create a new product instance
     const newProduct = new Product({
       name,
-      weight,
       description,
-      price,
+      prices: parsedPrices,
       image: image.buffer,
     });
 
@@ -147,30 +165,40 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update Product Route
-router.put("/update/:id", upload.single("image"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, weight, description, price } = req.body;
+router.put('/update/:id', upload.single('image'), async (req, res) => {
+  const { id } = req.params;
+  const { name, desc, prices } = req.body;
+  const imageFile = req.file; // Handle the uploaded image file
 
+  try {
     const product = await Product.findById(id);
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found." });
+      return res.status(404).json({ message: 'Product not found' });
     }
 
+    // Update product fields
     product.name = name || product.name;
-    product.weight = weight || product.weight;
-    product.description = description || product.description;
-    product.price = price || product.price;
+    product.description = desc || product.description;
 
-    if (req.file) {
-      product.image = req.file.buffer; // Save the new image
+    if (imageFile) {
+      product.image = '/uploads/' + imageFile.filename; // Save image path to the database
+    }
+
+    // Update prices array
+    if (prices && Array.isArray(prices)) {
+      product.prices = prices;
     }
 
     await product.save();
-    res.status(200).json({ message: "Product updated successfully!", product });
-  } catch (error) {
-    console.error("Error updating product:", error);
-    res.status(500).json({ message: "Failed to update the product." });
+
+    res.status(200).json({
+      message: 'Product updated successfully',
+      product: product,
+    });
+  } catch (err) {
+    console.error('Error updating product:', err);
+    res.status(500).json({ message: 'Error updating product' });
   }
 });
 

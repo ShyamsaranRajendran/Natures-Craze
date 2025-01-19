@@ -192,15 +192,15 @@ const handleAddToCart = (product) => {
           className="w-full h-48 object-cover mb-6 rounded-lg"
         />
         <p className="text-gray-800 mb-4">{product.description}</p>
-        <p className="text-2xl font-bold text-gray-900 mt-4">
-          ₹{product.price}
-        </p>
-        <p className=" mt-2">
-          Stock : <span className="text-green-600">{product.stock}</span>
-        </p>
-        <p className=" mt-2">
-          Rating : <span className="text-yellow-500"> {product.rating}</span>⭐
-        </p>
+        <div className="space-y-1">
+          {product.prices &&
+            product.prices.map((priceOption, index) => (
+              <p key={priceOption._id.$oid} className="text-sm text-gray-500">
+                Packsize: {priceOption.packSize} | Price: ₹
+                {priceOption.price.toLocaleString()}
+              </p>
+            ))}
+        </div>
 
         <div className="flex justify-between items-center px-0 py-4 border-t border-gray-200">
           <button
@@ -209,22 +209,19 @@ const handleAddToCart = (product) => {
           >
             <Share2 className="w-5 h-5 mr-2" /> Share
           </button>
-          {/* <button
-            className="flex items-center text-pink-500"
-            onClick={() => handleInterest(product)}
+
+          <button
+            className="flex items-center text-red-500"
+            onClick={handleCall}
           >
-            <Heart className="w-5 h-5 mr-2" /> Show Interest
-          </button> */}
-          <button className="flex items-center text-red-500"
-                              onClick={handleCall}
-                            >
-                              <Phone className="w-5 h-5 mr-1" /> Call
-                            </button>
-           <button className="flex items-center text-green-500"
-                              onClick={() => handleAddToCart(product)}
-                            >
-                              <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-                            </button>
+            <Phone className="w-5 h-5 mr-1" /> Call
+          </button>
+          <button
+            className="flex items-center text-green-500"
+            onClick={() => handleAddToCart(product)}
+          >
+            <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+          </button>
         </div>
       </div>
 

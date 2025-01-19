@@ -7,18 +7,17 @@ const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const AddProduct = () => {
   const [productName, setProductName] = useState("");
-  const [productWeight, setProductWeight] = useState("");
   const [productImage, setProductImage] = useState(null);
   const [productDescription, setProductDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [prices, setPrices] = useState([{ packSize: "", price: "" }]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]; // Get the selected file
+    const file = e.target.files[0];
     if (file) {
       const isImage = file.type.startsWith("image/");
-      const isValidSize = file.size <= 5 * 1024 * 1024; // Max size 5MB
+      const isValidSize = file.size <= 5 * 1024 * 1024;
       if (!isImage) {
         toast.error("Please select a valid image file.");
         return;
@@ -27,49 +26,63 @@ const AddProduct = () => {
         toast.error("Image size should not exceed 5MB.");
         return;
       }
-      setProductImage(file); // Update state with the selected file
-      console.log("Selected file:", file); // Debug log
+      setProductImage(file);
     }
   };
-const handleSubmit = async (e) => {
-  e.preventDefault();
 
-  if (!productName || !productWeight || !productImage || !price) {
-    toast.error("All fields are required!");
-    return;
-  }
+  const handlePriceChange = (index, field, value) => {
+    const updatedPrices = [...prices];
+    updatedPrices[index][field] = value;
+    setPrices(updatedPrices);
+  };
 
-  const formData = new FormData();
-  formData.append("name", productName);
-  formData.append("weight", productWeight);
-  formData.append("description", productDescription);
-  formData.append("price", price);
-  formData.append("image", productImage);
+  const addPriceField = () => {
+    setPrices([...prices, { packSize: "", price: "" }]);
+  };
 
-  for (let pair of formData.entries()) {
-    console.log(pair[0] + ": " + pair[1]);
-  }
+  const removePriceField = (index) => {
+    const updatedPrices = prices.filter((_, i) => i !== index);
+    setPrices(updatedPrices);
+  };
 
-  setLoading(true);
-  try {
-    const response = await fetch(`${backendURL}/prod/add`, {
-      method: "POST",
-      body: formData,
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (response.ok) {
-      toast.success("Product added successfully!");
-      navigate("/admin/products");
-    } else {
-      const errorData = await response.json();
-      toast.error(errorData.message || "Failed to add product.");
+    if (
+      !productName ||
+      !productImage ||
+      prices.length === 0
+    ) {
+      toast.error("All fields are required!");
+      return;
     }
-  } catch (error) {
-    toast.error("An error occurred. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    const formData = new FormData();
+    formData.append("name", productName);
+    formData.append("description", productDescription);
+    formData.append("prices", JSON.stringify(prices));
+    formData.append("image", productImage);
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${backendURL}/prod/add`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        toast.success("Product added successfully!");
+        navigate("/admin/products");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to add product.");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 mt-20">
@@ -86,28 +99,7 @@ const handleSubmit = async (e) => {
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Weight (kg)</label>
-          <input
-            type="number"
-            step="0.01"
-            className="w-full border rounded-lg px-4 py-2"
-            value={productWeight}
-            onChange={(e) => setProductWeight(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Price ($)</label>
-          <input
-            type="number"
-            step="0.01"
-            className="w-full border rounded-lg px-4 py-2"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-        </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
@@ -116,6 +108,48 @@ const handleSubmit = async (e) => {
             onChange={(e) => setProductDescription(e.target.value)}
             rows="4"
           ></textarea>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Prices</label>
+          {prices.map((price, index) => (
+            <div key={index} className="flex gap-4 mb-2">
+              <input
+                type="text"
+                className="flex-1 border rounded-lg px-4 py-2"
+                placeholder="Pack Size (e.g., 500g)"
+                value={price.packSize}
+                onChange={(e) =>
+                  handlePriceChange(index, "packSize", e.target.value)
+                }
+                required
+              />
+              <input
+                type="number"
+                step="0.01"
+                className="flex-1 border rounded-lg px-4 py-2"
+                placeholder="Price"
+                value={price.price}
+                onChange={(e) =>
+                  handlePriceChange(index, "price", e.target.value)
+                }
+                required
+              />
+              <button
+                type="button"
+                onClick={() => removePriceField(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addPriceField}
+            className="text-blue-500"
+          >
+            Add Price
+          </button>
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Image</label>

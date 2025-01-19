@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Razorpay from "razorpay";
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const Cart = () => {
-  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [packSize, setPackSize] = useState(""); // State for selected pack size
   const [quantity, setQuantity] = useState(1); // State for input quantity
@@ -16,6 +14,12 @@ const Cart = () => {
     address: "",
   });
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const prices = {
+    "250g": 200,
+    "500g": 400,
+    "750g": 600,
+    "1000g": 1000,
+  };
   const [cartImg, setCartImg] = useState([]);
 
   useEffect(() => {
@@ -119,7 +123,6 @@ const Cart = () => {
     try {
       // Get cart items from localStorage
       const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log(cartItems);
       if (!Array.isArray(cartItems) || cartItems.length === 0) {
         alert("Your cart is empty!");
         return;
@@ -132,7 +135,7 @@ const Cart = () => {
         phoneNumber: phoneNumber,
         address: address,
       };
-      console.log(requestData);
+
       // Create order from backend
       const response = await axios.post(
         `${backendURL}/orders/create`,
@@ -175,43 +178,22 @@ const Cart = () => {
                 },
               }
             );
-
             // Handle verification response from backend
             if (paymentVerificationResponse.status === 200) {
               toast.success("Payment verified successfully!");
               setShowCheckoutModal(false);
-
-              // Navigate to paymentSuccess with data
-              navigate("/payment/paymentSuccess", {
-                state: {
-                  message: "Payment verified successfully!",
-                  paymentDetails: paymentResponse,
-                  orderDetails: amount, // Assuming backend returns order details
-                },
-              });
             } else {
               toast.error("Payment verification failed.");
-
-              // Navigate to paymentFailed with error data
-              navigate("/payment/paymentFailed", {
-                state: {
-                  message: "Payment verification failed.",
-                  paymentDetails: paymentResponse,
-                  error: paymentVerificationResponse.data.error, // Assuming backend provides error details
-                },
-              });
+              console.error(
+                "Backend Response:",
+                paymentVerificationResponse.data
+              );
             }
-          } catch (error) {
-            console.error("Error during payment verification:", error);
-            toast.error("An error occurred during payment verification.");
-            navigate("/payment/paymentFailed", {
-              state: {
-                message: "An error occurred during payment verification.",
-                error: error.message,
-              },
-            });
+          } catch (verificationError) {
+            // Log and show error to the user
+            toast.error("Payment verification failed.");
+            console.error("Verification Error:", verificationError);
           }
-
         },
         prefill: {
           name: username || "John Doe", // Replace with actual username
@@ -246,6 +228,36 @@ const Cart = () => {
     }));
   };
 
+  // const createOrder = async (paymentResponse) => {
+  //   try {
+  //     const response = await fetch(`${backendURL}/orders/create`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         userId: "USER_ID", // Replace with actual user ID
+  //         cartItems: cart,
+  //         totalAmount: calculateTotal(),
+  //         paymentDetails: paymentResponse,
+  //         shippingDetails: userDetails,
+  //       }),
+  //     });
+
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       toast.success("Order created successfully!");
+  //       // Optionally clear cart or redirect to confirmation page
+  //       setCart([]);
+  //       localStorage.removeItem("cart");
+  //     } else {
+  //       toast.error(result.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error creating order.");
+  //   }
+  // };
+
   const handleRemoveItem = (productId) => {
     const updatedCart = cart.filter((item) => item._id !== productId);
     updateCart(updatedCart);
@@ -279,17 +291,12 @@ const Cart = () => {
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
       const itemTotal = Object.entries(item.quantities || {}).reduce(
-        (sum, [volume, qty]) => {
-          const price =
-            item.prices.find((price) => price.packSize === volume)?.price || 0;
-          return sum + price * qty;
-        },
+        (sum, [volume, qty]) => sum + prices[volume] * qty,
         0
       );
       return total + itemTotal;
     }, 0);
   };
-
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16">
@@ -338,9 +345,9 @@ const Cart = () => {
                           <option value="" disabled>
                             Select Pack Size
                           </option>
-                          {item.prices.map((price) => (
-                            <option key={price._id} value={price.packSize}>
-                              {price.packSize} : {price.price}
+                          {Object.keys(prices).map((size) => (
+                            <option key={size} value={size}>
+                              {size}
                             </option>
                           ))}
                         </select>
@@ -380,10 +387,7 @@ const Cart = () => {
                         className="flex items-center justify-between text-sm text-gray-700 mb-2"
                       >
                         <p>
-                          {volume} x {qty} = ₹
-                          {item.prices.find(
-                            (price) => price.packSize === volume
-                          )?.price * qty || 0}
+                          {volume} x {qty} = ₹{prices[volume] * qty}
                         </p>
                         <div className="flex items-center space-x-2">
                           <button
@@ -487,3 +491,6 @@ const Cart = () => {
 };
 
 export default Cart;
+
+
+

@@ -11,9 +11,9 @@ function EditProduct() {
 
   const [product, setProduct] = useState({
     name: "",
-    weight: "",
     desc: "",
     image: "",
+    prices: [], // Initialize prices array
   });
   const [imageFile, setImageFile] = useState(null); // For the new image file
   const [loading, setLoading] = useState(true);
@@ -33,9 +33,9 @@ function EditProduct() {
         if (data.product) {
           setProduct({
             name: data.product.name || "",
-            weight: data.product.weight || "",
-            desc: data.product.description || "", // Autofill description
+            desc: data.product.description || "",
             image: data.product.image || "",
+            prices: data.product.prices || [], // Autofill prices
           });
         } else {
           throw new Error("Product not found.");
@@ -62,12 +62,17 @@ function EditProduct() {
   const handleUpdate = async () => {
     const formData = new FormData();
     formData.append("name", product.name);
-    formData.append("weight", product.weight);
-    formData.append("desc", product.desc); // Append the description
+    formData.append("desc", product.desc);
 
     if (imageFile) {
       formData.append("image", imageFile); // Attach the image file if provided
     }
+
+    // Add prices to the formData
+    product.prices.forEach((priceOption, index) => {
+      formData.append(`prices[${index}][packSize]`, priceOption.packSize);
+      formData.append(`prices[${index}][price]`, priceOption.price);
+    });
 
     try {
       const response = await fetch(`${backendURL}/prod/update/${id}`, {
@@ -86,6 +91,25 @@ function EditProduct() {
       console.error("Error updating product:", error);
       toast.error(error.message);
     }
+  };
+
+  const handlePriceChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedPrices = [...product.prices];
+    updatedPrices[index][name] = value;
+    setProduct({ ...product, prices: updatedPrices });
+  };
+
+  const handleAddPrice = () => {
+    setProduct({
+      ...product,
+      prices: [...product.prices, { packSize: "", price: "" }],
+    });
+  };
+
+  const handleRemovePrice = (index) => {
+    const updatedPrices = product.prices.filter((_, i) => i !== index);
+    setProduct({ ...product, prices: updatedPrices });
   };
 
   if (loading) {
@@ -111,16 +135,7 @@ function EditProduct() {
             className="border rounded-lg px-4 py-2 w-full"
           />
         </div>
-        <div>
-          <label className="block text-lg font-medium mb-2">Weight (g):</label>
-          <input
-            type="text"
-            name="weight"
-            value={product.weight}
-            onChange={handleInputChange}
-            className="border rounded-lg px-4 py-2 w-full"
-          />
-        </div>
+        
         <div>
           <label className="block text-lg font-medium mb-2">Description:</label>
           <textarea
@@ -130,6 +145,47 @@ function EditProduct() {
             className="border rounded-lg px-4 py-2 w-full h-24"
           />
         </div>
+
+        {/* Prices Section */}
+        <div>
+          <label className="block text-lg font-medium mb-2">Prices:</label>
+          {product.prices.map((priceOption, index) => (
+            <div key={index} className="flex gap-4 mb-2">
+              <input
+                type="text"
+                name="packSize"
+                value={priceOption.packSize}
+                onChange={(e) => handlePriceChange(index, e)}
+                placeholder="Pack Size"
+                className="border rounded-lg px-4 py-2 w-1/2"
+              />
+              <input
+                type="number"
+                name="price"
+                value={priceOption.price}
+                onChange={(e) => handlePriceChange(index, e)}
+                placeholder="Price"
+                className="border rounded-lg px-4 py-2 w-1/2"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemovePrice(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddPrice}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            Add Price
+          </button>
+        </div>
+
+        {/* Image Upload */}
         <div>
           <label className="block text-lg font-medium mb-2">
             Upload New Image:

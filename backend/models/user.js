@@ -22,9 +22,8 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    admin: {
-        type: Number,
-        default: 0 // Non-admin by default
+    role: {
+        type: String
     },
     address: {
         type: String,  // Optional field for the address

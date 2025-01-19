@@ -20,11 +20,12 @@ const productSchema = new mongoose.Schema(
     stock: {
       type: Number,
       min: 0,
-    },
-    weight:{
-      type: String,
-      default: 'N/A'
-    },
+    },prices: [
+      {
+        packSize: { type: String, required: true }, // e.g., "250g", "500g"
+        price: { type: Number, required: true, min: 0 }, // Price for that pack size
+      },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,

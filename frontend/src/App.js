@@ -15,11 +15,17 @@ import AdminDashboard from "./components/admin/dashboard";
 import AdminProducts from "./components/admin/products";
 import AdminAddProducts from "./components/admin/Addproduct"
 import AdminEditProducts from "./components/admin/EditProduct"
+import AdminOrder from "./components/admin/orders";
+import AdminOrderDetail from "./components/admin/orderDetail";
+import AdminProcessing from "./components/admin/ProcessingOrders";
+import AdminProcessed from "./components/admin/ProcessedOrder";
 import Privacy from "./components/policy/privacy";
 import Terms from "./components/policy/terms"; 
 import Refund from "./components/policy/refund";
 import Shipping from "./components/policy/shipping";
 import Cart from "./components/cart";
+import PaymentFail from "./components/paymentFail";
+import PaymentSuccess from "./components/paymentSuccess";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen">
@@ -149,6 +155,8 @@ function App() {
           <Route path="/policy/terms" element={<Terms />} />
           <Route path="/policy/refund" element={<Refund />} />
           <Route path="/policy/shipping" element={<Shipping />} />
+          <Route path="/payment/paymentFail" element={<PaymentFail />} />
+          <Route path="/payment/paymentSuccess" element={<PaymentSuccess />} />
           {/* Protected Admin Routes */}
           <Route
             path="admin/dashboard"
@@ -179,6 +187,38 @@ function App() {
           element={
             <PrivateRoute allowedRoles={['admin']}>
               <AdminEditProducts/>
+            </PrivateRoute>
+          }
+          />
+           <Route 
+          path="admin/orders"
+          element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <AdminOrder/>
+            </PrivateRoute>
+          }
+          />
+          <Route 
+          path="admin/processing"
+          element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <AdminProcessing/>
+            </PrivateRoute>
+          }
+          />
+          <Route 
+          path="admin/processed"
+          element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <AdminProcessed/>
+            </PrivateRoute>
+          }
+          />
+           <Route 
+          path="admin/orders/edit/:id"
+          element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <AdminOrderDetail/>
             </PrivateRoute>
           }
           />
