@@ -163,7 +163,7 @@ router.post('/create', async (req, res) => {
 
 
 
-// Endpoint to update order status (e.g., for processing, shipped, delivered)
+
 router.get("/all", async (req, res) => {
 
   try {
@@ -197,13 +197,28 @@ router.get('/processing', async (req, res) => {
 });
 
 
+router.get("/:id", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-router.put("/orders/:id/status", async (req, res) => {
+    res.json(order);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching order", error });
+  }
+});
+
+
+
+router.patch("/edit/:id", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-
+  console.log(req.body);
   // Validate the status value
-  const validStatuses = ["pending", "processed", "shipped", "delivered", "cancelled"];
+  const validStatuses = ["pending", "processed", "processing", "delivered", "cancelled"];
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ message: "Invalid status value." });
   }
@@ -238,20 +253,5 @@ router.get("/:userId", async (req, res) => {
 });
 
 
-// Endpoint to update order status (e.g., for processing, shipped, delivered)
-router.patch("/:orderId", async (req, res) => {
-  const { status } = req.body;
-
-  try {
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.orderId,
-      { status },
-      { new: true }
-    );
-    res.json(updatedOrder);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating order", error });
-  }
-});
 
 module.exports = router;

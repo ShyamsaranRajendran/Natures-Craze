@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema({
   razorpayOrderId: { type: String },
   razorpayPaymentId: { type: String }, // Store payment ID here
   razorpaySignature: { type: String }, // Store signature here if needed
-  paymentStatus: { type: String, default: 'pending' }, // Can be 'pending', 'successful', or 'failed'
+  paymentStatus: { type: String, default: 'unpaid' }, // Can be 'pending', 'successful', or 'failed'
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

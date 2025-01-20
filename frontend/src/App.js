@@ -15,10 +15,10 @@ import AdminDashboard from "./components/admin/dashboard";
 import AdminProducts from "./components/admin/products";
 import AdminAddProducts from "./components/admin/Addproduct"
 import AdminEditProducts from "./components/admin/EditProduct"
-import AdminOrder from "./components/admin/orders";
-import AdminOrderDetail from "./components/admin/orderDetail";
-import AdminProcessing from "./components/admin/ProcessingOrders";
-import AdminProcessed from "./components/admin/ProcessedOrder";
+import AdminOrder from "./components/admin/order/orders";
+import AdminOrderDetail from "./components/admin/order/orderDetail";
+import AdminProcessing from "./components/admin/order/ProcessingOrders";
+import AdminProcessed from "./components/admin/order/ProcessedOrder";
 import Privacy from "./components/policy/privacy";
 import Terms from "./components/policy/terms"; 
 import Refund from "./components/policy/refund";
@@ -215,7 +215,7 @@ function App() {
           }
           />
            <Route 
-          path="admin/orders/edit/:id"
+          path="admin/orders/:id"
           element={
             <PrivateRoute allowedRoles={['admin']}>
               <AdminOrderDetail/>
