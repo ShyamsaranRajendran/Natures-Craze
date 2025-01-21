@@ -8,6 +8,7 @@ const backendURL = process.env.REACT_APP_BACKEND_URL;
 const Cart = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
   const [packSize, setPackSize] = useState(""); // State for selected pack size
   const [quantity, setQuantity] = useState(1); // State for input quantity
   const [userDetails, setUserDetails] = useState({
@@ -298,125 +299,146 @@ const Cart = () => {
         <p className="text-base text-gray-600">Your cart is empty.</p>
       ) : (
         <div className="space-y-6 max-h-[70vh] overflow-y-auto border-t border-gray-200 pt-4">
-          {cart.map((item, index) => (
-            <div
-              key={item._id}
-              className="p-4 border border-gray-300 rounded-lg shadow-sm bg-white flex flex-col sm:flex-row items-center sm:items-center justify-between"
-            >
-              {/* Product Image */}
-              {cartImg[index] && (
-                <img
-                  src={cartImg[index]}
-                  alt={item.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md mb-4 sm:mb-0 sm:mr-6"
-                />
-              )}
-              {/* Product Details */}
-              <div className="flex-1">
-                <h4 className="text-lg font-semibold text-gray-800">
-                  {item.name}
-                </h4>
-                <p className="text-sm text-gray-500">{item.description}</p>
-                <div className="mt-3">
-                  {/* Pack Size and Quantity Input */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-3 space-y-3 sm:space-y-0 mb-3">
-                    <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                      {/* Pack Size */}
-                      <div className="flex items-center space-x-3 w-full sm:w-auto">
-                        <label
-                          htmlFor="Packsize"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Pack Size:
-                        </label>
-                        <select
-                          id="Packsize"
-                          value={packSize}
-                          onChange={(e) => setPackSize(e.target.value)}
-                          className="w-full sm:w-40 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                          <option value="" disabled>
-                            Select Pack Size
-                          </option>
-                          {item.prices.map((price) => (
-                            <option key={price._id} value={price.packSize}>
-                              {price.packSize} : {price.price}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+          {cart.map((item, index) => {
+          
 
-                      {/* Quantity */}
-                      <div className="flex items-center space-x-3 w-full sm:w-auto">
-                        <label
-                          htmlFor="qty"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Quantity:
-                        </label>
-                        <input
-                          id="qty"
-                          type="number"
-                          value={quantity}
-                          onChange={(e) => setQuantity(Number(e.target.value))}
-                          min="1"
-                          className="w-full sm:w-40 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
+            return (
+              <div
+                key={item._id}
+                className="p-4 border border-gray-300 rounded-lg shadow-sm bg-white flex flex-col sm:flex-row items-center sm:items-center justify-between"
+              >
+                {/* Product Image */}
+                <div className="relative w-40 h-40 sm:w-48 sm:h-48 mb-4 sm:mb-0 sm:mr-6">
+                  {/* Loader */}
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-md">
+                      <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
                     </div>
-
-                    <button
-                      onClick={() => handleAddToCart(item._id)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm w-full sm:w-auto"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  {/* Quantities Display */}
-                  {Object.entries(item.quantities || {}).map(
-                    ([volume, qty]) => (
-                      <div
-                        key={volume}
-                        className="flex items-center justify-between text-sm text-gray-700 mb-2"
-                      >
-                        <p>
-                          {volume} x {qty} = ₹
-                          {item.prices.find(
-                            (price) => price.packSize === volume
-                          )?.price * qty || 0}
-                        </p>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item._id, volume, 1)
-                            }
-                            className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                          >
-                            +
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item._id, volume, -1)
-                            }
-                            className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                          >
-                            -
-                          </button>
-                        </div>
-                      </div>
-                    )
+                  )}
+                  {/* Image */}
+                  {cartImg[index] && (
+                    <img
+                      src={cartImg[index]}
+                      alt={item.name}
+                      onLoad={() => setIsLoading(false)}
+                      onError={() => setIsLoading(false)} // Ensures the loader hides even if the image fails to load
+                      className={`w-full h-full object-cover rounded-md ${
+                        isLoading ? "invisible" : "visible"
+                      }`}
+                    />
                   )}
                 </div>
+
+                {/* Product Details */}
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold text-gray-800">
+                    {item.name}
+                  </h4>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                  <div className="mt-3">
+                    {/* Pack Size and Quantity Input */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-3 space-y-3 sm:space-y-0 mb-3">
+                      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        {/* Pack Size */}
+                        <div className="flex items-center space-x-3 w-full sm:w-auto">
+                          <label
+                            htmlFor="Packsize"
+                            className="text-sm font-medium text-gray-700"
+                          >
+                            Pack Size:
+                          </label>
+                          <select
+                            id="Packsize"
+                            value={packSize}
+                            onChange={(e) => setPackSize(e.target.value)}
+                            className="w-full sm:w-40 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          >
+                            <option value="" disabled>
+                              Select Pack Size
+                            </option>
+                            {item.prices.map((price) => (
+                              <option key={price._id} value={price.packSize}>
+                                {price.packSize}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Quantity */}
+                        <div className="flex items-center space-x-3 w-full sm:w-auto">
+                          <label
+                            htmlFor="qty"
+                            className="text-sm font-medium text-gray-700"
+                          >
+                            Quantity:
+                          </label>
+                          <input
+                            id="qty"
+                            type="number"
+                            value={quantity}
+                            onChange={(e) =>
+                              setQuantity(Number(e.target.value))
+                            }
+                            min="1"
+                            className="w-full sm:w-40 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleAddToCart(item._id)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm w-full sm:w-auto"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    {/* Quantities Display */}
+                    {Object.entries(item.quantities || {}).map(
+                      ([volume, qty]) => (
+                        <div
+                          key={volume}
+                          className="flex items-center justify-between text-sm text-gray-700 mb-2"
+                        >
+                          <p>
+                            {volume} x {qty} = ₹
+                            {item.prices.find(
+                              (price) => price.packSize === volume
+                            )?.price * qty || 0}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(item._id, volume, 1)
+                              }
+                              className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(item._id, volume, -1)
+                              }
+                              className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                            >
+                              -
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+                {/* Remove Button */}
+                <button
+                  onClick={() => handleRemoveItem(item._id)}
+                  className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm mt-4 sm:mt-0"
+                >
+                  Remove
+                </button>
               </div>
-              {/* Remove Button */}
-              <button
-                onClick={() => handleRemoveItem(item._id)}
-                className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm mt-4 sm:mt-0"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+            );
+          })}
+
           {/* Total and Checkout Section */}
           <div className="flex flex-col sm:flex-row justify-between items-center border-t border-gray-200 pt-4 space-y-4 sm:space-y-0">
             <h3 className="text-xl font-semibold text-gray-800">

@@ -244,4 +244,26 @@ router.get("/recent", async (req, res) => {
   }
 });
 
+
+// Fetch product price list
+router.get("/price-chart", async (req, res) => {
+  try {
+    // Query all products and return their name and prices
+    const products = await Product.find({}, { name: 1, prices: 1, _id: 0 });
+
+    res.status(200).json({
+      success: true,
+      message: "Product price list fetched successfully",
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching product price list:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching product price list",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

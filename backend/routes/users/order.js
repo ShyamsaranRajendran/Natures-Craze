@@ -165,34 +165,30 @@ router.post('/create', async (req, res) => {
 
 
 router.get("/all", async (req, res) => {
-
   try {
-    const order = await Order.find({});
-    console.log(order);
-    res.json(order);
+    const orders = await Order.find({}).sort({ createdAt: -1 }); // Descending order
+    console.log(orders);
+    res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: "Error updating order", error });
+    res.status(500).json({ message: "Error fetching orders", error });
   }
 });
 
-
-
-router.get('/processed', async (req, res) => {
+router.get("/processed", async (req, res) => {
   try {
-    const orders = await Order.find({ status: 'processed' });
+    const orders = await Order.find({ status: "processed" }).sort({ createdAt: -1 }); // Descending order
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch orders' });
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
-
-router.get('/processing', async (req, res) => {
+router.get("/processing", async (req, res) => {
   try {
-    const orders = await Order.find({ status: 'processing' });
+    const orders = await Order.find({ status: "processing" }).sort({ createdAt: -1 }); // Descending order
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch orders' });
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
@@ -211,12 +207,51 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/order-status-count", async (req, res) => {
+  try {
+    const statusCounts = await Order.aggregate([
+      {
+        $group: {
+          _id: "$status", // Group by order status
+          count: { $sum: 1 } // Count orders for each status
+        }
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field from the response
+          status: "$_id", // Rename the status field
+          count: 1
+        }
+      }
+    ]);
+
+    // Create a default response for missing statuses if there are no orders for them
+    const allStatuses = ["pending", "processed", "shipped", "delivered", "cancelled"];
+    const result = allStatuses.map(status => {
+      const statusCount = statusCounts.find(item => item.status === status);
+      return {
+        status,
+        count: statusCount ? statusCount.count : 0
+      };
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching order status counts:", error);
+    res.status(500).json({ error: "Failed to fetch order status counts" });
+  }
+});
+
+
 
 
 router.patch("/edit/:id", async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+  const { id } = req.params; // Get the order ID from the request URL
+  const { status } = req.body; // Get the new status from the request body
+
+  // Log the incoming data for debugging purposes
   console.log(req.body);
+
   // Validate the status value
   const validStatuses = ["pending", "processed", "processing", "delivered", "cancelled"];
   if (!validStatuses.includes(status)) {
@@ -224,23 +259,26 @@ router.patch("/edit/:id", async (req, res) => {
   }
 
   try {
+    // Update the order status in the database
     const updatedOrder = await Order.findByIdAndUpdate(
       id,
-      { status },
-      { new: true } // Return the updated document
+      { status }, // Set the new status
+      { new: true } // Return the updated order
     );
 
+    // If no order is found, send a 404 error
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found." });
     }
 
+    // Send the updated order back in the response
     res.status(200).json(updatedOrder);
   } catch (error) {
+    // Log the error and send a 500 error response
     console.error("Error updating order status:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 });
-
 
 // Endpoint to get orders for a specific user
 router.get("/:userId", async (req, res) => {

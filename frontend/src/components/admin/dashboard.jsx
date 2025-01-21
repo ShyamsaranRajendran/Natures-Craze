@@ -1,50 +1,98 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import axios from "axios";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [orderStatusCounts, setOrderStatusCounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Temporary data for testing
+    // Fetch data for order status counts from the backend API
+    // const fetchOrderStatusCounts = async () => {
+    //   try {
+    //     const response = await axios.get(`${backendURL}/orders/order-status-count`);
+    //     setOrderStatusCounts(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching order status counts:", error);
+    //   }
+    // };
+
+    // Fetch temporary products data (can be replaced with real API)
     setTimeout(() => {
       setProducts([
-        { _id: 1, name: "Product 1", price: "$50", category: "Electronics" },
-        { _id: 2, name: "Product 2", price: "$30", category: "Furniture" },
-        { _id: 3, name: "Product 3", price: "$20", category: "Clothing" },
+        { _id: 1, name: "Product 1", price: 50, category: "Electronics" },
+        { _id: 2, name: "Product 2", price: 30, category: "Furniture" },
+        { _id: 3, name: "Product 3", price: 20, category: "Clothing" },
       ]);
-      setOrders([
-        {
-          _id: 1,
-          orderNumber: "ORD123",
-          status: "Shipped",
-          createdAt: "2025-01-13T14:30:00Z",
-        },
-        {
-          _id: 2,
-          orderNumber: "ORD124",
-          status: "Delivered",
-          createdAt: "2025-01-11T09:45:00Z",
-        },
-        {
-          _id: 3,
-          orderNumber: "ORD125",
-          status: "Processing",
-          createdAt: "2025-01-10T17:00:00Z",
-        },
-      ]);
+      // fetchOrderStatusCounts();
       setLoading(false);
     }, 1000); // Simulating an API delay
   }, []);
 
-  const handleManageProducts = () => {
-    navigate("/manage-products");
+  const handleManageOrders = () => {
+    navigate("/admin/orders");
   };
 
-  const handleManageOrders = () => {
-    navigate("/manage-orders");
+  // Data for Price Chart
+  const productNames = products.map((product) => product.name);
+  const productPrices = products.map((product) => product.price);
+  const chartData = {
+    labels: productNames,
+    datasets: [
+      {
+        label: "Product Prices",
+        data: productPrices,
+        backgroundColor: ["#4caf50", "#2196f3", "#ff9800"],
+        borderColor: "#ddd",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Product Prices Chart",
+      },
+    },
+  };
+
+  // Color mapping for order status
+  const statusColorMap = {
+    processing: "#ff9800",
+    pending: "#2196f3",
+    processed: "#4caf50",
+    paid: "#4caf50",
+    unpaid: "#f44336",
   };
 
   return (
@@ -57,38 +105,44 @@ const AdminDashboard = () => {
             Admin Dashboard
           </h1>
 
-          {/* Products Section */}
+          {/* Price Chart Section */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-medium text-gray-700">Products</h3>
-            <ul className="space-y-2">
-              {products.map((product) => (
-                <li key={product._id} className="text-gray-600">
-                  {product.name} - {product.category} - {product.price}
-                </li>
-              ))}
-            </ul>
+            <h3 className="text-xl font-medium text-gray-700">Price Chart</h3>
+            <div className="mt-4">
+              <Bar data={chartData} options={chartOptions} />
+            </div>
           </div>
 
-          {/* Orders Section */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-medium text-gray-700">Orders</h3>
-            <ul className="space-y-2">
-              {orders.map((order) => (
-                <li key={order._id} className="text-gray-600">
-                  Order #{order.orderNumber} - {order.status} (Placed on:{" "}
-                  {new Date(order.createdAt).toLocaleString()})
-                </li>
-              ))}
-            </ul>
+          {/* Orders Status Count Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {orderStatusCounts.map((statusItem) => (
+              <div
+                key={statusItem.status}
+                className="bg-white p-6 rounded-lg shadow-md flex items-center justify-between"
+              >
+                <div className="flex items-center">
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: statusColorMap[statusItem.status],
+                    }}
+                  >
+                    <span className="text-white font-semibold">
+                      {statusItem.status[0].toUpperCase()}
+                    </span>
+                  </div>
+                  <h4 className="ml-4 text-lg font-semibold text-gray-800 capitalize">
+                    {statusItem.status}
+                  </h4>
+                </div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {statusItem.count}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="space-x-4">
-            <button
-              onClick={handleManageProducts}
-              className="bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
-            >
-              Manage Products
-            </button>
             <button
               onClick={handleManageOrders}
               className="bg-purple-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-purple-700 transition duration-200"

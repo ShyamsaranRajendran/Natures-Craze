@@ -37,22 +37,24 @@ function Orders() {
 
 
   // Handle filtering
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      !filters.search ||
-      order.username.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesStatus = !filters.status || order.status === filters.status;
-    const matchesPaymentMethod =
-      !filters.paymentMethod || order.paymentStatus === filters.paymentMethod;
-    const matchesDate =
-      (!filters.startDate ||
-        new Date(order.createdAt) >= new Date(filters.startDate)) &&
-      (!filters.endDate ||
-        new Date(order.createdAt) <= new Date(filters.endDate));
-    return (
-      matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate
-    );
-  });
+ const filteredOrders = orders.filter((order) => {
+   const matchesSearch =
+     !filters.search ||
+     order.username.toLowerCase().includes(filters.search.toLowerCase()) ||
+     order._id.slice(-4).includes(filters.search); // Search by last 4 digits of order ID
+
+   const matchesStatus = !filters.status || order.status === filters.status;
+   const matchesPaymentMethod =
+     !filters.paymentMethod || order.paymentStatus === filters.paymentMethod;
+   const matchesDate =
+     (!filters.startDate ||
+       new Date(order.createdAt) >= new Date(filters.startDate)) &&
+     (!filters.endDate ||
+       new Date(order.createdAt) <= new Date(filters.endDate));
+
+   return matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate;
+ });
+
 
   if (loading) {
     return <div className="text-center py-8">Loading orders...</div>;
@@ -153,11 +155,25 @@ function Orders() {
               </div>
 
               <p className="text-sm text-gray-700 mb-1 font-medium">
-                Username: {order.username}
+                <strong>Name : </strong> {order.username}
               </p>
               <p className="text-sm text-gray-700 mb-1">
-                <strong>Total:</strong>{" "}
-                <span className="text-green-600">₹{order.totalAmount}</span>
+                <strong>Total :</strong>{" "}
+                <span
+                  className={`${
+                    order.paymentStatus === "paid"
+                      ? "text-green-600"
+                      : order.paymentStatus === "unpaid"
+                      ? "text-red-600"
+                      : "text-gray-600" // Default color for other statuses
+                  }`}
+                >
+                  ₹
+                  {order.paymentStatus === "paid" ||
+                  order.paymentStatus === "unpaid"
+                    ? order.totalAmount // Show total amount if status is paid or unpaid
+                    : order.paymentStatus}
+                </span>
               </p>
               <p className="text-sm text-gray-700 mb-1">
                 <strong>Status:</strong>{" "}
@@ -171,6 +187,24 @@ function Orders() {
                   }
                 >
                   {order.status}
+                </span>
+              </p>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Payment:</strong>{" "}
+                <span
+                  className={`${
+                    order.paymentStatus === "paid"
+                      ? "text-green-600"
+                      : order.paymentStatus === "unpaid"
+                      ? "text-red-600"
+                      : "text-gray-600" // Default color for other statuses
+                  }`}
+                >
+                  ₹
+                  {order.paymentStatus === "paid" ||
+                  order.paymentStatus === "unpaid"
+                    ? order.paymentStatus // Show total amount if status is paid or unpaid
+                    : order.paymentStatus}
                 </span>
               </p>
             </div>

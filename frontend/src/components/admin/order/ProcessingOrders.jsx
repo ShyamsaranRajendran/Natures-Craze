@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchProcessingOrders = async () => {
       try {
@@ -52,72 +52,70 @@ const ProcessingOrders = () => {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="p-6 border border-gray-300 rounded-lg shadow-lg bg-white mb-4"
+              className="border border-gray-300 rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition-shadow duration-300"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click
+                navigate(`/admin/orders/${order._id}`);
+              }}
             >
-              <h3 className="text-lg font-semibold mb-4">
-                Order ID:{" "}
-                <span className="text-indigo-600">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-indigo-600">
                   ...{order._id.slice(-4)}
-                </span>
-              </h3>
-
-              <p className="text-sm text-gray-700 mb-1">
-                <strong>Customer Name:</strong> {order.username || "Unknown"}
-              </p>
-              <p className="text-sm text-gray-700 mb-1">
-                <strong>Phone Number:</strong> {order.phoneNumber || "N/A"}
-              </p>
-              <p className="text-sm text-gray-700 mb-1">
-                <strong>Address:</strong> {order.address || "N/A"}
-              </p>
-
-              <div className="mt-4">
-                <strong>Items:</strong>
-                <ul className="list-disc ml-6 mt-2">
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item) => (
-                      <li key={item._id} className="text-gray-700">
-                        <span className="font-medium">{item.name}</span> -{" "}
-                        <span>
-                          {item.weight}, {item.quantity} x ₹
-                          {item.price.toFixed(2)}
-                        </span>{" "}
-                        ={" "}
-                        <span className="font-bold">
-                          ₹{item.totalPrice.toFixed(2)}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-gray-500">No items in this order.</li>
-                  )}
-                </ul>
+                </h3>
               </div>
 
-              <p className="text-sm text-gray-700 mt-2">
-                <strong>Total Amount:</strong>{" "}
-                <span className="text-green-600 font-bold">
-                  ₹{order.totalAmount}
-                </span>
+              <p className="text-sm text-gray-700 mb-1 font-medium">
+                <strong>Name : </strong> {order.username}
               </p>
-              <p className="text-sm text-gray-700">
-                <strong>Payment Status:</strong> {order.paymentStatus || "N/A"}
-              </p>
-              <p className="text-sm text-gray-700">
-                <strong>Status:</strong>{" "}
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Total :</strong>{" "}
                 <span
                   className={`${
-                    order.status === "processing"
+                    order.paymentStatus === "paid"
+                      ? "text-green-600"
+                      : order.paymentStatus === "unpaid"
+                      ? "text-red-600"
+                      : "text-gray-600" // Default color for other statuses
+                  }`}
+                >
+                  ₹
+                  {order.paymentStatus === "paid" ||
+                  order.paymentStatus === "unpaid"
+                    ? order.totalAmount // Show total amount if status is paid or unpaid
+                    : order.paymentStatus}
+                </span>
+              </p>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Status:</strong>{" "}
+                <span
+                  className={
+                    order.status === "pending"
+                      ? "text-yellow-500"
+                      : order.status === "processing"
                       ? "text-blue-500"
                       : "text-green-600"
-                  }`}
+                  }
                 >
                   {order.status}
                 </span>
               </p>
-              <p className="text-sm text-gray-700">
-                <strong>Created At:</strong>{" "}
-                {new Date(order.createdAt).toLocaleString()}
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Payment:</strong>{" "}
+                <span
+                  className={`${
+                    order.paymentStatus === "paid"
+                      ? "text-green-600"
+                      : order.paymentStatus === "unpaid"
+                      ? "text-red-600"
+                      : "text-gray-600" // Default color for other statuses
+                  }`}
+                >
+                  ₹
+                  {order.paymentStatus === "paid" ||
+                  order.paymentStatus === "unpaid"
+                    ? order.paymentStatus // Show total amount if status is paid or unpaid
+                    : order.paymentStatus}
+                </span>
               </p>
             </div>
           ))}

@@ -182,7 +182,7 @@ const Products = () => {
                           key={priceOption._id.$oid}
                           className="text-sm text-gray-500"
                         >
-                          Packsize: {priceOption.packSize} | Price: ₹
+                          Pack size: {priceOption.packSize}  |  Price: ₹
                           {priceOption.price.toLocaleString()}
                         </p>
                       ))}
