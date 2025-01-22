@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Razorpay from "razorpay";
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -294,6 +294,7 @@ const Cart = () => {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+      <ToastContainer />
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Your Cart</h2>
       {cart.length === 0 ? (
         <p className="text-base text-gray-600">Your cart is empty.</p>

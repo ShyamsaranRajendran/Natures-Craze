@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../assets/logo.svg";
-
+import { Link, useNavigate } from "react-router-dom";
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+const handleLoginClick = () => {
+  navigate("/login");
+};
 
+const handleLogoutClick = () => {
+  localStorage.removeItem("token");
+
+  localStorage.removeItem("cart");
+  window.location.reload();
+};
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -12,7 +22,7 @@ const Header = () => {
         setIsScrolled(false);
       }
     };
-
+    window.scrollTo(0, 0);
     window.addEventListener("scroll", handleScroll);
 
     return () => {
@@ -34,6 +44,8 @@ const Header = () => {
           <img
             src={Logo}
             alt="Logo"
+            onClick={handleLoginClick}
+            onDoubleClick={handleLogoutClick}
             className="w-5 h-5 cursor-pointer hover:text-yellow-600 transition-colors"
           />
         </div>

@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
-import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const backendURL = process.env.REACT_APP_BACKEND_URL ;
+
+const backendURL = process.env.REACT_APP_BACKEND_URL;
+
 const ProductDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-    const [cart, setCart] = useState([]);
-    const [userName, setUserName] = useState("");
-    const [mobileNumber, setMobileNumber] = useState("");
-  const [contact, setContact] = useState(null);
-  const [showContactAgreement, setShowContactAgreement] = useState(false);
+  const [packSize, setPackSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
+  const getCartFromLocalStorage = () => {
+    const cart = localStorage.getItem("cart");
+    return cart ? JSON.parse(cart) : [];
+  };
+
+  const [cart, setCart] = useState(() => getCartFromLocalStorage());
+  const [temporaryCart, setTemporaryCart] = useState([]);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -27,7 +31,6 @@ const ProductDetails = () => {
         }
         const data = await response.json();
         setProduct(data.product);
-        setRecommendedProducts(data.recommendedProducts || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -38,129 +41,96 @@ const ProductDetails = () => {
     fetchProductDetails();
   }, [id]);
 
-  const handleInterest = () => {
-    setShowContactAgreement(true);
+  const updateCart = (updatedCart) => {
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const handleContactAgreement = async (response) => {
-    if (response === "agree") {
-      setContact("Thank you for agreeing! We will contact you.");
-      const productUrl = `http://localhost:3000/products/${id}`;
-
-      try {
-        const interestDetails = {
-          productId: id,
-          productUrl,
-          message: `User is interested in this product.`,
-        };
-
-        const res = await fetch(`${backendURL}/order/interest`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(interestDetails),
-        });
-
-        if (!res.ok) throw new Error("Failed to send interest details.");
-      } catch (err) {
-        console.error("Error sending contact agreement:", err);
-      }
-    } else {
-      setContact("You have disagreed.");
+  const handleAddToTemporaryCart = (productId) => {
+    if (!packSize || quantity <= 0) {
+      toast.warning("Please select a valid pack size and quantity.");
+      return;
     }
 
-    setTimeout(() => {
-      setShowContactAgreement(false);
-      setContact(null);
-    }, 2000);
-  };
-  
-   const handleCall = () => {
-     const phoneNumber = "+919698904457"; // International format for the phone number
-     window.location.href = `tel:${phoneNumber}`;
-   };
-
-const handleAddToCart = (product) => {
-  // Create a copy of the product without the image buffer
-  const { image, ...productWithoutImage } = product;
-
-  // Check if the product is already in the cart
-  const existingItem = cart.find(
-    (item) =>
-      item._id === productWithoutImage._id && item.volume === product.volume
-  );
-
-  if (existingItem) {
-    // If the product already exists, update the quantity
-    const updatedCart = cart.map((item) =>
-      item._id === productWithoutImage._id && item.volume === product.volume
-        ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
-        : item
+    const existingProduct = temporaryCart.find(
+      (item) => item._id === productId
     );
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-    // Show toast notification
-    toast.success(`${productWithoutImage.name} quantity increased!`, {
-      position: "bottom-center",
-      autoClose: 3000,
-    });
-  } else {
-    // If the product doesn't exist, add it to the cart without the image
-    const updatedCart = [...cart, { ...productWithoutImage, quantity: 1 }];
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    if (existingProduct) {
+      const updatedQuantities = {
+        ...existingProduct.quantities,
+        [packSize]: (existingProduct.quantities?.[packSize] || 0) + quantity,
+      };
 
-    // Show toast notification
-    toast.success(`${productWithoutImage.name} added to cart!`, {
-      position: "bottom-center",
-      autoClose: 3000,
-    });
-  }
-};
+      const updatedTemporaryCart = temporaryCart.map((item) =>
+        item._id === productId
+          ? { ...item, quantities: updatedQuantities }
+          : item
+      );
 
-
-  const handleShare = (product) => {
-    const productUrl = `${window.location.origin}/product/${product._id}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Use clipboard API if available
-      navigator.clipboard
-        .writeText(productUrl)
-        .then(() =>
-          console.log(`Product link copied to clipboard: ${productUrl}`)
-        )
-        .catch(() => alert("Failed to copy the product link."));
+      setTemporaryCart(updatedTemporaryCart);
     } else {
-      // Fallback for devices or browsers that do not support clipboard API
-      const textArea = document.createElement("textarea");
-      textArea.value = productUrl;
-      textArea.style.position = "fixed"; // Avoid scrolling to bottom
-      textArea.style.left = "-9999px"; // Hide from view
-      document.body.appendChild(textArea);
-      textArea.select();
+      const newProduct = {
+        _id: productId,
+        name: product.name,
+        description: product.description,
+        prices: product.prices,
+        rating: product.rating,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        reviews: product.reviews,
+        quantities: { [packSize]: quantity },
+        quantity: 1,
+      };
 
-      try {
-        const successful = document.execCommand("copy");
-        const message = successful
-          ? "Product link copied to clipboard!"
-          : "Failed to copy the product link.";
-      } catch (err) {
-        alert("Your browser does not support clipboard copy.");
-      } finally {
-        document.body.removeChild(textArea);
-      }
+      setTemporaryCart([...temporaryCart, newProduct]);
     }
+
+    toast.success(`${quantity} packs of ${packSize} added to temporary cart!`);
+    setPackSize("");
+    setQuantity(1);
+  };
+
+  const handleAddToMainCart = () => {
+    const updatedCart = [...cart, ...temporaryCart];
+    updateCart(updatedCart);
+    setTemporaryCart([]);
+    toast.success("Successfully added to the cart!");
+  };
+
+  const handleClearTemporaryCart = () => {
+    setTemporaryCart([]);
+    toast.info("Cart is cleared!");
+  };
+
+  const handleQuantityChange = (volume, change) => {
+    const updatedTemporaryCart = temporaryCart.map((item) => {
+      if (item._id === product._id) {
+        const updatedQuantities = { ...item.quantities };
+        const newQuantity = (updatedQuantities[volume] || 0) + change;
+
+        if (newQuantity <= 0) {
+          delete updatedQuantities[volume];
+        } else {
+          updatedQuantities[volume] = newQuantity;
+        }
+
+        return { ...item, quantities: updatedQuantities };
+      }
+      return item;
+    });
+
+    const filteredTemporaryCart = updatedTemporaryCart.filter(
+      (item) => Object.keys(item.quantities).length > 0
+    );
+
+    setTemporaryCart(filteredTemporaryCart);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-customYellow">
-        <div
-          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
-          aria-label="Loading..."
-        ></div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="loader" aria-label="Loading..."></div>
       </div>
     );
   }
@@ -181,145 +151,101 @@ const handleAddToCart = (product) => {
     );
   }
 
+  const currentProductInTemporaryCart =
+    temporaryCart.find((item) => item._id === product._id) || {};
+
   return (
     <div className="container mx-auto px-4 py-10">
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-        {/* Check if the image is Base64 or URL */}
+      <ToastContainer />
+      <div className="bg-white shadow-lg rounded-lg p-6 md:p-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4">{product.name}</h1>
         <img
           src={product.image ? `${product.image}` : DefaultImage}
           alt={product.name}
-          className="w-full h-48 object-cover mb-6 rounded-lg"
+          className="w-full max-w-xs mx-auto mb-6 rounded-lg object-cover"
         />
-        <p className="text-gray-800 mb-4">{product.description}</p>
-        <div className="space-y-1">
-          {product.prices &&
-            product.prices.map((priceOption, index) => (
-              <p key={priceOption._id.$oid} className="text-sm text-gray-500">
-                Packsize: {priceOption.packSize} | Price: ₹
-                {priceOption.price.toLocaleString()}
-              </p>
-            ))}
-        </div>
+        <p className="text-gray-800 mb-4 text-sm md:text-base">
+          {product.description}
+        </p>
 
-        <div className="flex justify-between items-center px-0 py-4 border-t border-gray-200">
-          <button
-            className="flex items-center text-blue-500"
-            onClick={() => handleShare(product)}
-          >
-            <Share2 className="w-5 h-5 mr-2" /> Share
-          </button>
-
-          <button
-            className="flex items-center text-red-500"
-            onClick={handleCall}
-          >
-            <Phone className="w-5 h-5 mr-1" /> Call
-          </button>
-          <button
-            className="flex items-center text-green-500"
-            onClick={() => handleAddToCart(product)}
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-4">Recommended Products</h2>
-        <div className="flex space-x-4 overflow-x-auto">
-          {recommendedProducts.map((recProduct) => (
-            <div
-              key={recProduct._id}
-              className="bg-white shadow-md rounded-lg p-4 w-60 flex-shrink-0"
+        <div className="mt-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+            <select
+              value={packSize}
+              onChange={(e) => setPackSize(e.target.value)}
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full sm:w-auto"
             >
-              <img
-                src={recProduct.image ? `${recProduct.image}` : DefaultImage}
-                alt={recProduct.name}
-                className="h-40 w-full object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-lg font-medium">{recProduct.name}</h3>
-              <p className="text-gray-600">₹{recProduct.price}</p>
-              <a
-                href={`/product/${recProduct._id}`}
-                className="text-blue-500 mt-2 inline-block"
-              >
-                View Details
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* {showContactAgreement && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Our team will contact you. Please provide your details.
-            </h2>
-            {contact ? (
-              <p className="mt-4 text-lg font-medium text-gray-700">
-                {contact}
-              </p>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleContactAgreement("agree");
-                }}
-              >
-                <div className="mb-4">
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="mobile"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Mobile Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="mobile"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg mr-4"
-                  >
-                    Agree
-                  </button>
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                    onClick={() => handleContactAgreement("disagree")}
-                  >
-                    Disagree
-                  </button>
-                </div>
-              </form>
-            )}
+              <option value="" disabled>
+                Select Pack Size
+              </option>
+              {product.prices.map((price) => (
+                <option key={price._id} value={price.packSize}>
+                  {price.packSize}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full sm:w-24 text-center"
+            />
+            <button
+              onClick={() => handleAddToTemporaryCart(product._id)}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full sm:w-auto"
+            >
+              Add
+            </button>
           </div>
         </div>
-      )} */}
+
+        <div className="mt-6">
+          {Object.entries(currentProductInTemporaryCart.quantities || {}).map(
+            ([volume, qty]) => (
+              <div
+                key={volume}
+                className="flex flex-row sm:flex-row items-center justify-between mb-4"
+              >
+                <p>
+                  {volume} x {qty} = ₹
+                  {product.prices.find((price) => price.packSize === volume)
+                    ?.price * qty || 0}
+                </p>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleQuantityChange(volume, 1)}
+                    className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => handleQuantityChange(volume, -1)}
+                    className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    -
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+
+        <div className="mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+          <button
+            onClick={handleAddToMainCart}
+            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 w-full sm:w-auto"
+          >
+            Add to Cart
+          </button>
+          <button
+            onClick={handleClearTemporaryCart}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 w-full sm:w-auto"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

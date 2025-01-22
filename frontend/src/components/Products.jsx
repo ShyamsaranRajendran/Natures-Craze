@@ -76,52 +76,44 @@ const Products = () => {
     }
   };
 
-const handleShare = (product) => {
-  const productUrl = `${window.location.origin}/product/${product._id}`;
+  const handleShare = (product) => {
+    const productUrl = `${window.location.origin}/product/${product._id}`;
 
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    // Use clipboard API if available
-    navigator.clipboard
-      .writeText(productUrl)
-      .then(() => {
-        toast.success("Product link copied to clipboard!");
-      })
-      .catch(() => {
-        toast.error("Failed to copy the product link.");
-      });
-  } else {
-    // Fallback for devices or browsers that do not support clipboard API
-    const textArea = document.createElement("textarea");
-    textArea.value = productUrl;
-    textArea.style.position = "fixed"; // Avoid scrolling to bottom
-    textArea.style.left = "-9999px"; // Hide from view
-    document.body.appendChild(textArea);
-    textArea.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Use clipboard API if available
+      navigator.clipboard
+        .writeText(productUrl)
+        .then(() =>
+          console.log(`Product link copied to clipboard: ${productUrl}`)
+        )
+        .catch(() => alert("Failed to copy the product link."));
+    } else {
+      // Fallback for devices or browsers that do not support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = productUrl;
+      textArea.style.position = "fixed"; // Avoid scrolling to bottom
+      textArea.style.left = "-9999px"; // Hide from view
+      document.body.appendChild(textArea);
+      textArea.select();
 
-    try {
-      const successful = document.execCommand("copy");
-      if (successful) {
-        toast.success("Product link copied to clipboard!");
-      } else {
-        toast.error("Failed to copy the product link.");
+      try {
+        const successful = document.execCommand("copy");
+        const message = successful
+          ? "Product link copied to clipboard!"
+          : "Failed to copy the product link.";
+      } catch (err) {
+        alert("Your browser does not support clipboard copy.");
+      } finally {
+        document.body.removeChild(textArea);
       }
-    } catch (err) {
-      toast.error("Your browser does not support clipboard copy.");
-    } finally {
-      document.body.removeChild(textArea);
     }
-  }
-};
-
-
-  const handleCall = () => {
-    const phoneNumber = "+919698904457"; // International format for the phone number
-    window.location.href = `tel:${phoneNumber}`;
   };
+
+
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white">
+      <div className="flex items-center justify-center h-screen bg-customYellow">
         <div
           className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
           aria-label="Loading..."
@@ -180,31 +172,13 @@ const handleShare = (product) => {
                   <p className="text-sm text-gray-600 line-clamp-2">
                     {product.description}
                   </p>
-                  <div className="space-y-1">
-                    {product.prices &&
-                      product.prices.map((priceOption, index) => (
-                        <p
-                          key={priceOption._id.$oid}
-                          className="text-sm text-gray-500"
-                        >
-                          Pack size: {priceOption.packSize}  |  Price: ₹
-                          {priceOption.price.toLocaleString()}
-                        </p>
-                      ))}
-                  </div>
                 </div>
                 <div className="p-4 flex justify-between items-center border-t">
                   <button
                     className="flex items-center text-blue-500"
                     onClick={() => handleShare(product)}
                   >
-                    <Share2 className="w-5 h-5 mr-1" /> Share
-                  </button>
-                  <button
-                    className="flex items-center text-red-500"
-                    onClick={handleCall}
-                  >
-                    <Phone className="w-5 h-5 mr-1" /> Call
+                    <Phone className="w-5 h-5 mr-1" /> WhatsApp
                   </button>
                   <button
                     className="flex items-center text-green-500"

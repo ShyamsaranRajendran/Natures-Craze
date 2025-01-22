@@ -94,27 +94,10 @@ const HomePage = () => {
             {/* Shop Now Button */}
             <Link
               to="/products"
-              className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-yellow-600 transform hover:scale-105 transition-all"
+              className="mt-6 md:mt-8 px-6 py-3 bg-gray-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-yellow-600 transform hover:scale-105 transition-all"
             >
               Shop Now
             </Link>
-
-            {/* Login/Logout Button */}
-            {!isLoggedIn ? (
-              <button
-                onClick={handleLoginClick}
-                className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all"
-              >
-                Login
-              </button>
-            ) : (
-              <button
-                onClick={handleLogoutClick}
-                className="mt-6 md:mt-8 px-6 py-3 bg-yellow-500 text-white text-lg font-semibold rounded-full shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all"
-              >
-                Logout
-              </button>
-            )}
           </div>
         </div>
       </div>
