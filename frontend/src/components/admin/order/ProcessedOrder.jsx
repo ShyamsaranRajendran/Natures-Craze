@@ -232,10 +232,18 @@ const downloadInvoice = async (order) => {
 
 
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen bg-white">
+      <div
+        className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+        aria-label="Loading..."
+      ></div>
+    </div>
+  );
 
   return (
     <div className="p-6 mt-20">
+            <ToastContainer />
       <h1 className="text-2xl font-bold mb-4">Processed Orders</h1>
       {orders.length === 0 ? (
         <p>No processed orders found.</p>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { ToastContainer,toast } from "react-toastify";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 function OrderDetail() {
@@ -66,8 +66,14 @@ function OrderDetail() {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading order details...</div>;
-  }
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div
+          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+          aria-label="Loading..."
+        ></div>
+      </div>
+    );  }
 
   if (error) {
     return (
@@ -79,6 +85,7 @@ function OrderDetail() {
 
   return (
     <div className="p-6 mt-10 max-w-3xl mx-auto">
+      <ToastContainer />
       <h1 className="text-2xl font-bold text-center mb-6">Order Details</h1>
       {order ? (
         <div className="border border-gray-300 rounded-lg shadow-md p-6 bg-white">

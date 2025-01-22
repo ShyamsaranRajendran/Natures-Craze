@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { ToastContainer,toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -39,16 +39,24 @@ const ProcessingOrders = () => {
     fetchProcessingOrders();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen bg-white">
+      <div
+        className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+        aria-label="Loading..."
+      ></div>
+    </div>
+  );
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="p-6 mt-20">
+            <ToastContainer />
       <h1 className="text-2xl font-bold mb-4">Processing Orders</h1>
       {orders.length === 0 ? (
         <p>No processing orders found.</p>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           {orders.map((order) => (
             <div
               key={order._id}

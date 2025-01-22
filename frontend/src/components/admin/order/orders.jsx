@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { ToastContainer,toast } from "react-toastify";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 function Orders() {
@@ -57,8 +57,14 @@ function Orders() {
 
 
   if (loading) {
-    return <div className="text-center py-8">Loading orders...</div>;
-  }
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div
+          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+          aria-label="Loading..."
+        ></div>
+      </div>
+    );  }
 
   if (error) {
     return (
@@ -70,6 +76,7 @@ function Orders() {
 
   return (
     <div className="p-4 mt-10">
+            <ToastContainer />
       <h1 className="text-2xl font-bold text-center mb-4">Orders</h1>
 
       {/* Filters */}
@@ -138,7 +145,7 @@ function Orders() {
       {filteredOrders.length === 0 ? (
         <p className="text-center text-gray-600">No orders available.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-7 gap-4">
           {filteredOrders.map((order) => (
             <div
               key={order._id}

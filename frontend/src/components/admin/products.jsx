@@ -95,7 +95,12 @@ const Products = () => {
       </div>
 
       {loading ? (
-        <p>Loading products...</p>
+        <div className="flex items-center justify-center h-screen bg-white">
+          <div
+            className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
+            aria-label="Loading..."
+          ></div>
+        </div>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (

@@ -76,38 +76,43 @@ const Products = () => {
     }
   };
 
-  const handleShare = (product) => {
-    const productUrl = `${window.location.origin}/product/${product._id}`;
+const handleShare = (product) => {
+  const productUrl = `${window.location.origin}/product/${product._id}`;
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Use clipboard API if available
-      navigator.clipboard
-        .writeText(productUrl)
-        .then(() =>
-          console.log(`Product link copied to clipboard: ${productUrl}`)
-        )
-        .catch(() => alert("Failed to copy the product link."));
-    } else {
-      // Fallback for devices or browsers that do not support clipboard API
-      const textArea = document.createElement("textarea");
-      textArea.value = productUrl;
-      textArea.style.position = "fixed"; // Avoid scrolling to bottom
-      textArea.style.left = "-9999px"; // Hide from view
-      document.body.appendChild(textArea);
-      textArea.select();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    // Use clipboard API if available
+    navigator.clipboard
+      .writeText(productUrl)
+      .then(() => {
+        toast.success("Product link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy the product link.");
+      });
+  } else {
+    // Fallback for devices or browsers that do not support clipboard API
+    const textArea = document.createElement("textarea");
+    textArea.value = productUrl;
+    textArea.style.position = "fixed"; // Avoid scrolling to bottom
+    textArea.style.left = "-9999px"; // Hide from view
+    document.body.appendChild(textArea);
+    textArea.select();
 
-      try {
-        const successful = document.execCommand("copy");
-        const message = successful
-          ? "Product link copied to clipboard!"
-          : "Failed to copy the product link.";
-      } catch (err) {
-        alert("Your browser does not support clipboard copy.");
-      } finally {
-        document.body.removeChild(textArea);
+    try {
+      const successful = document.execCommand("copy");
+      if (successful) {
+        toast.success("Product link copied to clipboard!");
+      } else {
+        toast.error("Failed to copy the product link.");
       }
+    } catch (err) {
+      toast.error("Your browser does not support clipboard copy.");
+    } finally {
+      document.body.removeChild(textArea);
     }
-  };
+  }
+};
+
 
   const handleCall = () => {
     const phoneNumber = "+919698904457"; // International format for the phone number
@@ -116,7 +121,7 @@ const Products = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-customYellow">
+      <div className="flex items-center justify-center h-screen bg-white">
         <div
           className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
           aria-label="Loading..."
