@@ -137,6 +137,7 @@ const OrdersPage = () => {
                 <th className="border px-4 py-2">Order ID</th>
                 <th className="border px-4 py-2">Username</th>
                 <th className="border px-4 py-2">Phone</th>
+                <th className="border px-4 py-2">Address</th>
                 <th className="border px-4 py-2">Total Amount</th>
                 <th className="border px-4 py-2">Status</th>
                 <th className="border px-4 py-2">Payment Status</th>
@@ -150,6 +151,7 @@ const OrdersPage = () => {
                   <td className="border px-4 py-2">{order._id}</td>
                   <td className="border px-4 py-2">{order.username}</td>
                   <td className="border px-4 py-2">{order.phoneNumber}</td>
+                  <td className="border px-4 py-2">{order.address}</td>
                   <td className="border px-4 py-2">₹{order.totalAmount}</td>
                   <td className="border px-4 py-2 capitalize">
                     {order.status}

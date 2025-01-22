@@ -75,39 +75,17 @@ const Products = () => {
       toast.success(`${productWithoutImage.name} added to cart!`);
     }
   };
+const handleShare = (product) => {
+  // Construct the WhatsApp URL with a pre-filled message (optional)
+  const message = `Hello, I am interested in buying the product:${window.location.origin}/product/${product._id}.`;
+  const phoneNumber = "+919361864257"; // Replace with the desired phone number
 
-  const handleShare = (product) => {
-    const productUrl = `${window.location.origin}/product/${product._id}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Use clipboard API if available
-      navigator.clipboard
-        .writeText(productUrl)
-        .then(() =>
-          console.log(`Product link copied to clipboard: ${productUrl}`)
-        )
-        .catch(() => alert("Failed to copy the product link."));
-    } else {
-      // Fallback for devices or browsers that do not support clipboard API
-      const textArea = document.createElement("textarea");
-      textArea.value = productUrl;
-      textArea.style.position = "fixed"; // Avoid scrolling to bottom
-      textArea.style.left = "-9999px"; // Hide from view
-      document.body.appendChild(textArea);
-      textArea.select();
-
-      try {
-        const successful = document.execCommand("copy");
-        const message = successful
-          ? "Product link copied to clipboard!"
-          : "Failed to copy the product link.";
-      } catch (err) {
-        alert("Your browser does not support clipboard copy.");
-      } finally {
-        document.body.removeChild(textArea);
-      }
-    }
-  };
+  // Open the WhatsApp chat URL
+  window.open(
+    `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
 
 
 

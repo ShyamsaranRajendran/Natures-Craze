@@ -33,7 +33,7 @@ const Contact = () => {
               curcumin138@gamil.com
             </div>
             <div className="flex items-center">
-              <Phone className="w-5 h-5 mr-2 text-green-500" /> +91 96989 04457
+              <Phone className="w-5 h-5 mr-2 text-green-500" /> +91 93618 64257
             </div>
             <div className="flex items-center">
               <MapPin className="w-5 h-5 mr-2 text-red-500" /> Perunduari,
