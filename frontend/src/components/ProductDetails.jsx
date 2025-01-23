@@ -290,19 +290,7 @@ const ProductDetails = () => {
                       </div>
 
                       <div className="flex items-center space-x-4">
-                        <select
-                          value={qty}
-                          onChange={(e) =>
-                            handleQuantityChange(volume, Number(e.target.value))
-                          }
-                          className="block rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 p-2 "
-                        >
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <option key={value} value={value}>
-                              {value}
-                            </option>
-                          ))}
-                        </select>
+                        {qty}
                       </div>
                     </div>
                   ))}

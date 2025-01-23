@@ -48,54 +48,64 @@ const ProductsPage = () => {
   });
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-white">
-      <div
-        className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
-        aria-label="Loading..."
-      ></div>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+      <div className="relative w-16 h-16">
+        <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+        <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+      </div>
     </div>
   );
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="p-6 ">
-      <h1 className="text-2xl font-semibold mb-4">Products</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Products</h1>
 
       {/* Filters Section */}
-      <div className="mb-6 overflow-x-auto">
-        <div className="grid grid-cols-[repeat(5,minmax(200px,1fr))] gap-4">
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-4">
           <input
             type="text"
             placeholder="Search by product name"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="border p-2 rounded-md w-full"
+            className="border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-1/3"
           />
         </div>
       </div>
 
       {/* Product Table */}
-      <div className="overflow-x-auto">
-        <table className="table-auto border-collapse border w-full text-left">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2">Product ID</th>
-              <th className="border px-4 py-2">Name</th>
-              <th className="border px-4 py-2">Description</th>
-              <th className="border px-4 py-2">Prices</th>
-              <th className="border px-4 py-2">Actions</th>
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table className="w-full text-sm text-left text-gray-700">
+          <thead className="text-xs text-gray-500 uppercase bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 border-b">Product ID</th>
+              <th className="px-6 py-3 border-b">Name</th>
+              <th className="px-6 py-3 border-b">Description</th>
+              <th className="px-6 py-3 border-b">Prices</th>
+              <th className="px-6 py-3 border-b text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                <tr key={product._id}>
-                  <td className="border px-4 py-2">{product._id}</td>
-                  <td className="border px-4 py-2">{product.name}</td>
-                  <td className="border px-4 py-2">{product.description}</td>
-                  <td className="border px-4 py-2">
+                <tr
+                  key={product._id}
+                  className="hover:bg-gray-100 transition duration-150"
+                >
+                  <td className="px-6 py-4 border-b">{product._id}</td>
+                  <td className="px-6 py-4 border-b font-medium">
+                    {product.name}
+                  </td>
+                  <td className="px-6 py-4 border-b  text-gray-600">
+                    {product.description}
+                  </td>
+                  <td className="px-6 py-4 border-b w-1/4">
                     {product.prices.map((priceOption, index) => (
-                      <div key={index} className="mb-2">
+                      <div
+                        key={index}
+                        className="mb-1 p-2 bg-gray-50 rounded-lg shadow-sm"
+                      >
                         <p>
                           <strong>Pack:</strong> {priceOption.packSize},{" "}
                           <strong>Price:</strong> ₹{priceOption.price}
@@ -103,9 +113,9 @@ const ProductsPage = () => {
                       </div>
                     ))}
                   </td>
-                  <td className="border px-4 py-2">
+                  <td className="px-6 py-4 border-b text-center">
                     <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-150"
                       onClick={() =>
                         (window.location.href = `/admin/products/edit/${product._id}`)
                       }
@@ -119,7 +129,7 @@ const ProductsPage = () => {
               <tr>
                 <td
                   colSpan="6"
-                  className="border px-4 py-2 text-center text-gray-500"
+                  className="px-6 py-4 text-center text-gray-500 border-b"
                 >
                   No products found.
                 </td>

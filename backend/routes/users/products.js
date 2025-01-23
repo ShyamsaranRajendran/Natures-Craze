@@ -73,33 +73,41 @@ router.post("/add", upload.single("image"), async (req, res) => {
 router.post("/images", async (req, res) => {
   try {
     const { ids } = req.body;
-    
+
+    // Validate input: Check if IDs are provided and in the correct format
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: "No product IDs provided" });
     }
 
-    // Find products by IDs
+    // Find products by IDs in the database
     const products = await Product.find({ _id: { $in: ids } });
 
-    // If no products are found, return an error
+    // Handle case where no matching products are found
     if (products.length === 0) {
       return res.status(404).json({ error: "No products found for the given IDs" });
     }
 
-    // Convert the image buffer into a base64 string for each product
-    const images = products.map(product => {
-      const imageBuffer = product.image; // Assuming image is a Buffer
-      const imageBase64 = imageBuffer.toString("base64"); // Convert the buffer to a base64 string
-      return `data:image/jpeg;base64,${imageBase64}`; // Add the correct image MIME type
+    // Map images with their corresponding IDs
+    const images = products.map((product) => {
+      const imageBuffer = product.image; // Assuming `image` is a Buffer in the Product schema
+      const imageBase64 = imageBuffer
+        ? `data:image/jpeg;base64,${imageBuffer.toString("base64")}` // Convert buffer to base64
+        : null; // If no image, return null or a default placeholder URL
+
+      return {
+        id: product._id, // Include the product ID
+        image: imageBase64, // Include the base64-encoded image or null
+      };
     });
 
-    // Send the base64 encoded images as the response
+    // Send the mapped images and IDs to the frontend
     res.status(200).json({ images });
   } catch (error) {
     console.error("Error fetching product images:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // Utility to format products (e.g., convert image buffer to base64)
 const formatProduct = (product) => {

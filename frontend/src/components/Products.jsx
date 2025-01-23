@@ -155,7 +155,7 @@ const Products = () => {
           </div>
           <input
             type="text"
-            placeholder="Search products by name or weight..."
+            placeholder="Search products by name ..."
             className="w-full pl-10 pr-4 py-3 border-2 border-amber-200 rounded-xl focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 bg-white shadow-sm transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

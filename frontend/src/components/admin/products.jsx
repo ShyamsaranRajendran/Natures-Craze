@@ -103,11 +103,11 @@ const Products = () => {
 
       {/* Loading/Error States */}
       {loading ? (
-        <div className="flex items-center justify-center h-40">
-          <div
-            className="border-4 border-gray-300 border-t-blue-500 rounded-full w-12 h-12 animate-spin"
-            aria-label="Loading..."
-          ></div>
+        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+          </div>
         </div>
       ) : error ? (
         <p className="text-red-500 text-center">{error}</p>
@@ -128,8 +128,11 @@ const Products = () => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {product.name}
                 </h3>
-                <p className="text-gray-600 text-sm">
+                {/* <p className="text-gray-600 text-sm">
                   {product.description || "No description available"}
+                </p> */}
+                <p className="text-gray-600 text-sm line-clamp-2">
+                  {product.description}
                 </p>
               </div>
               <div className="mt-4 flex justify-between space-x-2">

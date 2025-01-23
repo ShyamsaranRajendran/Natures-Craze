@@ -36,22 +36,22 @@ const Cart = () => {
         }
 
         // Fetch images from the backend
-        const response = await fetch(`${backendURL}/prod/images`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: prodIds }),
-        });
+        // const response = await fetch(`${backendURL}/prod/images`, {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ ids: prodIds }),
+        // });
 
-        if (response.ok) {
-          const data = await response.json();
-          setCartImg(data.images);
-        } else {
-          console.error(
-            "Error fetching product images:",
-            response.status,
-            response.statusText
-          );
-        }
+        // if (response.ok) {
+        //   const data = await response.json();
+        //   setCartImg(data.images);
+        // } else {
+        //   console.error(
+        //     "Error fetching product images:",
+        //     response.status,
+        //     response.statusText
+        //   );
+        // }
       } catch (error) {
         console.error("Error while fetching product images:", error);
       }
@@ -59,6 +59,47 @@ const Cart = () => {
 
     fetchProductImages();
   }, [backendURL]);
+
+ useEffect(() => {
+   // Fetch images when the cart is updated
+   if (cart.length > 0) {
+     const fetchImages = async () => {
+       try {
+         const ids = cart.map((item) => item._id); // Extract product IDs
+         const response = await fetch(`${backendURL}/prod/images`, {
+           method: "POST",
+           headers: {
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify({ ids }), // Send product IDs to backend
+         });
+
+         if (!response.ok) {
+           throw new Error("Failed to fetch images");
+         }
+
+         const data = await response.json();
+
+         // Create a mapping of ID -> Image
+         const imageMap = data.images.reduce((acc, item) => {
+           acc[item.id] = item.image; // Map product ID to base64 image
+           return acc;
+         }, {});
+
+         // Set cartImg array in the order of the cart
+         const images = cart.map((item) => imageMap[item._id] || null); // Default to null if no image
+         setCartImg(images);
+       } catch (error) {
+         console.error("Error fetching images:", error);
+       } finally {
+         setIsLoading(false);
+       }
+     };
+
+     fetchImages();
+   }
+ }, [cart]);
+
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -351,7 +392,9 @@ const Cart = () => {
                         <h3 className="text-xl font-semibold text-gray-900">
                           {item.name}
                         </h3>
-                        <p className="text-gray-600 mt-1">{item.description}</p>
+                        <p className="text-gray-600 mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
                       </div>
                       <button
                         onClick={() => handleRemoveItem(item._id)}

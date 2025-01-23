@@ -81,7 +81,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Address</p>
-                    <p className="text-gray-900">Perunduari, Erode, India</p>
+                    <p className="text-gray-900">Kangapuram, Erode, India</p>
                   </div>
                 </div>
 
@@ -140,11 +140,13 @@ const Contact = () => {
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Find Us</h2>
               <div className="rounded-lg overflow-hidden shadow-inner">
+              
                 <iframe
-                  title="Location Map"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d19619.261231796987!2d77.6628345!3d11.361828999999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96951a342163d%3A0x5782bc25210cbf12!2sGangapuram%2C%20Tamil%20Nadu!5e1!3m2!1sen!2sin!4v1737630673415!5m2!1sen!2sin"
                   className="w-full h-[400px]"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.9962934950386!2d77.71160931531163!3d11.341036091900853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f517dba65b3%3A0x2d539b5fae46f40a!2sErode%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1613996775709!5m2!1sen!2sin"
+                  title="Location Map"
                   loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
                 ></iframe>
               </div>
             </div>

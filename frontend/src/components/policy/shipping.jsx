@@ -34,7 +34,7 @@ function Shipping() {
       </p>
       <ul className="text-gray-700 mt-2">
         <li className="font-medium">
-          Phone: <span className="text-blue-600">9698904457</span>
+          Phone: <span className="text-blue-600">+91 9361864257</span>
         </li>
         <li className="font-medium">
           Email:{" "}

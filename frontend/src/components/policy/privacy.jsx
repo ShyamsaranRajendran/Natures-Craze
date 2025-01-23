@@ -98,7 +98,7 @@ function Privacy() {
         <span className="font-semibold">Address:</span> 70,
         Pudurvellangattuvalasu, Kanagapuram (PO), Erode, Tamil Nadu, 638112{" "}
         <br />
-        <span className="font-semibold">Phone:</span> 9698904457 <br />
+        <span className="font-semibold">Phone:</span> +91 9361864257 <br />
         <span className="font-semibold">Email:</span>{" "}
         <span className="text-blue-600">curcuimin138@gmail.com</span>
       </p>
