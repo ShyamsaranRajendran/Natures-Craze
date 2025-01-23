@@ -81,7 +81,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Address</p>
-                    <p className="text-gray-900">Kangapuram, Erode, India</p>
+                    <p className="text-gray-900">Kanagapuram, Erode,Tamil Nadu, India</p>
                   </div>
                 </div>
 
@@ -140,9 +140,8 @@ const Contact = () => {
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Find Us</h2>
               <div className="rounded-lg overflow-hidden shadow-inner">
-              
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d19619.261231796987!2d77.6628345!3d11.361828999999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96951a342163d%3A0x5782bc25210cbf12!2sGangapuram%2C%20Tamil%20Nadu!5e1!3m2!1sen!2sin!4v1737630673415!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d4906.632741494903!2d77.67110567504889!3d11.255685288923734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDE1JzIwLjUiTiA3N8KwNDAnMjUuMyJF!5e1!3m2!1sen!2sin!4v1737632699741!5m2!1sen!2sin"
                   className="w-full h-[400px]"
                   title="Location Map"
                   loading="lazy"

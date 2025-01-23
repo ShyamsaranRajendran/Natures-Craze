@@ -5,6 +5,7 @@ import {
   Search,
   Heart,
   Package,
+  Camera,
   Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
