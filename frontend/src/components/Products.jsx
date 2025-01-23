@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Phone, Share2, Heart } from "lucide-react";
+import {
+  ShoppingCart,
+  Phone,
+  Search,
+  Heart,
+  Package,
+  Star,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,6 +20,7 @@ const Products = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,13 +39,19 @@ const Products = () => {
     };
 
     fetchProducts();
+
+    // Load favorites from localStorage
+    const storedFavorites = JSON.parse(
+      localStorage.getItem("favorites") || "[]"
+    );
+    setFavorites(storedFavorites);
   }, []);
 
   const filteredProducts = products.filter((product) => {
-    const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex for matching
+    const regex = new RegExp(searchTerm, "i");
     return (
       regex.test(product.name) ||
-      (product.weight && regex.test(product.weight.toString())) // Check weight as a string
+      (product.weight && regex.test(product.weight.toString()))
     );
   });
 
@@ -60,116 +73,178 @@ const Products = () => {
     if (existingItem) {
       const updatedCart = cart.map((item) =>
         item._id === productWithoutImage._id && item.volume === product.volume
-          ? { ...item, quantity: item.quantity + 1 } // Increase the quantity of the existing item
+          ? { ...item, quantity: item.quantity + 1 }
           : item
       );
       setCart(updatedCart);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
-
       toast.success(`${productWithoutImage.name} quantity increased!`);
     } else {
       const updatedCart = [...cart, { ...productWithoutImage, quantity: 1 }];
       setCart(updatedCart);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
-
       toast.success(`${productWithoutImage.name} added to cart!`);
     }
   };
-const handleShare = (product) => {
-  // Construct the WhatsApp URL with a pre-filled message (optional)
-  const message = `Hello, I am interested in buying the product:${window.location.origin}/product/${product._id}.`;
-  const phoneNumber = "+919361864257"; // Replace with the desired phone number
 
-  // Open the WhatsApp chat URL
-  window.open(
-    `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-};
+  const handleShare = (product) => {
+    const message = `Hello, I am interested in buying the product:${window.location.origin}/product/${product._id}.`;
+    const phoneNumber = "+919361864257";
+    window.open(
+      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
 
+  const toggleFavorite = (productId) => {
+    const newFavorites = favorites.includes(productId)
+      ? favorites.filter((id) => id !== productId)
+      : [...favorites, productId];
 
+    setFavorites(newFavorites);
+    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+
+    const action = favorites.includes(productId) ? "removed from" : "added to";
+    toast.success(`Product ${action} favorites!`);
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-customYellow">
-        <div
-          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
-          aria-label="Loading..."
-        ></div>
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center text-lg font-medium text-red-500 mt-10">
-        Error: {error}
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-500 text-2xl">!</span>
+          </div>
+          <p className="text-lg font-medium text-red-500">Error: {error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-20">
-      <ToastContainer />
-      <div className="flex justify-center mb-8">
-        <input
-          type="text"
-          placeholder="Search products..."
-          className="p-2 border border-gray-300 rounded-lg w-full sm:w-1/2"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4 sm:px-6 lg:px-8 mt-10">
+      <ToastContainer position="bottom-right" theme="colored" />
 
-      {filteredProducts.length === 0 ? (
-        <p className="text-center text-lg font-medium text-gray-600">
-          No products available.
-        </p>
-      ) : (
-        <div>
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-            Available Products
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Premium Turmeric Products
           </h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover our collection of high-quality turmeric products, carefully
+            sourced and processed for maximum benefits.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative max-w-2xl mx-auto mb-12">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search products by name or weight..."
+            className="w-full pl-10 pr-4 py-3 border-2 border-amber-200 rounded-xl focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 bg-white shadow-sm transition-colors"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md mx-auto">
+            <Package className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+            <p className="text-xl text-gray-600">No products found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredProducts.map((product) => (
               <div
                 key={product._id}
-                className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300"
               >
-                <Link to={`/product/${product._id}`} className="block">
-                  <img
-                    src={product.image || DefaultImage}
-                    alt={product.name}
-                    className="w-full h-48 lg:h-60 object-cover"
-                  />
-                </Link>
-                <div className="p-4 flex flex-col space-y-2">
-                  <h3 className="font-semibold text-gray-800">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {product.description}
-                  </p>
+                <div className="relative">
+                  <Link to={`/product/${product._id}`}>
+                    <div className="relative h-64 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/30 to-amber-50/10"></div>
+                      <img
+                        src={
+                          product.image ||
+                          "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&auto=format&fit=crop&q=80"
+                        }
+                        alt={product.name}
+                        className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => toggleFavorite(product._id)}
+                    className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-colors"
+                  >
+                    <Heart
+                      className={`w-5 h-5 ${
+                        favorites.includes(product._id)
+                          ? "text-red-500 fill-current"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
                 </div>
-                <div className="p-4 flex justify-between items-center border-t">
-                  <button
-                    className="flex items-center text-blue-500"
-                    onClick={() => handleShare(product)}
-                  >
-                    <Phone className="w-5 h-5 mr-1" /> WhatsApp
-                  </button>
-                  <button
-                    className="flex items-center text-green-500"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-                  </button>
+
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm line-clamp-2">
+                      {product.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center mb-4">
+                    <div className="flex items-center text-amber-500">
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 text-gray-300" />
+                    </div>
+                    <span className="text-sm text-gray-500 ml-2">(4.0)</span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <button
+                      onClick={() => handleShare(product)}
+                      className="flex items-center px-3 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      Contact
+                    </button>
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

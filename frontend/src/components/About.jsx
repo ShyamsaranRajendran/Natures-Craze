@@ -1,110 +1,170 @@
 import React from "react";
-import image1 from "../assets/turmeric_3.jpg"; // Import the image
 import { Link } from "react-router-dom";
+import {
+  Award,
+  Leaf,
+  Heart,
+  Truck,
+  Phone,
+  Mail,
+  MapPin,
+  ArrowRight,
+  Star,
+  Users,
+  Shield,
+  Sun,
+} from "lucide-react";
 
 const About = () => {
   return (
-    <div
-      className="min-h-screen bg-cover bg-center text-white relative"
-      style={{
-        backgroundImage: `url(${image1})`, // Set the background image
-      }}
-    >
-      {/* Overlay with blur effect */}
-      <div className="absolute inset-0 bg-black opacity-50 filter blur-xl"></div>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      {/* Hero Section */}
+      <div className="relative h-[60vh]">
+        <div className="absolute inset-0">
+          <img
+            src="https://m.media-amazon.com/images/I/71OzxY5WpxS._AC_UF1000,1000_QL80_.jpg"
+            alt="Turmeric Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"></div>
+        </div>
 
-      {/* Container for the about page */}
-      <div className="max-w-screen-lg mx-auto px-4 py-20 relative z-10">
-        {/* Heading Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-white tracking-wider mb-4 animate__animated animate__fadeIn animate__delay-1s">
-            About Us
+        <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-amber-400 mb-4">
+            Our Story
           </h1>
-          <p className="text-lg text-gray-200 opacity-80 animate__animated animate__fadeIn animate__delay-2s">
-            We are passionate about delivering the finest turmeric powder to
-            your doorstep, enriched with nature's goodness.
+          <p className="text-xl text-gray-200 max-w-2xl">
+            Bringing the finest turmeric from farm to table since 1970
           </p>
         </div>
+      </div>
 
-        {/* Story Section */}
-        <div className="text-center mb-16 animate__animated animate__fadeIn animate__delay-3s">
-          <h2 className="text-3xl font-semibold mb-4">Our Story</h2>
-          <p className="text-lg text-gray-200 opacity-80">
-            Our journey started with a simple idea: to bring you the purest and
-            highest-quality turmeric powder, harvested from the finest farms. We
-            work with trusted farmers who practice sustainable farming methods,
-            ensuring that every grain of turmeric is packed with the natural
-            benefits nature has to offer.
-          </p>
-        </div>
-
-        {/* Product Benefits Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {/* Health Benefit 1 */}
-          <div className="bg-white bg-opacity-60 rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-            <div className=" p-6 text-center">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Boosts Immunity
-              </h3>
-              <p className="text-gray-600 text-sm mt-4">
-                Our turmeric powder is known for its immune-boosting properties,
-                keeping you healthy and vibrant all year round.
+      {/* Mission Section */}
+      <div className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Our Mission
+              </h2>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                At the heart of our mission lies a commitment to delivering the
+                purest, most potent turmeric products while preserving
+                traditional farming and processing methods. We believe in the
+                power of nature's remedies and work tirelessly to bring these
+                benefits to your doorstep.
               </p>
+              <div className="space-y-4">
+                {[
+                  "Supporting local farmers and sustainable agriculture",
+                  "Maintaining the highest quality standards",
+                  "Preserving traditional processing methods",
+                  "Promoting health and wellness through natural products",
+                ].map((point, index) => (
+                  <div key={index} className="flex items-center">
+                    <Star className="w-5 h-5 text-amber-500 mr-2 flex-shrink-0" />
+                    <span className="text-gray-700">{point}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Health Benefit 2 */}
-          <div className="bg-white bg-opacity-60 rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-            <div className=" p-6 text-center">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Anti-Inflammatory
-              </h3>
-              <p className="text-gray-600 text-sm mt-4">
-                Our turmeric powder has powerful anti-inflammatory effects,
-                promoting joint health and reducing pain.
-              </p>
-            </div>
-          </div>
-
-          {/* Health Benefit 3 */}
-          <div className="bg-white bg-opacity-60 rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-            <div className=" p-6 text-center">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Rich in Antioxidants
-              </h3>
-              <p className="text-gray-600 text-sm mt-4">
-                Packed with antioxidants, our turmeric powder helps combat free
-                radicals and supports healthy skin.
-              </p>
+            <div className="grid grid-cols-2 gap-4">
+              <img
+                src="https://www.agrifarming.in/wp-content/uploads/The-Golden-Root-2.jpg"
+                alt="Turmeric Farming"
+                className="rounded-lg shadow-lg"
+              />
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSljT1mewP_hrNODZ6a_xDWwXe9hvZW9SDwnQ&s"
+                alt="Processing"
+                className="rounded-lg shadow-lg mt-8"
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Commitment Section */}
-        <div className="text-center animate__animated animate__fadeIn animate__delay-4s">
-          <h2 className="text-3xl font-semibold mb-4">Our Commitment</h2>
-          <p className="text-lg text-gray-200 opacity-80 mb-8">
-            We are committed to delivering the highest quality turmeric powder.
-            From farm to your table, we ensure that every batch is 100% natural,
-            with no additives, ensuring maximum flavor and health benefits.
-          </p>
-          <p className="text-lg text-gray-200 opacity-80">
-            We believe in sustainability and fair trade. Our farmers are paid
-            fairly, and we use eco-friendly packaging to reduce our carbon
-            footprint.
-          </p>
-        </div>
-
-        {/* Contact Call-to-Action */}
-        <div className="text-center mt-16">
-          <h2 className="text-2xl font-bold text-teal-100 mb-4">
-            Get in Touch
+      {/* Values Section */}
+      <div className="bg-amber-50 py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Our Core Values
           </h2>
-          <p className="text-lg text-gray-200 opacity-80">
-            Have any questions or want to know more about our turmeric products?
-            Feel free to reach out to us.
-          </p>
-         
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Leaf className="w-8 h-8" />,
+                title: "Sustainability",
+                description:
+                  "We practice eco-friendly farming and processing methods to protect our environment for future generations.",
+              },
+              {
+                icon: <Heart className="w-8 h-8" />,
+                title: "Quality",
+                description:
+                  "Every batch of our turmeric is tested for purity and potency to ensure the highest quality standards.",
+              },
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: "Community",
+                description:
+                  "We support local farmers and their families through fair trade practices and sustainable partnerships.",
+              },
+            ].map((value, index) => (
+              <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
+                <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mb-4 text-white">
+                  {value.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {value.title}
+                </h3>
+                <p className="text-gray-600">{value.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Process Section */}
+      <div className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Our Process
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                icon: <Leaf className="w-6 h-6" />,
+                title: "Cultivation",
+                description: "Organic farming practices in fertile soil",
+              },
+              {
+                icon: <Sun className="w-6 h-6" />,
+                title: "Harvesting",
+                description: "Hand-picked at peak maturity",
+              },
+              {
+                icon: <Shield className="w-6 h-6" />,
+                title: "Processing",
+                description: "Traditional cold grinding method",
+              },
+              {
+                icon: <Truck className="w-6 h-6" />,
+                title: "Delivery",
+                description: "Carefully packed and delivered fresh",
+              },
+            ].map((step, index) => (
+              <div key={index} className="text-center">
+                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                  {step.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600">{step.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

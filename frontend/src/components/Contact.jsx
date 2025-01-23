@@ -1,137 +1,180 @@
 import React from "react";
-import { FaWhatsapp, FaInstagram, FaEnvelope } from "react-icons/fa";
-import pouring from "../assets/pouring.jpg"; // Ensure the path to the image is correct
-import { Mail, Phone, MapPin } from "lucide-react";
-import { Link } from "react-router-dom"; // Assuming React Router is being used
+import { Link } from "react-router-dom";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  ExternalLink,
+  ArrowRight,
+} from "lucide-react";
 
 const Contact = () => {
   return (
-    <div
-      className="min-h-screen bg-cover bg-center flex flex-col justify-center items-center px-6 py-16"
-      style={{
-        backgroundImage: `url(${pouring})`,
-      }}
-    >
-      <div className="w-full max-w-4xl bg-white bg-opacity-80 rounded-lg shadow-lg p-8 transition-all transform">
-        <h2 className="text-3xl font-bold text-yellow-700 text-center mb-6 transition-transform transform">
-          Get in Touch with Us
-        </h2>
-        <p className="text-gray-600 text-center mb-8 transition-opacity opacity-80 hover:opacity-100">
-          Have questions about our turmeric products? We're here to help! Fill
-          out the form below, and we'll get back to you shortly.
-        </p>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      {/* Hero Section */}
+      <div className="relative h-[40vh]">
+        <div className="absolute inset-0">
+          <img
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRKPPDhsG35ug0Lj7DG5UD2oVQZpVWQgiARg&s"
+            alt="Turmeric Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"></div>
+        </div>
 
-        {/* Contact Information Section */}
-        <div className="contact-info-container mb-12 p-6 rounded-lg shadow-md transition-all transform">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">
-            Contact Information
-          </h3>
+        <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-amber-400 mb-4">
+            Contact Us
+          </h1>
+          <p className="text-xl text-gray-200 max-w-2xl">
+            We're here to help with all your turmeric needs
+          </p>
+        </div>
+      </div>
 
-          <div className="text-gray-600 mt-4 space-y-2">
-            <div className="flex items-center">
-              <Mail className="w-5 h-5 mr-2 text-blue-500" />{" "}
-              curcumin138@gamil.com
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Contact Information */}
+          <div className="space-y-8">
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Get in Touch
+              </h2>
+
+              {/* Contact Details */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email</p>
+                    <a
+                      href="mailto:curcumin138@gmail.com"
+                      className="text-gray-900 hover:text-amber-600"
+                    >
+                      curcumin138@gmail.com
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <a
+                      href="tel:+919361864257"
+                      className="text-gray-900 hover:text-amber-600"
+                    >
+                      +91 93618 64257
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Address</p>
+                    <p className="text-gray-900">Perunduari, Erode, India</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Business Hours</p>
+                    <div className="text-gray-900">
+                      <p>Mon - Fri: 9:00 AM - 9:00 PM</p>
+                      <p>Saturday: 10:00 AM - 6:00 PM</p>
+                      <p>Sunday: Closed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center">
-              <Phone className="w-5 h-5 mr-2 text-green-500" /> +91 93618 64257
-            </div>
-            <div className="flex items-center">
-              <MapPin className="w-5 h-5 mr-2 text-red-500" /> Perunduari,
-              Erode, India
+
+            {/* Social Links */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Connect With Us
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <a
+                  href="https://wa.me/9698904457"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <ExternalLink className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-green-700 font-medium">WhatsApp</span>
+                </a>
+
+                <a
+                  href="https://www.instagram.com/natures_delightz_?igsh=MWx5MDVtZ2Y3NDZnMA=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center">
+                    <ExternalLink className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-pink-700 font-medium">Instagram</span>
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* Store Hours */}
-          <h4 className="text-md font-semibold text-blue-600 mt-6">
-            Store Hours
-          </h4>
-          <p className="text-gray-600">
-            <strong>Monday - Friday:</strong> 9:00 AM - 9:00 PM
-          </p>
-          <p className="text-gray-600">
-            <strong>Saturday:</strong> 10:00 AM - 6:00 PM
-          </p>
-          <p className="text-gray-600">
-            <strong>Sunday:</strong> Closed
-          </p>
+          {/* Map and Policies */}
+          <div className="space-y-8">
+            {/* Map */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Find Us</h2>
+              <div className="rounded-lg overflow-hidden shadow-inner">
+                <iframe
+                  title="Location Map"
+                  className="w-full h-[400px]"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.9962934950386!2d77.71160931531163!3d11.341036091900853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f517dba65b3%3A0x2d539b5fae46f40a!2sErode%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1613996775709!5m2!1sen!2sin"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
 
-          {/* Social Media Links */}
-          <div className="flex justify-center items-center gap-8 mt-6">
-            {/* WhatsApp */}
-            <a
-              href="https://wa.me/9698904457"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-600 hover:text-green-700 text-3xl transition"
-            >
-              <FaWhatsapp />
-            </a>
-            {/* Instagram */}
-            <a
-              href="https://www.instagram.com/natures_delightz_?igsh=MWx5MDVtZ2Y3NDZnMA=="
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-pink-500 hover:text-pink-600 text-3xl transition"
-            >
-              <FaInstagram />
-            </a>
-            {/* Email */}
-            <a
-              href="mailto:curcumin138@gamil.com"
-              className="text-yellow-600 hover:text-yellow-700 text-3xl transition"
-            >
-              <FaEnvelope />
-            </a>
+            {/* Policies */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Our Policies
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { title: "Privacy Policy", path: "/policy/privacy" },
+                  { title: "Terms & Conditions", path: "/policy/terms" },
+                  { title: "Refund Policy", path: "/policy/refund" },
+                  { title: "Shipping Policy", path: "/policy/shipping" },
+                ].map((policy, index) => (
+                  <Link
+                    key={index}
+                    to={policy.path}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-amber-50 transition-colors group"
+                  >
+                    <span className="text-gray-900 group-hover:text-amber-700">
+                      {policy.title}
+                    </span>
+                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-amber-500 transform group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Map Section */}
-        <div className="map-container mt-8">
-          <iframe
-            title="Location Map"
-            className="w-full h-64 rounded-lg shadow-md transition-all transform"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.9962934950386!2d77.71160931531163!3d11.341036091900853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f517dba65b3%3A0x2d539b5fae46f40a!2sErode%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1613996775709!5m2!1sen!2sin"
-            loading="lazy"
-          ></iframe>
-        </div>
-
-        {/* Policies Section */}
-        <div className="policies-section mt-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Policies</h3>
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
-            <li>
-              <Link
-                to="/policy/privacy"
-                className="text-blue-500 hover:underline"
-              >
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/policy/terms"
-                className="text-blue-500 hover:underline"
-              >
-                Terms and Conditions
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/policy/refund"
-                className="text-blue-500 hover:underline"
-              >
-                Refund Policy
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/policy/shipping"
-                className="text-blue-500 hover:underline"
-              >
-                Shipping Policy
-              </Link>
-            </li>
-          </ul>
         </div>
       </div>
     </div>

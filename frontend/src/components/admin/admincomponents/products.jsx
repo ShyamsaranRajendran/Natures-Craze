@@ -58,7 +58,7 @@ const ProductsPage = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="p-6 mt-20">
+    <div className="p-6 ">
       <h1 className="text-2xl font-semibold mb-4">Products</h1>
 
       {/* Filters Section */}
@@ -71,7 +71,6 @@ const ProductsPage = () => {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             className="border p-2 rounded-md w-full"
           />
-         
         </div>
       </div>
 
@@ -108,7 +107,7 @@ const ProductsPage = () => {
                     <button
                       className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       onClick={() =>
-                        (window.location.href = `/admin/products/${product._id}`)
+                        (window.location.href = `/admin/products/edit/${product._id}`)
                       }
                     >
                       View

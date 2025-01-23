@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { Calendar, Search, Filter, RefreshCw } from "lucide-react";
+import { toast,ToastContainer } from "react-toastify";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
-const OrdersPage = () => {
+const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,166 +16,214 @@ const OrdersPage = () => {
     endDate: "",
   });
 
-  // Fetch orders from the backend
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get(`${backendURL}/orders/all`);
-        setOrders(response.data);
-      } catch (err) {
-        setError(err.message || "Failed to fetch orders.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get(`${backendURL}/orders/all`);
+      setOrders(response.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Filter logic
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      await axios.patch(
+          `${backendURL}/orders/edit/${id}`,
+          { status: newStatus },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      fetchOrders(); 
+      toast.success("Order status updated successfully!", {
+                position: "top-right",
+                autoClose: 3000,
+              });
+    } catch (err) {
+      console.error("Error updating order status:", err);
+    }
+  };
+
   const filteredOrders = orders.filter((order) => {
+    const searchRegex = new RegExp(filters.search, "i");
     const matchesSearch =
-      !filters.search ||
-      order.username.toLowerCase().includes(filters.search.toLowerCase()) ||
-      order._id.slice(-4).includes(filters.search);
-
+      searchRegex.test(order.username) || searchRegex.test(order._id);
     const matchesStatus = !filters.status || order.status === filters.status;
-    const matchesPaymentMethod =
+    const matchesPayment =
       !filters.paymentMethod || order.paymentStatus === filters.paymentMethod;
-    const matchesDate =
-      (!filters.startDate ||
-        Date.parse(order.createdAt) >= Date.parse(filters.startDate)) &&
-      (!filters.endDate ||
-        Date.parse(order.createdAt) <= Date.parse(filters.endDate));
 
-    return (
-      matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate
-    );
+    return matchesSearch && matchesStatus && matchesPayment;
   });
 
-  return (
-    <div className="p-3">
-      <h1 className="text-2xl font-semibold mb-4">Orders</h1>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="text-center text-red-600 p-4">
+        Error loading orders: {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow">
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <input
-          type="text"
-          placeholder="Search by username"
-          value={filters.search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          className="border p-2 rounded-md w-full"
-        />
-        <select
-          value={filters.status}
-          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="border p-2 rounded-md w-full"
-        >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="processed">Processed</option>
-        </select>
-        <select
-          value={filters.paymentMethod}
-          onChange={(e) =>
-            setFilters({ ...filters, paymentMethod: e.target.value })
-          }
-          className="border p-2 rounded-md w-full"
-        >
-          <option value="">All Payment Methods</option>
-          <option value="paid">Paid</option>
-          <option value="unpaid">Unpaid</option>
-        </select>
-        <div>
-          <label
-            className="block text-sm text-gray-600 mb-1"
-            htmlFor="startDate"
-          >
-            From
-          </label>
-          <input
-            id="startDate"
-            type="date"
-            value={filters.startDate || new Date().toISOString().split("T")[0]}
-            onChange={(e) =>
-              setFilters({ ...filters, startDate: e.target.value })
-            }
-            className="border p-2 rounded-md w-full"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1" htmlFor="endDate">
-            To
-          </label>
-          <input
-            id="endDate"
-            type="date"
-            value={filters.endDate || new Date().toISOString().split("T")[0]}
-            onChange={(e) =>
-              setFilters({ ...filters, endDate: e.target.value })
-            }
-            className="border p-2 rounded-md w-full"
-          />
+      <ToastContainer/>
+      <div className="p-4 border-b border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search orders..."
+              value={filters.search}
+              onChange={(e) =>
+                setFilters({ ...filters, search: e.target.value })
+              }
+              className=" p-2 pl-10  w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="text-gray-400 w-5 h-5" />
+            <select
+              value={filters.status}
+              onChange={(e) =>
+                setFilters({ ...filters, status: e.target.value })
+              }
+              className="w-full p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2"
+            >
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="processed">Processed</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="text-gray-400 w-5 h-5" />
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) =>
+                setFilters({ ...filters, startDate: e.target.value })
+              }
+              className="w-full  p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="text-gray-400 w-5 h-5" />
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) =>
+                setFilters({ ...filters, endDate: e.target.value })
+              }
+              className="w-full  p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Loading, Error, and Empty State */}
-      {loading && (
-        <p className="text-center text-gray-500">Loading orders...</p>
-      )}
-      {error && <p className="text-center text-red-500">Error: {error}</p>}
-      {!loading && !error && filteredOrders.length === 0 && (
-        <p className="text-center text-gray-500">No orders found.</p>
-      )}
-
-      {/* Filtered Orders Table */}
-      {!loading && !error && filteredOrders.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="table-auto border-collapse border w-full text-left">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-4 py-2">Order ID</th>
-                <th className="border px-4 py-2">Username</th>
-                <th className="border px-4 py-2">Phone</th>
-                <th className="border px-4 py-2">Address</th>
-                <th className="border px-4 py-2">Total Amount</th>
-                <th className="border px-4 py-2">Status</th>
-                <th className="border px-4 py-2">Payment Status</th>
-                <th className="border px-4 py-2">Date</th>
-                {/* <th className="border px-4 py-2">Actions</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order._id}>
-                  <td className="border px-4 py-2">{order._id}</td>
-                  <td className="border px-4 py-2">{order.username}</td>
-                  <td className="border px-4 py-2">{order.phoneNumber}</td>
-                  <td className="border px-4 py-2">{order.address}</td>
-                  <td className="border px-4 py-2">₹{order.totalAmount}</td>
-                  <td className="border px-4 py-2 capitalize">
-                    {order.status}
-                  </td>
-                  <td className="border px-4 py-2 capitalize">
+      {/* Orders Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Order ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Contact
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Payment
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredOrders.map((order) => (
+              <tr key={order._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {order._id}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    {order.username}
+                  </div>
+                  <div className="text-sm text-gray-500">{order.address}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {order.phoneNumber}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{order.totalAmount}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={order.status}
+                    onChange={(e) =>
+                      handleStatusUpdate(order._id, e.target.value)
+                    }
+                    className="text-sm  p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="processed">Processed</option>
+                  </select>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      order.paymentStatus === "paid"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
                     {order.paymentStatus}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  {/* <td className="border px-4 py-2">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                      View
-                    </button>
-                  </td> */}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => handleStatusUpdate(order._id, order.status)}
+                    className="text-amber-600 hover:text-amber-900"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
-export default OrdersPage;
+export default Orders;
