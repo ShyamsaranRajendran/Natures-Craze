@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Calendar, Search, Filter, RefreshCw } from "lucide-react";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import * as XLSX from "xlsx"; // Import XLSX
+
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const Orders = () => {
@@ -34,15 +36,15 @@ const Orders = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       await axios.patch(
-          `${backendURL}/orders/edit/${id}`,
-          { status: newStatus },
-          { headers: { "Content-Type": "application/json" } }
-        );
-      fetchOrders(); 
+        `${backendURL}/orders/edit/${id}`,
+        { status: newStatus },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      fetchOrders();
       toast.success("Order status updated successfully!", {
-                position: "top-right",
-                autoClose: 3000,
-              });
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (err) {
       console.error("Error updating order status:", err);
     }
@@ -51,13 +53,32 @@ const Orders = () => {
   const filteredOrders = orders.filter((order) => {
     const searchRegex = new RegExp(filters.search, "i");
     const matchesSearch =
-      searchRegex.test(order.username) || searchRegex.test(order._id);
+      searchRegex.test(order.username) || searchRegex.test(order.order_id);
     const matchesStatus = !filters.status || order.status === filters.status;
     const matchesPayment =
       !filters.paymentMethod || order.paymentStatus === filters.paymentMethod;
 
     return matchesSearch && matchesStatus && matchesPayment;
   });
+
+  const handleExportToExcel = () => {
+    const formattedOrders = filteredOrders.map((order) => ({
+      "Order ID": order.order_id,
+      Customer: order.username,
+      Contact: order.phoneNumber,
+      Amount: order.totalAmount,
+      Status: order.status,
+      "Payment Status": order.paymentStatus,
+      Date: new Date(order.createdAt).toLocaleDateString(),
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(formattedOrders);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Orders");
+
+    // Save the Excel file
+    XLSX.writeFile(wb, "orders.xlsx");
+  };
 
   if (loading) {
     return (
@@ -81,7 +102,7 @@ const Orders = () => {
   return (
     <div className="bg-white rounded-lg shadow">
       {/* Filters */}
-      <ToastContainer/>
+      <ToastContainer />
       <div className="p-4 border-b border-gray-200">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
@@ -136,6 +157,16 @@ const Orders = () => {
         </div>
       </div>
 
+      {/* Export Button */}
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={handleExportToExcel}
+          className="bg-amber-500 text-white py-2 px-4 rounded-md hover:bg-amber-600"
+        >
+          Export to Excel
+        </button>
+      </div>
+
       {/* Orders Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -168,60 +199,73 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.map((order) => (
-              <tr key={order._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {order._id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {order.username}
-                  </div>
-                  <div className="text-sm text-gray-500">{order.address}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.phoneNumber}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{order.totalAmount}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={order.status}
-                    onChange={(e) =>
-                      handleStatusUpdate(order._id, e.target.value)
-                    }
-                    className="text-sm  p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="processed">Processed</option>
-                  </select>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      order.paymentStatus === "paid"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {order.paymentStatus}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleStatusUpdate(order._id, order.status)}
-                    className="text-amber-600 hover:text-amber-900"
-                  >
-                    <RefreshCw className="w-5 h-5" />
-                  </button>
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <tr key={order._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.order_id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {order.username}
+                    </div>
+                    <div className="text-sm text-gray-500">{order.address}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {order.phoneNumber}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ₹{order.totalAmount}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      value={order.status}
+                      onChange={(e) =>
+                        handleStatusUpdate(order._id, e.target.value)
+                      }
+                      className="text-sm  p-2 border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="processed">Processed</option>
+                    </select>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.paymentStatus === "paid"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(order._id, order.status)
+                      }
+                      className="text-amber-600 hover:text-amber-900"
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="px-6 py-4 text-center text-gray-500 border-b"
+                >
+                  No orders found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

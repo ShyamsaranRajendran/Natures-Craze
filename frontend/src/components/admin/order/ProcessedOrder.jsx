@@ -256,10 +256,7 @@ const downloadInvoice = async (order) => {
               onClick={() => handleOrderClick(order)} // Add onClick to view order details
             >
               <h3 className="text-lg font-semibold">
-                ID:{" "}
-                <span className="text-indigo-600">
-                  ...{order._id.slice(-4)}
-                </span>
+                ID : {order.order_id}
               </h3>
 
               <p className="text-sm text-gray-700 mb-1">
@@ -302,7 +299,7 @@ const downloadInvoice = async (order) => {
           <div className="bg-white p-8 rounded-lg shadow-lg w-3/4 md:w-1/2">
             <h2 className="text-2xl font-bold mb-4">Order Details</h2>
             <p>
-              <strong>Order ID:</strong> {selectedOrder._id}
+              <strong>Order ID:</strong> {selectedOrder.order_id}
             </p>
             <p>
               <strong>Customer Name:</strong>{" "}

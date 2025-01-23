@@ -51,7 +51,7 @@ const ProcessingOrders = () => {
 
   return (
     <div className="p-6 mt-20">
-            <ToastContainer />
+      <ToastContainer />
       <h1 className="text-2xl font-bold mb-4">Processing Orders</h1>
       {orders.length === 0 ? (
         <p>No processing orders found.</p>
@@ -68,7 +68,7 @@ const ProcessingOrders = () => {
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-semibold text-indigo-600">
-                  ...{order._id.slice(-4)}
+                  ID : {order.order_id}
                 </h3>
               </div>
 

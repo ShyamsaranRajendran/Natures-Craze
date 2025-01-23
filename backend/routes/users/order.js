@@ -162,7 +162,66 @@ router.post('/create', async (req, res) => {
 });
 
 
+router.patch("/assign-ids", async (req, res) => {
+  try {
+    // Fetch all orders sorted by creation date
+    const orders = await Order.find().sort({ createdAt: 1 });
 
+    // Ensure orders is an array
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found to update." });
+    }
+
+    let idCounter = 1; // Start the ID counter
+
+    for (const order of orders) {
+  order.order_id = idCounter++; // Assign the sequential ID
+
+  // Ensure paymentStatus is valid
+  if (!["pending", "successful", "failed"].includes(order.paymentStatus)) {
+    order.paymentStatus = "pending"; // Set a default valid value
+  }
+
+  await order.save(); // Save the updated order
+}
+
+
+    res.status(200).json({
+      message: "IDs assigned successfully to all orders.",
+      totalUpdated: idCounter - 1, // Total number of orders updated
+    });
+  } catch (error) {
+    console.error("Error assigning IDs:", error);
+    res.status(500).json({ message: "Error assigning IDs", error });
+  }
+});
+
+router.get("/charts", async (req, res) => {
+    try {
+        // Fetch all orders and only return the createdAt field
+        const orders = await Order.find({}, 'createdAt'); // You can also use projection to select specific fields
+
+        res.json(orders);
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        res.status(500).json({ message: "Failed to fetch orders" });
+    }
+});
+
+router.get("/id/:razorpay_order_id", async (req, res) => {
+  try {
+    const { razorpay_order_id } = req.params;
+    const order = await Order.findOne({ razorpayOrderId : razorpay_order_id });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.get("/all", async (req, res) => {
   try {

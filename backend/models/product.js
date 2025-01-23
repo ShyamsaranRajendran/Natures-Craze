@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const productSchema = new mongoose.Schema(
   {
+    id: {
+      type: Number,
+      unique: true, // Ensure the id field is unique
+    },
     name: {
       type: String,
       trim: true,
@@ -20,7 +25,8 @@ const productSchema = new mongoose.Schema(
     stock: {
       type: Number,
       min: 0,
-    },prices: [
+    },
+    prices: [
       {
         packSize: { type: String, required: true }, // e.g., "250g", "500g"
         price: { type: Number, required: true, min: 0 }, // Price for that pack size
@@ -42,11 +48,11 @@ const productSchema = new mongoose.Schema(
     },
     reviews: [
       {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Reference to User model
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User model
         comment: String,
         rating: { type: Number, min: 1, max: 5 },
         createdAt: { type: Date, default: Date.now },
-      }
+      },
     ],
   },
   {
@@ -54,8 +60,11 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+// Auto-increment the `id` field
+productSchema.plugin(AutoIncrement, { inc_field: "id" });
+
 // Update `updatedAt` field on document save
-productSchema.pre('save', function(next) {
+productSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });

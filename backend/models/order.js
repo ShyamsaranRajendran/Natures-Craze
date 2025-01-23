@@ -1,31 +1,99 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
-const orderSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  address: { type: String, required: true },
-  items: [{
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-    name: { type: String, required: true },
-    price: { type: Number, required: true },
-    weight: { type: String, required: true },
-    quantity: { type: Number, required: true },
-    totalPrice: { type: Number, required: true },
-  }],
-  totalAmount: { type: Number, required: true },
-  status: {
-    type: String,
-    enum: ["pending", "processed", "shipped", "delivered", "cancelled"],
-    default: "pending", 
+const orderSchema = new mongoose.Schema(
+  {
+    order_id: {
+      type: Number,
+      unique: true, // Auto-incremented ID, unique for each order
+    },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    items: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        weight: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        totalPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "processed", "shipped", "delivered", "processing"],
+      default: "pending",
+    },
+    razorpayOrderId: {
+      type: String,
+      trim: true,
+    },
+    razorpayPaymentId: {
+      type: String,
+      trim: true,
+    },
+    razorpaySignature: {
+      type: String,
+      trim: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "pending", "successful", "failed"],
+      default: "unpaid",
+    },
   },
-  razorpayOrderId: { type: String },
-  razorpayPaymentId: { type: String },
-  razorpaySignature: { type: String },
-  paymentStatus: { type: String, default: 'unpaid' }, // Can be 'pending', 'successful', or 'failed'
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+  {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
+  }
+);
 
-const Order = mongoose.model('Order', orderSchema);
+// Auto-increment the `id` field
+orderSchema.plugin(AutoIncrement, { inc_field: "order_id" });
+
+
+
+const Order = mongoose.model("Order", orderSchema);
 
 module.exports = Order;

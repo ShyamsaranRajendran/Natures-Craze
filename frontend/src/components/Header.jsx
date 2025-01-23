@@ -39,14 +39,15 @@ const handleLogoutClick = () => {
       }`}
     >
       <div className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-xl font-bold text-yellow-600">Turmeric World</h1>
+        <h1 className="text-xl font-bold text-yellow-600">NaturesCrazes</h1>
         <div className="flex items-center space-x-4">
           <img
             src={Logo}
             alt="Logo"
             onClick={handleLoginClick}
             onDoubleClick={handleLogoutClick}
-            className="w-5 h-5 cursor-pointer hover:text-yellow-600 transition-colors"
+            style={{ color: "black" }}
+            className="w-5 h-5 cursor-pointer text-yellow-600 transition-colors "
           />
         </div>
       </div>

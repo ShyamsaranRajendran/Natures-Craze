@@ -8,6 +8,7 @@ import {
   ExternalLink,
   ArrowRight,
 } from "lucide-react";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 
 const Contact = () => {
   return (
@@ -81,7 +82,9 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Address</p>
-                    <p className="text-gray-900">Kanagapuram, Erode,Tamil Nadu, India</p>
+                    <p className="text-gray-900">
+                      Kanagapuram, Erode,Tamil Nadu, India
+                    </p>
                   </div>
                 </div>
 
@@ -108,13 +111,13 @@ const Contact = () => {
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <a
-                  href="https://wa.me/9698904457"
+                  href="https://wa.me/+919361864257"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
                 >
                   <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                    <ExternalLink className="w-5 h-5 text-white" />
+                    <FaWhatsapp className="w-5 h-5 text-white" />
                   </div>
                   <span className="text-green-700 font-medium">WhatsApp</span>
                 </a>
@@ -126,7 +129,7 @@ const Contact = () => {
                   className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
                 >
                   <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center">
-                    <ExternalLink className="w-5 h-5 text-white" />
+                    <FaInstagram className="w-5 h-5 text-white" />
                   </div>
                   <span className="text-pink-700 font-medium">Instagram</span>
                 </a>

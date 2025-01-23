@@ -176,7 +176,7 @@ router.get("/:id", async (req, res) => {
 router.put('/update/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
   const { name, desc, prices } = req.body;
-  const imageFile = req.file; // Handle the uploaded image file
+  const image = req.file;
 
   try {
     const product = await Product.findById(id);
@@ -189,8 +189,8 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
     product.name = name || product.name;
     product.description = desc || product.description;
 
-    if (imageFile) {
-      product.image = '/uploads/' + imageFile.filename; // Save image path to the database
+    if (image) {
+      product.image = image.buffer
     }
 
     // Update prices array

@@ -34,7 +34,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white font-sans">
+    <div className="min-h-screen  bg-gradient-to-b from-amber-50 to-white font-sans">
       {/* Hero Section */}
       <div className="relative h-screen">
         <div className="absolute inset-0">
@@ -196,13 +196,13 @@ const HomePage = () => {
                         Lab-tested for purity and potency
                       </li>
                     </ul>
-                    <Link
+                    {/* <Link
                       to={`/category/${index + 1}`}
                       className="mt-4 inline-flex items-center text-amber-600 hover:text-amber-700"
                     >
                       Learn more
                       <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
+                    </Link> */}
                   </div>
                 </div>
               </div>

@@ -91,7 +91,7 @@ function OrderDetail() {
         <div className="border border-gray-300 rounded-lg shadow-md p-6 bg-white">
           <div className="mb-4">
             <h3 className="text-lg font-semibold">
-              Order ID: <span className="text-indigo-600">{order._id}</span>
+              Order ID: <span className="text-indigo-600">{order.order_id}</span>
             </h3>
           </div>
 

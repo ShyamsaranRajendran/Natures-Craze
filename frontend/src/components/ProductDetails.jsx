@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import {useNavigate} from "react-router-dom";
 import { useParams } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
 import { toast, ToastContainer } from "react-toastify";
@@ -14,7 +15,7 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [packSize, setPackSize] = useState("");
   const [quantity, setQuantity] = useState(1);
-
+  const navigate = useNavigate();
   const getCartFromLocalStorage = () => {
     const cart = localStorage.getItem("cart");
     return cart ? JSON.parse(cart) : [];
@@ -175,14 +176,32 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4 sm:px-6 lg:px-8 mt-10">
-      <ToastContainer position="bottom-right" theme="colored" />
-
+      <ToastContainer position="top-right" theme="colored" />
+      <button
+        onClick={() => navigate(-1)}
+        className="text-gray-600 hover:text-gray-800 mr-4"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="md:flex">
             {/* Left side - Product Image */}
             <div className="md:w-1/2 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-100/50 to-amber-50/30"></div>
+              <div className="absolute inset-0 from-amber-100/50 to-amber-50/30"></div>
               <img
                 src={
                   product.image ||
@@ -258,10 +277,10 @@ const ProductDetails = () => {
 
                 <button
                   onClick={() => handleAddToTemporaryCart(product._id)}
-                  className="w-full mt-4 bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors flex items-center justify-center"
+                  className="p-3 mt-4 bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors flex items-center justify-center"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart
+                  Add
                 </button>
               </div>
 
@@ -289,9 +308,7 @@ const ProductDetails = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-center space-x-4">
-                        {qty}
-                      </div>
+                      <div className="flex items-center space-x-4">{qty}</div>
                     </div>
                   ))}
 

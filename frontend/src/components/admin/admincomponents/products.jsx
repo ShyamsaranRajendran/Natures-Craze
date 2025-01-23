@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx"; // Import the XLSX library
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -47,14 +48,36 @@ const ProductsPage = () => {
     return matchesSearch && matchesWeight && matchesPrice;
   });
 
-  if (loading) return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-        <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+  // Export to Excel logic
+  const handleExportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(
+      filteredProducts.map((product) => {
+        const prices = product.prices
+          .map(
+            (priceOption) => `${priceOption.packSize} - ₹${priceOption.price}`
+          )
+          .join(", ");
+        return {
+          "Product ID": product.id,
+          "Product Name": product.name,
+          Prices: prices,
+        };
+      })
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Products");
+    XLSX.writeFile(wb, "products.xlsx");
+  };
+
+  if (loading)
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+        </div>
       </div>
-    </div>
-  );
+    );
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -74,6 +97,16 @@ const ProductsPage = () => {
         </div>
       </div>
 
+      {/* Export to Excel Button */}
+      <div className="mb-6">
+        <button
+          onClick={handleExportToExcel}
+          className="bg-green-500 text-white px-6 py-2 rounded-lg shadow hover:bg-green-600 transition duration-150"
+        >
+          Download as Excel
+        </button>
+      </div>
+
       {/* Product Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
         <table className="w-full text-sm text-left text-gray-700">
@@ -81,7 +114,6 @@ const ProductsPage = () => {
             <tr>
               <th className="px-6 py-3 border-b">Product ID</th>
               <th className="px-6 py-3 border-b">Name</th>
-              <th className="px-6 py-3 border-b">Description</th>
               <th className="px-6 py-3 border-b">Prices</th>
               <th className="px-6 py-3 border-b text-center">Actions</th>
             </tr>
@@ -93,13 +125,11 @@ const ProductsPage = () => {
                   key={product._id}
                   className="hover:bg-gray-100 transition duration-150"
                 >
-                  <td className="px-6 py-4 border-b">{product._id}</td>
+                  <td className="px-6 py-4 border-b">{product.id}</td>
                   <td className="px-6 py-4 border-b font-medium">
                     {product.name}
                   </td>
-                  <td className="px-6 py-4 border-b  text-gray-600">
-                    {product.description}
-                  </td>
+
                   <td className="px-6 py-4 border-b w-1/4">
                     {product.prices.map((priceOption, index) => (
                       <div
