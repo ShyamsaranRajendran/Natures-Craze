@@ -39,7 +39,7 @@ const handleLogoutClick = () => {
       }`}
     >
       <div className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-xl font-bold text-yellow-600">NaturesCrazes</h1>
+        <h1 className="text-xl font-bold text-yellow-600">NaturesCraze</h1>
         <div className="flex items-center space-x-4">
           <img
             src={Logo}

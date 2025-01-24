@@ -41,7 +41,7 @@ function Orders() {
    const matchesSearch =
      !filters.search ||
      order.username.toLowerCase().includes(filters.search.toLowerCase()) ||
-     order._id.slice(-4).includes(filters.search); // Search by last 4 digits of order ID
+     order.order_id.slice(-4).includes(filters.search); // Search by last 4 digits of order ID
 
    const matchesStatus = !filters.status || order.status === filters.status;
    const matchesPaymentMethod =

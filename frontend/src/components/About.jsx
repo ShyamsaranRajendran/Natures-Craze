@@ -34,7 +34,7 @@ const About = () => {
             Our Story
           </h1>
           <p className="text-xl text-gray-200 max-w-2xl">
-            Bringing the finest turmeric from farm to table since 1970
+            Bringing the finest turmeric from farm to table since 2016
           </p>
         </div>
       </div>

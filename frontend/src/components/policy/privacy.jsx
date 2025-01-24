@@ -4,26 +4,30 @@ function Privacy() {
   const navigate = useNavigate(); 
   return (
     <div className="bg-gray-50 p-6 rounded-lg shadow-md max-w-4xl mx-auto mt-10">
-      <button
-        onClick={() => navigate(-1)}
-        className="text-gray-600 hover:text-gray-800 mr-4"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <h1 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 hover:text-gray-800 mr-4 p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300"
+          aria-label="Go Back"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Privacy Policy</h1>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        Privacy Policy
+      </h1>
+
       <p className="text-gray-700 leading-relaxed mb-4">
         This privacy policy sets out how{" "}
         <span className="font-semibold">MOUNESH RAJA V</span> uses and protects

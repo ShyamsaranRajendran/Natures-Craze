@@ -17,6 +17,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    alternatePhoneNumber: {
+      type: String,
+      trim: true,
+    },
     address: {
       type: String,
       required: true,

@@ -50,17 +50,26 @@ const Orders = () => {
     }
   };
 
+  // Handle filtering
   const filteredOrders = orders.filter((order) => {
-    const searchRegex = new RegExp(filters.search, "i");
     const matchesSearch =
-      searchRegex.test(order.username) || searchRegex.test(order.order_id);
+      !filters.search ||
+      order.username.toLowerCase().includes(filters.search.toLowerCase()) ||
+      order.order_id.slice(-4).includes(filters.search); // Search by last 4 digits of order ID
+
     const matchesStatus = !filters.status || order.status === filters.status;
-    const matchesPayment =
+    const matchesPaymentMethod =
       !filters.paymentMethod || order.paymentStatus === filters.paymentMethod;
+    const matchesDate =
+      (!filters.startDate ||
+        new Date(order.createdAt) >= new Date(filters.startDate)) &&
+      (!filters.endDate ||
+        new Date(order.createdAt) <= new Date(filters.endDate));
 
-    return matchesSearch && matchesStatus && matchesPayment;
+    return (
+      matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate
+    );
   });
-
   const handleExportToExcel = () => {
     const formattedOrders = filteredOrders.map((order) => ({
       "Order ID": order.order_id,
@@ -213,6 +222,7 @@ const Orders = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.phoneNumber}
+                    {order.alternatePhoneNumber !== null && order.alternatePhoneNumber}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ₹{order.totalAmount}

@@ -12,10 +12,12 @@ const Cart = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [packSize, setPackSize] = useState(""); // State for selected pack size
   const [quantity, setQuantity] = useState(1); // State for input quantity
+  const [productQuantities, setProductQuantities] = useState({});
   const [userDetails, setUserDetails] = useState({
     username: "",
     phoneNumber: "",
     address: "",
+    alternatePhoneNumber: "", // Added alternate phone number
   });
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [cartImg, setCartImg] = useState([]);
@@ -26,6 +28,16 @@ const Cart = () => {
         // Retrieve cart from local storage
         const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
         setCart(storedCart);
+
+        const initialQuantities = {};
+        storedCart.forEach((item) => {
+          initialQuantities[item._id] = {
+            packSize: item.prices[0].packSize,
+            quantity: item.quantities[item.prices[0].packSize] || 1,
+          };
+        });
+        setProductQuantities(initialQuantities);
+               console.log(initialQuantities);
 
         // Extract product IDs from the stored cart
         const prodIds = storedCart.map((item) => item._id);
@@ -60,46 +72,98 @@ const Cart = () => {
     fetchProductImages();
   }, [backendURL]);
 
- useEffect(() => {
-   // Fetch images when the cart is updated
-   if (cart.length > 0) {
-     const fetchImages = async () => {
-       try {
-         const ids = cart.map((item) => item._id); // Extract product IDs
-         const response = await fetch(`${backendURL}/prod/images`, {
-           method: "POST",
-           headers: {
-             "Content-Type": "application/json",
-           },
-           body: JSON.stringify({ ids }), // Send product IDs to backend
-         });
+  useEffect(() => {
+    // Fetch images when the cart is updated
+    if (cart.length > 0) {
+      const fetchImages = async () => {
+        try {
+          const ids = cart.map((item) => item._id); // Extract product IDs
+          const response = await fetch(`${backendURL}/prod/images`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ids }), // Send product IDs to backend
+          });
 
-         if (!response.ok) {
-           throw new Error("Failed to fetch images");
-         }
+          if (!response.ok) {
+            throw new Error("Failed to fetch images");
+          }
 
-         const data = await response.json();
+          const data = await response.json();
 
-         // Create a mapping of ID -> Image
-         const imageMap = data.images.reduce((acc, item) => {
-           acc[item.id] = item.image; // Map product ID to base64 image
-           return acc;
-         }, {});
+          // Create a mapping of ID -> Image
+          const imageMap = data.images.reduce((acc, item) => {
+            acc[item.id] = item.image; // Map product ID to base64 image
+            return acc;
+          }, {});
 
-         // Set cartImg array in the order of the cart
-         const images = cart.map((item) => imageMap[item._id] || null); // Default to null if no image
-         setCartImg(images);
-       } catch (error) {
-         console.error("Error fetching images:", error);
-       } finally {
-         setIsLoading(false);
-       }
-     };
+          // Set cartImg array in the order of the cart
+          const images = cart.map((item) => imageMap[item._id] || null); // Default to null if no image
+          setCartImg(images);
+        } catch (error) {
+          console.error("Error fetching images:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-     fetchImages();
-   }
- }, [cart]);
+      fetchImages();
+    }
+  }, [cart]);
 
+  const handlePackSizeChange = (productId, packSize) => {
+    setProductQuantities((prev) => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        packSize,
+      },
+    }));
+  };
+ const calculateItemTotal = (item, packSize, quantity) => {
+   const price = item.prices.find((p) => p.packSize === packSize)?.price || 0;
+   return price * quantity;
+ };
+
+  const handleQuantityChange = (productId, change) => {
+    setProductQuantities((prev) => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        quantity: Math.max(1, (prev[productId]?.quantity || 1) + change),
+      },
+    }));
+
+    // const updatedCart = cart.map((item) => {
+    
+  };
+
+  
+
+  // const handleQuantityChange = (productId, volume, change) => {
+  //   const updatedCart = cart.map((item) => {
+  //     if (item._id === productId) {
+  //       const updatedQuantities = { ...item.quantities };
+  //       const newQuantity = (updatedQuantities[volume] || 0) + change;
+
+  //       if (newQuantity <= 0) {
+  //         delete updatedQuantities[volume];
+  //       } else {
+  //         updatedQuantities[volume] = newQuantity;
+  //       }
+
+  //       return { ...item, quantities: updatedQuantities };
+  //     }
+  //     return item;
+  //   });
+
+  //   updateCart(
+  //     updatedCart.filter(
+  //       (item) => Object.keys(item.quantities || {}).length > 0
+  //     )
+  //   );
+  // };
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -116,36 +180,66 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const handleAddToCart = (productId) => {
-    if (!packSize || quantity <= 0) {
-      toast.warning("Please select a valid pack size and quantity.");
-      return;
-    }
+ const handleAddToCart = (productId) => {
+   const productDetails = productQuantities[productId];
+   const product = cart.find((item) => item._id === productId);
 
-    const updatedCart = cart.map((item) => {
-      if (item._id === productId) {
-        const updatedQuantities = {
-          ...item.quantities,
-          [packSize]: (item.quantities?.[packSize] || 0) + quantity,
-        };
+   if (!productDetails?.packSize) {
+     toast.warning("Please select a pack size");
+     return;
+   }
 
-        return { ...item, quantities: updatedQuantities };
-      }
-      return item;
-    });
+   const price = product.prices.find(
+     (p) => p.packSize === productDetails.packSize
+   )?.price;
+   if (!price) {
+     toast.error("Price not found for selected pack size");
+     return;
+   }
 
-    updateCart(updatedCart);
-    toast.success(`${quantity} packs of ${packSize} added to cart!`);
-    setPackSize("");
-    setQuantity(1);
-  };
+   const updatedCart = cart.map((item) => {
+     if (item._id === productId) {
+      console.log(productDetails)
+       const currentQuantity = item.quantities?.[productDetails.packSize] || 0;
+       return {
+         ...item,
+         quantities: {
+           ...item.quantities,
+           [productDetails.packSize]:
+             currentQuantity + (productDetails.quantity || 1),
+         },
+       };
+     }
+     return item;
+   });
+
+   updateCart(updatedCart);
+   toast.success(
+     `${productDetails.quantity} ${productDetails.packSize} added to cart`
+   );
+ };
+
 
   const handleCheckout = async () => {
     setShowCheckoutModal(true);
   };
   const handleConfirmCheckout = async () => {
-    const { username, phoneNumber, address } = userDetails;
+    const { username, phoneNumber, alternatePhoneNumber, address } =
+      userDetails;
+    const phoneRegex = /^[0-9]{10}$/; // Regex to check 10 digits
 
+    if (!phoneRegex.test(userDetails.phoneNumber)) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    if (
+      userDetails.alternatePhoneNumber &&
+      !phoneRegex.test(userDetails.alternatePhoneNumber)
+    ) {
+      alert("Please enter a valid 10-digit alternate phone number.");
+      return;
+    }
     // Check if required details are present
     if (!username || !phoneNumber || !address) {
       alert("Please fill in all the details!");
@@ -173,6 +267,7 @@ const Cart = () => {
         Items: cartItems,
         username: username,
         phoneNumber: phoneNumber,
+        alternatePhoneNumber: alternatePhoneNumber,
         address: address,
       };
       console.log(requestData);
@@ -229,6 +324,7 @@ const Cart = () => {
                 state: {
                   message: "Payment verified successfully!",
                   paymentDetails: paymentResponse,
+                  razorpayOrderId: razorpayOrderId,
                   orderDetails: amount, // Assuming backend returns order details
                 },
               });
@@ -294,28 +390,52 @@ const Cart = () => {
     toast.success("Item removed from cart!");
   };
 
-  const handleQuantityChange = (productId, volume, change) => {
+  // const handleQuantityChange = (productId, volume, change) => {
+  //   const updatedCart = cart.map((item) => {
+  //     if (item._id === productId) {
+  //       const updatedQuantities = { ...item.quantities };
+  //       const newQuantity = (updatedQuantities[volume] || 0) + change;
+
+  //       if (newQuantity <= 0) {
+  //         delete updatedQuantities[volume];
+  //       } else {
+  //         updatedQuantities[volume] = newQuantity;
+  //       }
+
+  //       return { ...item, quantities: updatedQuantities };
+  //     }
+  //     return item;
+  //   });
+
+  //   updateCart(
+  //     updatedCart.filter(
+  //       (item) => Object.keys(item.quantities || {}).length > 0
+  //     )
+  //   );
+  // };
+
+  const handleUpdateQuantity = (productId, packSize, change) => {
     const updatedCart = cart.map((item) => {
       if (item._id === productId) {
-        const updatedQuantities = { ...item.quantities };
-        const newQuantity = (updatedQuantities[volume] || 0) + change;
+        const currentQty = item.quantities[packSize] || 0;
+        const newQty = Math.max(0, currentQty + change);
 
-        if (newQuantity <= 0) {
-          delete updatedQuantities[volume];
+        const updatedQuantities = { ...item.quantities };
+        if (newQty === 0) {
+          delete updatedQuantities[packSize];
         } else {
-          updatedQuantities[volume] = newQuantity;
+          updatedQuantities[packSize] = newQty;
         }
 
-        return { ...item, quantities: updatedQuantities };
+        return {
+          ...item,
+          quantities: updatedQuantities,
+        };
       }
       return item;
     });
 
-    updateCart(
-      updatedCart.filter(
-        (item) => Object.keys(item.quantities || {}).length > 0
-      )
-    );
+    updateCart(updatedCart);
   };
 
   const calculateTotal = () => {
@@ -413,8 +533,10 @@ const Cart = () => {
                             Pack Size
                           </label>
                           <select
-                            value={packSize}
-                            onChange={(e) => setPackSize(e.target.value)}
+                            value={productQuantities[item._id]?.packSize || ""}
+                            onChange={(e) =>
+                              handlePackSizeChange(item._id, e.target.value)
+                            }
                             className="w-full px-3 py-2 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 bg-white"
                           >
                             <option value="">Select Size</option>
@@ -426,7 +548,7 @@ const Cart = () => {
                           </select>
                         </div>
 
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Quantity
                           </label>
@@ -449,20 +571,18 @@ const Cart = () => {
                               <Plus className="w-4 h-4" />
                             </button>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
 
-                     
-                    <div className="w-full flex justify-center mt-8">
-                      <button
-                        onClick={() => handleAddToCart(item._id)}
-                        className=" mt-4 px-6 py-1 bg-amber-500 text-white py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors flex flex-row items-center justify-center"
-                        //  className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add to Cart
-                      </button>
+                      <div className="w-full flex justify-center mt-8">
+                        <button
+                          onClick={() => handleAddToCart(item._id)}
+                          className=" mt-4 px-6 py-1 bg-amber-500 text-white py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors flex flex-row items-center justify-center"
+                          //  className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add to Cart
+                        </button>
                       </div>
                     </div>
 
@@ -488,7 +608,7 @@ const Cart = () => {
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() =>
-                                handleQuantityChange(item._id, volume, 1)
+                                handleUpdateQuantity(item._id, volume, 1)
                               }
                               className="p-1 rounded-md bg-green-100 text-green-600 hover:bg-green-200"
                             >
@@ -496,7 +616,7 @@ const Cart = () => {
                             </button>
                             <button
                               onClick={() =>
-                                handleQuantityChange(item._id, volume, -1)
+                                handleUpdateQuantity(item._id, volume, -1)
                               }
                               className="p-1 rounded-md bg-red-100 text-red-600 hover:bg-red-200"
                             >
@@ -522,7 +642,7 @@ const Cart = () => {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  className="px-8 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center"
+                  className="ml-2 px-8 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center"
                 >
                   Proceed to Checkout
                 </button>
@@ -574,6 +694,22 @@ const Cart = () => {
                   onChange={handleInputChange}
                   placeholder="Enter your phone number"
                   className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
+                  maxLength={10}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Alternate Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="alternatePhoneNumber"
+                  value={userDetails.alternatePhoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter alternate phone number"
+                  className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
+                  maxLength={10}
                 />
               </div>
 

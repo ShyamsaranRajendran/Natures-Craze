@@ -116,8 +116,8 @@ const Contact = () => {
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
                 >
-                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                    <FaWhatsapp className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 p-1 bg-green-500 rounded-full flex items-center justify-center">
+                    <FaWhatsapp className="w-5 h-5  text-white" />
                   </div>
                   <span className="text-green-700 font-medium">WhatsApp</span>
                 </a>
@@ -129,7 +129,7 @@ const Contact = () => {
                   className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
                 >
                   <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center">
-                    <FaInstagram className="w-5 h-5 text-white" />
+                    <FaInstagram className="w-5 h-5  text-white" />
                   </div>
                   <span className="text-pink-700 font-medium">Instagram</span>
                 </a>

@@ -53,7 +53,7 @@ router.post("/verify", async (req, res) => {
 
 router.post('/create', async (req, res) => {
   try {
-    const { Items, username, phoneNumber, address } = req.body;
+    const { Items, username, phoneNumber,alternatePhoneNumber, address } = req.body;
 
     // Validate required fields
     if (!username || !phoneNumber || !address) {
@@ -107,6 +107,7 @@ router.post('/create', async (req, res) => {
       username,
       phoneNumber,
       address,
+      alternatePhoneNumber,
       items: flattenedItems,
       totalAmount,
     });
