@@ -22,7 +22,7 @@ const allowedOrigins = [
   'http://192.168.183.209:3000',
   'https://turmeric-tau.vercel.app',
   'https://natures-carze.com',
-  'https://www.natures-carze.com/'
+  'https://www.natures-carze.com' // Removed the trailing slash
 ];
 
 // Enable CORS with dynamic origin checking
