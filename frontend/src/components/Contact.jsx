@@ -9,7 +9,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-
+import Credits from "./Credits";
 const Contact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
@@ -123,8 +123,8 @@ const Contact = () => {
                 </a>
 
                 <a
-                  href="https://www.instagram.com/natures_delightz_?igsh=MWx5MDVtZ2Y3NDZnMA=="
-                  target="_blank"
+                  href="https://www.instagram.com/natures_craze_/"
+                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
                 >
@@ -181,6 +181,7 @@ const Contact = () => {
           </div>
         </div>
       </div>
+      <Credits />
     </div>
   );
 };

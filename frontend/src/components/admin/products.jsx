@@ -20,6 +20,8 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null); // New state to manage the selected image for enlarge modal
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
 
   const navigate = useNavigate();
 
@@ -74,6 +76,18 @@ const Products = () => {
     navigate("/admin/products/add");
   };
 
+  // Function to handle image click and open the modal
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
+  // Function to close the modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
   return (
     <div className="container mx-auto px-6 py-10 mt-10">
       <ToastContainer />
@@ -122,7 +136,8 @@ const Products = () => {
               <img
                 src={product.image || DefaultImage}
                 alt={product.name}
-                className="w-full h-40 object-cover rounded-lg mb-4"
+                className="w-full h-40 object-cover rounded-lg mb-4 cursor-pointer"
+                onClick={() => handleImageClick(product.image || DefaultImage)} // Open modal on image click
               />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -153,6 +168,31 @@ const Products = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal for Enlarged Image */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={closeModal} // Close modal when clicking outside of the image
+        >
+          <div
+            className="relative bg-white p-4 rounded-lg"
+            onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside the image
+          >
+            <button
+              className="absolute top-2 right-2 text-white bg-red-500 rounded-full px-3 py-1"
+              onClick={closeModal}
+            >
+              ✕
+            </button>
+            <img
+              src={selectedImage}
+              alt="Enlarged Product"
+              className="max-w-full max-h-[80vh] object-contain"
+            />
+          </div>
         </div>
       )}
     </div>

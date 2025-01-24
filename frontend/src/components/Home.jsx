@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Pouring from "../assets/pouring.jpg";
+import Credits from "./Credits"
 import {
   ChevronDown,
   ChevronUp,
@@ -231,6 +232,7 @@ const HomePage = () => {
           </Link>
         </div>
       </div>
+      <Credits/>
     </div>
   );
 };

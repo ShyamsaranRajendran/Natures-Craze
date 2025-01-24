@@ -18,6 +18,9 @@ const Orders = () => {
     endDate: "",
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage, setOrdersPerPage] = useState(10);
+
   const fetchOrders = async () => {
     try {
       const response = await axios.get(`${backendURL}/orders/all`);
@@ -70,6 +73,15 @@ const Orders = () => {
       matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate
     );
   });
+
+  // Pagination logic
+  const totalOrders = filteredOrders.length;
+  const totalPages = Math.ceil(totalOrders / ordersPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const handleExportToExcel = () => {
     const formattedOrders = filteredOrders.map((order) => ({
       "Order ID": order.order_id,
@@ -88,6 +100,12 @@ const Orders = () => {
     // Save the Excel file
     XLSX.writeFile(wb, "orders.xlsx");
   };
+
+  // Slice the orders for the current page
+  const currentOrders = filteredOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
 
   if (loading) {
     return (
@@ -208,8 +226,8 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
+            {currentOrders.length > 0 ? (
+              currentOrders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {order.order_id}
@@ -222,7 +240,8 @@ const Orders = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.phoneNumber}
-                    {order.alternatePhoneNumber !== null && order.alternatePhoneNumber}
+                    {order.alternatePhoneNumber !== null &&
+                      order.alternatePhoneNumber}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ₹{order.totalAmount}
@@ -268,16 +287,34 @@ const Orders = () => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="6"
-                  className="px-6 py-4 text-center text-gray-500 border-b"
-                >
-                  No orders found.
+                <td colSpan="8" className="text-center py-4">
+                  No orders found
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center py-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="px-4 text-sm font-medium text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

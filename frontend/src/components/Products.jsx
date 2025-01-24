@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import DefaultImage from "../assets/default-placeholder.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Credits from "./Credits";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const Products = () => {
@@ -86,6 +86,9 @@ const Products = () => {
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       toast.success(`${productWithoutImage.name} added to cart!`);
     }
+
+                  window.location.reload();
+
   };
 
   const handleShare = (product) => {
@@ -134,7 +137,7 @@ const Products = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4 sm:px-6 lg:px-8 mt-10">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-12 px-1 mt-10">
       <ToastContainer position="top-right" theme="colored" />
 
       <div className="max-w-7xl mx-auto">
@@ -175,8 +178,8 @@ const Products = () => {
                 key={product._id}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300"
               >
+                                  <Link to={`/product/${product._id}`}>
                 <div className="relative">
-                  <Link to={`/product/${product._id}`}>
                     <div className="relative h-64 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-amber-100/30 to-amber-50/10"></div>
                       <img
@@ -188,7 +191,6 @@ const Products = () => {
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                  </Link>
                   <button
                     onClick={() => toggleFavorite(product._id)}
                     className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-colors"
@@ -241,11 +243,13 @@ const Products = () => {
                     </button>
                   </div>
                 </div>
+                </Link>
               </div>
             ))}
           </div>
         )}
       </div>
+      <Credits />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Razorpay from "razorpay";
 import { ShoppingBag, Plus, Minus, Trash2, Package, X } from "lucide-react";
-
+import Credits from "./Credits";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const Cart = () => {
   const navigate = useNavigate();
@@ -388,6 +388,8 @@ const Cart = () => {
     const updatedCart = cart.filter((item) => item._id !== productId);
     updateCart(updatedCart);
     toast.success("Item removed from cart!");
+                  window.location.reload();
+
   };
 
   // const handleQuantityChange = (productId, volume, change) => {
@@ -423,6 +425,7 @@ const Cart = () => {
         const updatedQuantities = { ...item.quantities };
         if (newQty === 0) {
           delete updatedQuantities[packSize];
+          window.location.reload();
         } else {
           updatedQuantities[packSize] = newQty;
         }
@@ -453,7 +456,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4 sm:px-6 lg:px-8 mt-10">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-5 mt-10">
       <ToastContainer position="top-right" theme="colored" />
 
       <div className="max-w-7xl mx-auto">
@@ -739,6 +742,7 @@ const Cart = () => {
           </div>
         </div>
       )}
+      <Credits />
     </div>
   );
 };

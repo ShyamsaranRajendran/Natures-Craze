@@ -26,6 +26,7 @@ import Shipping from "./components/policy/shipping";
 import Cart from "./components/cart";
 import PaymentFail from "./components/paymentFail";
 import PaymentSuccess from "./components/paymentSuccess";
+import Developer from "./components/Developer";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen">
@@ -157,6 +158,7 @@ function App() {
           <Route path="/policy/shipping" element={<Shipping />} />
           <Route path="/payment/paymentFail" element={<PaymentFail />} />
           <Route path="/payment/paymentSuccess" element={<PaymentSuccess />} />
+          <Route path ="/developer" element={<Developer/>}/>
           {/* Protected Admin Routes */}
           <Route
             path="admin/dashboard"
