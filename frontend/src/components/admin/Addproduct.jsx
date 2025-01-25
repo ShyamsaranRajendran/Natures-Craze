@@ -48,11 +48,7 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !productName ||
-      !productImage ||
-      prices.length === 0
-    ) {
+    if (!productName || !productImage || prices.length === 0) {
       toast.error("All fields are required!");
       return;
     }
@@ -85,37 +81,51 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 mt-20">
+    <div className="container mx-auto px-4 mt-16 lg:mt-20">
       <ToastContainer />
-      <h2 className="text-2xl font-bold mb-6">Add Product</h2>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+      <h2 className="text-xl lg:text-2xl font-bold mb-6 text-center">
+        Add Product
+      </h2>
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-lg w-full mx-auto bg-white p-4 rounded-lg shadow-md"
+      >
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Product Name</label>
+          <label className="block text-sm lg:text-base font-medium mb-2">
+            Product Name
+          </label>
           <input
             type="text"
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-2 text-sm lg:text-base"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             required
           />
         </div>
-        
+
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Description</label>
+          <label className="block text-sm lg:text-base font-medium mb-2">
+            Description
+          </label>
           <textarea
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-2 text-sm lg:text-base"
             value={productDescription}
             onChange={(e) => setProductDescription(e.target.value)}
             rows="4"
           ></textarea>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Prices</label>
+          <label className="block text-sm lg:text-base font-medium mb-2">
+            Prices
+          </label>
           {prices.map((price, index) => (
-            <div key={index} className="flex gap-4 mb-2">
+            <div
+              key={index}
+              className="flex flex-col lg:flex-row gap-2 lg:gap-4 mb-2"
+            >
               <input
                 type="text"
-                className="flex-1 border rounded-lg px-4 py-2"
+                className="w-full lg:flex-1 border rounded-lg px-4 py-2 text-sm lg:text-base"
                 placeholder="Pack Size (e.g., 500g)"
                 value={price.packSize}
                 onChange={(e) =>
@@ -126,7 +136,7 @@ const AddProduct = () => {
               <input
                 type="number"
                 step="0.01"
-                className="flex-1 border rounded-lg px-4 py-2"
+                className="w-full lg:flex-1 border rounded-lg px-4 py-2 text-sm lg:text-base"
                 placeholder="Price"
                 value={price.price}
                 onChange={(e) =>
@@ -137,7 +147,7 @@ const AddProduct = () => {
               <button
                 type="button"
                 onClick={() => removePriceField(index)}
-                className="text-red-500"
+                className="text-red-500 text-sm lg:text-base"
               >
                 Remove
               </button>
@@ -146,25 +156,27 @@ const AddProduct = () => {
           <button
             type="button"
             onClick={addPriceField}
-            className="text-blue-500"
+            className="text-blue-500 text-sm lg:text-base"
           >
             Add Price
           </button>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Image</label>
+          <label className="block text-sm lg:text-base font-medium mb-2">
+            Image
+          </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-2 text-sm lg:text-base"
             required
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg ${
+          className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-sm lg:text-base ${
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >

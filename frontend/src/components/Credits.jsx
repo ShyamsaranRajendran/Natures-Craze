@@ -98,13 +98,13 @@ function Footer() {
           © 2025 Nature Craze Pvt. All rights reserved.
         </p>
         <div className="mt-2">
-          <a href="/policy/terms" className="text-gray-200 hover:text-white">
+          {/* <a href="/policy/terms" className="text-gray-200 hover:text-white">
             Terms
           </a>
           <span className="mx-2">|</span>
           <a href="/policy/privacy" className="text-gray-200 hover:text-white">
             Privacy
-          </a>
+          </a> */}
           <a
             href="/developer"
             className="text-gray-200 py-1 hover:text-white flex items-center justify-center"

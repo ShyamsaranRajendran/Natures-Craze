@@ -6,10 +6,10 @@ const router = express.Router();
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  // key_id: process.env.RAZORPAY_KEY_ID,
-  key_id: "rzp_test_814EkXmD14BWDD",
-  // key_secret: process.env.RAZORPAY_KEY_SECRET,
-  key_secret: "tDGkmo8xCjbbEDG2kBSucvmB",
+  key_id: "rzp_live_vniaz7V3nXYe0J",
+  // key_id: "rzp_test_814EkXmD14BWDD",
+  key_secret: "lNbjKV8iTX89QnGBIjEFE323",
+  // key_secret: "tDGkmo8xCjbbEDG2kBSucvmB",
 });
 
 
