@@ -292,7 +292,7 @@ const Cart = () => {
         key: "rzp_live_vniaz7V3nXYe0J", // Use your Razorpay key (replace for production)
         amount: amount, // Amount from the backend
         currency: "INR",
-        name: "Your Store Name",
+        name: "Natures Craze",
         description: "Order Payment",
         order_id: razorpayOrderId, // Order ID from the backend
         handler: async function (paymentResponse) {
