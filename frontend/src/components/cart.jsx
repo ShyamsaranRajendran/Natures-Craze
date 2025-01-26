@@ -289,7 +289,7 @@ const Cart = () => {
       const { razorpayOrderId, amount } = response.data;
       // Razorpay payment options
       const options = {
-        key: "rzp_test_814EkXmD14BWDD", // Use your Razorpay key (replace for production)
+        key: "rzp_live_vniaz7V3nXYe0J", // Use your Razorpay key (replace for production)
         amount: amount, // Amount from the backend
         currency: "INR",
         name: "Your Store Name",
@@ -354,7 +354,6 @@ const Cart = () => {
         prefill: {
           name: username || "John Doe", // Replace with actual username
           contact: phoneNumber || "9999999999", // Replace with actual phone number
-          email: userDetails.email || "user@example.com", // Replace with actual email
         },
         theme: {
           color: "#F37254", // Customize with your brand color

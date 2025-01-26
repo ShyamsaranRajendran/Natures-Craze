@@ -130,10 +130,10 @@ router.post('/create', async (req, res) => {
 
     // Prepare the payload for Razorpay Checkout
     const checkoutPayload = {
-      key: 'rzp_test_814EkXmD14BWDD', // Your Razorpay Key ID
+      key: 'rzp_live_vniaz7V3nXYe0J', // Your Razorpay Key ID
       amount: totalAmount * 100, // Amount in smallest currency sub-unit (paise)
       currency: 'INR', // Currency code
-      name: 'My Business', // Business name
+      name: 'Natures Craze', // Business name
       description: 'Order Payment', // Description shown at checkout
       image: 'https://turmeric-tau.vercel.app/static/media/logo.07e4fd23b7d4a6e60e95cab57f39536f.svg', // Business logo URL (optional)
       order_id: razorpayOrder.id, // Razorpay order ID
@@ -145,8 +145,8 @@ router.post('/create', async (req, res) => {
       theme: {
         color: '#F37254',
       },
-      callback_url: 'http://localhost:5000/success', // Redirect URL on payment success
-      redirect: true, // Redirect to callback URL after payment
+      callback_url: '', // Redirect URL on payment success
+      redirect: false, // Redirect to callback URL after payment
     };
 
     // Return the Razorpay order ID and checkout payload to frontend
