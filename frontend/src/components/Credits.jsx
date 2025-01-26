@@ -48,7 +48,8 @@ function Footer() {
             <li>
               <a
                 href="/policy/terms"
-                className="text-gray-200 hover:text-white"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
+                aria-label="Terms of Service"
               >
                 Terms of Service
               </a>
@@ -56,9 +57,28 @@ function Footer() {
             <li>
               <a
                 href="/policy/privacy"
-                className="text-gray-200 hover:text-white"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
+                aria-label="Privacy Policy"
               >
                 Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a
+                href="/policy/shipping"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
+                aria-label="Shipping Policy"
+              >
+                Shipping Policy
+              </a>
+            </li>
+            <li>
+              <a
+                href="/policy/refund"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
+                aria-label="Cancellation and Refund Policy"
+              >
+                Cancellation and Refund Policy
               </a>
             </li>
           </ul>
