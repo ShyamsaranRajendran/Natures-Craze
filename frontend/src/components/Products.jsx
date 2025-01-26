@@ -141,7 +141,7 @@ const Products = () => {
       <ToastContainer position="top-right" theme="colored" />
 
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white pt-12 px-2 mt-10">
-        <div className="max-w-7xl mx-auto mb-2 border rounded-lg p-4">
+        <div className="max-w-7xl mx-auto mb-2  p-4">
           {/* Header Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">

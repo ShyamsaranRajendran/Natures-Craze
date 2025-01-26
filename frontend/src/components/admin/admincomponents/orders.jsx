@@ -203,6 +203,9 @@ const Orders = () => {
                 Order ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Razorpay ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Customer
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -232,11 +235,16 @@ const Orders = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {order.order_id}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.razorpayOrderId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-wrap">
                     <div className="text-sm font-medium text-gray-900">
                       {order.username}
                     </div>
-                    <div className="text-sm text-gray-500">{order.address}</div>
+                    <div className="text-sm text-gray-500 break-words">
+                      {order.address}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.phoneNumber}
