@@ -16,30 +16,13 @@ db.once('open', function () {
 
 const app = express();
 app.use(express.json());
-// CORS configuration
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://192.168.183.209:3000',
-  'https://turmeric-tau.vercel.app',
-  'https://natures-carze.com',
-  'https://www.natures-carze.com' // Removed the trailing slash
-];
-
-// Enable CORS with dynamic origin checking
+// Enable CORS for all origins
 app.use(cors({
-  origin: (origin, callback) => {
-    // If the request has no origin (e.g., from a server-side request), allow it
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'), false);
-    }
-  },
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-  credentials: true, // Optional, if you need cookies to be sent with the request
+  credentials: true, // Optional: Enable credentials if needed
 }));
-
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
