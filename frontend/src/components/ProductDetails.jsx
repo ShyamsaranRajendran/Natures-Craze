@@ -98,12 +98,19 @@ const ProductDetails = () => {
 
   };
 
-  const handleAddToMainCart = () => {
-    const updatedCart = [...cart, ...temporaryCart];
-    updateCart(updatedCart);
-    setTemporaryCart([]);
-    toast.success("Successfully added to the cart!");
-  };
+const handleAddToMainCart = () => {
+  const updatedCart = [...cart, ...temporaryCart];
+  updateCart(updatedCart);
+  setTemporaryCart([]);
+
+  toast.success("Successfully added to the cart!");
+
+  // Delay reload by 2 seconds
+  setTimeout(() => {
+    window.location.reload();
+  }, 2000); // 2000 milliseconds = 2 seconds
+};
+
 
   const handleClearTemporaryCart = () => {
     setTemporaryCart([]);

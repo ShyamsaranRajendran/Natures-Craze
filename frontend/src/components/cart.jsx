@@ -406,7 +406,9 @@ const Cart = () => {
     const updatedCart = cart.filter((item) => item._id !== productId);
     updateCart(updatedCart);
     toast.success("Item removed from cart!");
-                  window.location.reload();
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 3000);
 
   };
 
@@ -443,7 +445,9 @@ const Cart = () => {
         const updatedQuantities = { ...item.quantities };
         if (newQty === 0) {
           delete updatedQuantities[packSize];
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
         } else {
           updatedQuantities[packSize] = newQty;
         }
