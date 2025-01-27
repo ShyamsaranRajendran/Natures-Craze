@@ -68,16 +68,17 @@ const About = () => {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
               <img
                 src="https://www.agrifarming.in/wp-content/uploads/The-Golden-Root-2.jpg"
                 alt="Turmeric Farming"
-                className="rounded-lg shadow-lg"
+                className="rounded-xl shadow-md w-full h-auto object-cover"
               />
+
               <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSljT1mewP_hrNODZ6a_xDWwXe9hvZW9SDwnQ&s"
+                src="https://gardenerspath.com/wp-content/uploads/2021/05/How-to-Grow-Turmeric-Cover.jpg"
                 alt="Processing"
-                className="rounded-lg shadow-lg mt-8"
+                className="rounded-xl shadow-md w-full h-auto object-cover"
               />
             </div>
           </div>

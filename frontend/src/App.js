@@ -125,7 +125,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 function App() {
 
   const [isAdmin, setIsAdmin] = useState(false);
-
+  
   useEffect(() => {
     const getRole = async () => {
       const roleData = await fetchUserRole();

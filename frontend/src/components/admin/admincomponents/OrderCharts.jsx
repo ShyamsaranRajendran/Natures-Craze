@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,19 +8,17 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement,
 } from "chart.js";
 import dayjs from "dayjs";
 
-// Register the necessary components
+// Register necessary chart components
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
   Tooltip,
-  Legend,
-  ArcElement
+  Legend
 );
 
 const OrderCharts = ({ orders }) => {
@@ -121,43 +119,21 @@ const OrderCharts = ({ orders }) => {
         </div>
       </div>
 
-      {/* Monthly Orders Chart */}
-      <div className="flex flex-col   max-h-120 justify-center items-center">
-        <h3 className="text-center text-lg font-semibold mb-2">
+      {/* Monthly Orders Data */}
+      <div className="w-full md:w-1/3 bg-white p-4 rounded-lg shadow-lg max-h-96">
+        <h3 className="text-center text-lg font-semibold mb-4">
           Monthly Orders
         </h3>
-        <div className="h-full">
-          <Pie
-            data={{
-              labels: monthlyData.map((m) => m.month),
-              datasets: [
-                {
-                  label: "Orders",
-                  data: monthlyData.map((m) => m.count),
-                  backgroundColor: [
-                    "rgba(255, 99, 132, 0.2)",
-                    "rgba(54, 162, 235, 0.2)",
-                    "rgba(255, 206, 86, 0.2)",
-                  ],
-                  borderColor: [
-                    "rgba(255, 99, 132, 1)",
-                    "rgba(54, 162, 235, 1)",
-                    "rgba(255, 206, 86, 1)",
-                  ],
-                  borderWidth: 1,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              maintainAspectRatio: true,
-              plugins: {
-                legend: {
-                  position: "top",
-                },
-              },
-            }}
-          />
+        <div className="h-full flex flex-col items-center justify-center bg-gray-100 rounded-lg p-4">
+          {monthlyData.map((m, index) => (
+            <div
+              key={index}
+              className="w-full flex justify-between items-center p-2 mb-2 bg-white rounded shadow-md"
+            >
+              <span className="font-medium text-gray-600">{m.month}</span>
+              <span className="font-bold text-gray-800">{m.count}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

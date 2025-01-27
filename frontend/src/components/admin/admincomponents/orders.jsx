@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Calendar, Search, Filter, RefreshCw } from "lucide-react";
+import { Calendar, Search, Filter, RefreshCw,Download } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import * as XLSX from "xlsx"; // Import XLSX
+import { jsPDF } from "jspdf";
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -73,6 +74,87 @@ const Orders = () => {
       matchesSearch && matchesStatus && matchesPaymentMethod && matchesDate
     );
   });
+
+
+const handleDownload = (order) => {
+  // Create a new instance of jsPDF
+  const doc = new jsPDF();
+
+  // Add Title
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Order Invoice", 105, 15, { align: "center" });
+
+  // Add Order Details
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  const leftAlignX = 10;
+  const rightAlignX = 200;
+
+  let y = 30; // Starting vertical position
+  const lineSpacing = 10; // Space between lines
+
+  doc.text(`Order ID: ${order.order_id}`, leftAlignX, y);
+  y += lineSpacing;
+  doc.text(`Customer Name: ${order.username}`, leftAlignX, y);
+  y += lineSpacing;
+  doc.text(`Phone Number: ${order.phoneNumber}`, leftAlignX, y);
+  y += lineSpacing;
+  if (order.alternatePhoneNumber) {
+    doc.text(`Alternate Phone: ${order.alternatePhoneNumber}`, leftAlignX, y);
+    y += lineSpacing;
+  }
+  doc.text(`Address: ${order.address}`, leftAlignX, y);
+  y += lineSpacing;
+  doc.text(
+    `Order Date: ${new Date(order.createdAt).toLocaleDateString()}`,
+    leftAlignX,
+    y
+  );
+  y += lineSpacing;
+  doc.text(`Payment Status: ${order.paymentStatus}`, leftAlignX, y);
+  y += lineSpacing * 2; // Add extra space before the next section
+
+  // Add Items Header
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Items:", leftAlignX, y);
+  y += lineSpacing;
+
+  // Add Table Header
+  const tableStartY = y;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Item", leftAlignX, tableStartY);
+  doc.text("Price", 100, tableStartY, { align: "center" });
+  doc.text("Quantity", 140, tableStartY, { align: "center" });
+  doc.text("Total", rightAlignX, tableStartY, { align: "right" });
+
+  y = tableStartY + lineSpacing;
+
+  // Add Items List
+  doc.setFont("helvetica", "normal");
+  order.items.forEach((item, index) => {
+    doc.text(`${index + 1}. ${item.name} (${item.weight})`, leftAlignX, y);
+    doc.text(`${item.price}`, 100, y, { align: "center" });
+    doc.text(`${item.quantity}`, 140, y, { align: "center" });
+    doc.text(`${item.totalPrice}`, rightAlignX, y, { align: "right" });
+    y += lineSpacing; // Move to the next line for the next item
+  });
+
+  y += lineSpacing; // Add extra space before the total
+
+  // Add Total Amount
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total Amount: ₹${order.totalAmount}`, leftAlignX, y);
+
+  // Save the PDF
+  doc.save(`order-invoice-${order.order_id}.pdf`);
+};
+
+
+
 
   // Pagination logic
   const totalOrders = filteredOrders.length;
@@ -196,7 +278,7 @@ const Orders = () => {
 
       {/* Orders Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="max-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -222,6 +304,9 @@ const Orders = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Download
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -280,6 +365,14 @@ const Orders = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => handleDownload(order)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      <Download className="w-5 h-5" />
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button

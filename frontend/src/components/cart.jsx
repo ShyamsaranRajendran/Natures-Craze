@@ -8,6 +8,7 @@ import Credits from "./Credits";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const Cart = () => {
   const navigate = useNavigate();
+    const [isClicked, setIsClicked] = useState(false);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [packSize, setPackSize] = useState(""); // State for selected pack size
@@ -215,7 +216,7 @@ const Cart = () => {
 
    updateCart(updatedCart);
    toast.success(
-     `${productDetails.quantity} ${productDetails.packSize} added to cart`
+     `${productDetails.packSize} added to cart`
    );
  };
 
@@ -224,6 +225,23 @@ const Cart = () => {
     setShowCheckoutModal(true);
   };
   const handleConfirmCheckout = async () => {
+
+
+     if (isClicked) return; // Prevent further clicks while already processing
+
+     setIsClicked(true); // Disable the button (start processing)
+
+     // Simulate a checkout process with a timeout
+     setTimeout(() => {
+       // Proceed with the actual checkout logic here
+
+       console.log("Checkout successful!");
+
+       // After checkout process is done, enable the button again if needed
+       setIsClicked(false); // Re-enable the button if necessary
+     }, 10000);
+
+
     const { username, phoneNumber, alternatePhoneNumber, address } =
       userDetails;
     const phoneRegex = /^[0-9]{10}$/; // Regex to check 10 digits
@@ -289,7 +307,8 @@ const Cart = () => {
       const { razorpayOrderId, amount } = response.data;
       // Razorpay payment options
       const options = {
-        key: "rzp_live_vniaz7V3nXYe0J", // Use your Razorpay key (replace for production)
+        // key: "rzp_live_vniaz7V3nXYe0J",
+        key: "rzp_test_814EkXmD14BWDD",
         amount: amount, // Amount from the backend
         currency: "INR",
         name: "Natures Craze",
@@ -736,9 +755,12 @@ const Cart = () => {
               <div className="p-6 bg-gray-50 rounded-b-2xl">
                 <button
                   onClick={handleConfirmCheckout}
-                  className="w-full py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors flex items-center justify-center"
+                  disabled={isClicked} // Disable the button if isClicked is true
+                  className={`w-full py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors flex items-center justify-center ${
+                    isClicked ? "cursor-not-allowed opacity-50" : ""
+                  }`}
                 >
-                  Proceed to Payment
+                  {isClicked ? "Processing..." : "Proceed to Payment"}
                 </button>
               </div>
             </div>

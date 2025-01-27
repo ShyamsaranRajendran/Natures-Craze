@@ -19,7 +19,7 @@ const Layout = ({ isAdmin }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen pt-18" style={{paddingBottom: "4rem"}}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -27,7 +27,7 @@ const Layout = ({ isAdmin }) => {
         newestOnTop
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
+        pauseOnFocusLosss
         draggable
         pauseOnHover
         style={{ zIndex: 9999 }} // Bring ToastContainer to the top

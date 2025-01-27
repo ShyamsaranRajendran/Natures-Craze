@@ -9,7 +9,6 @@ const backendURL = process.env.REACT_APP_BACKEND_URL;
 const ProcessedOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null); // State to store selected order for viewing details
 
   useEffect(() => {
     const fetchProcessedOrders = async () => {
@@ -57,193 +56,186 @@ const ProcessedOrder = () => {
     fetchProcessedOrders();
   }, []);
 
-  // Handle the click on the card to view the full details of the order
-  const handleOrderClick = (order) => {
-    setSelectedOrder(order); // Set the clicked order as the selected order
-  };
+  const downloadInvoice = async (order) => {
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create();
 
-  // Function to close the order details view (if you implement a modal)
-  const closeOrderDetails = () => {
-    setSelectedOrder(null); // Close the selected order
-  };
+    // Add a page to the document
+    const page = pdfDoc.addPage([595, 842]); // Standard A4 size: 595x842 points
+    const { width, height } = page.getSize();
 
+    // Set up font
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-const downloadInvoice = async (order) => {
-  // Create a new PDF document
-  const pdfDoc = await PDFDocument.create();
+    // Helper function to calculate the starting position for left-aligned text starting from the center
+    const calculateStartX = (maxWidth) => (width - maxWidth) / 2;
 
-  // Add a page to the document
-  const page = pdfDoc.addPage([595, 842]); // Standard A4 size: 595x842 points
-  const { width, height } = page.getSize();
+    // Define font size
+    const fontSize = 12;
 
-  // Set up font
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  // Helper function to calculate the starting position for left-aligned text starting from the center
-  const calculateStartX = (maxWidth) => (width - maxWidth) / 2;
-
-  // Define font size
-  const fontSize = 12;
-
-  // Calculate the maximum width for content
-  const longestLine = Math.max(
-    font.widthOfTextAtSize("Invoice", 18),
-    font.widthOfTextAtSize(`Order ID: ${order._id}`, fontSize),
-    font.widthOfTextAtSize(
-      `Customer Name: ${order.username || "Unknown"}`,
-      fontSize
-    ),
-    font.widthOfTextAtSize(
-      `Phone Number: ${order.phoneNumber || "N/A"}`,
-      fontSize
-    ),
-    font.widthOfTextAtSize(`Address: ${order.address || "N/A"}`, fontSize),
-    font.widthOfTextAtSize(
-      `Total Amount: ${order.totalAmount.toFixed(2)}`,
-      fontSize
-    ),
-    font.widthOfTextAtSize(`Payment Status: ${order.paymentStatus}`, fontSize),
-    font.widthOfTextAtSize(`Order Status: ${order.status}`, fontSize),
-    ...(order.items || []).map((item) =>
+    // Calculate the maximum width for content
+    const longestLine = Math.max(
+      font.widthOfTextAtSize("Invoice", 18),
+      font.widthOfTextAtSize(`Order ID: ${order._id}`, fontSize),
       font.widthOfTextAtSize(
-        `${item.name} - ${item.weight}, ${
-          item.quantity
-        } x ${item.price.toFixed(2)} = ${item.totalPrice.toFixed(2)}`,
+        `Customer Name: ${order.username || "Unknown"}`,
         fontSize
+      ),
+      font.widthOfTextAtSize(
+        `Phone Number: ${order.phoneNumber || "N/A"}`,
+        fontSize
+      ),
+      font.widthOfTextAtSize(`Address: ${order.address || "N/A"}`, fontSize),
+      font.widthOfTextAtSize(
+        `Total Amount: ${order.totalAmount.toFixed(2)}`,
+        fontSize
+      ),
+      font.widthOfTextAtSize(
+        `Payment Status: ${order.paymentStatus}`,
+        fontSize
+      ),
+      font.widthOfTextAtSize(`Order Status: ${order.status}`, fontSize),
+      ...(order.items || []).map((item) =>
+        font.widthOfTextAtSize(
+          `${item.name} - ${item.weight}, ${
+            item.quantity
+          } x ${item.price.toFixed(2)} = ${item.totalPrice.toFixed(2)}`,
+          fontSize
+        )
       )
-    )
-  );
-  const startX = calculateStartX(longestLine);
+    );
+    const startX = calculateStartX(longestLine);
 
-  // Add the title
-  page.drawText("Invoice", {
-    x: (width - font.widthOfTextAtSize("Invoice", 18)) / 2,
-    y: height - 50,
-    size: 18,
-    font,
-  });
-
-  // Add order details
-  let yOffset = height - 100;
-  page.drawText(`Order ID: ${order._id}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Customer Name: ${order.username || "Unknown"}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Phone Number: ${order.phoneNumber || "N/A"}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Address: ${order.address || "N/A"}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Total Amount: ${order.totalAmount.toFixed(2)}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Payment Status: ${order.paymentStatus}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  // page.drawText(`Order Status: ${order.status}`, {
-  //   x: startX,
-  //   y: yOffset,
-  //   size: fontSize,
-  //   font,
-  // });
-  // yOffset -= 40;
-
-  // Add Items section
-  page.drawText("Items:", { x: startX, y: yOffset, size: fontSize, font });
-  yOffset -= 20;
-
-  // Loop through items and add them to the invoice
-  if (order.items && order.items.length > 0) {
-    order.items.forEach((item) => {
-      const itemLine = `${item.name} - ${item.weight}, ${
-        item.quantity
-      } x ${item.price.toFixed(2)} = ${item.totalPrice.toFixed(2)}`;
-      page.drawText(itemLine, { x: startX, y: yOffset, size: fontSize, font });
-      yOffset -= 20;
+    // Add the title
+    page.drawText("Invoice", {
+      x: (width - font.widthOfTextAtSize("Invoice", 18)) / 2,
+      y: height - 50,
+      size: 18,
+      font,
     });
-  } else {
-    page.drawText("No items in this order.", {
+
+    // Add order details
+    let yOffset = height - 100;
+    page.drawText(`Order ID: ${order._id}`, {
       x: startX,
       y: yOffset,
       size: fontSize,
       font,
     });
     yOffset -= 20;
-  }
+    page.drawText(`Customer Name: ${order.username || "Unknown"}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    page.drawText(`Phone Number: ${order.phoneNumber || "N/A"}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    page.drawText(`Address: ${order.address || "N/A"}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    page.drawText(`Total Amount: ${order.totalAmount.toFixed(2)}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    page.drawText(`Payment Status: ${order.paymentStatus}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    // page.drawText(`Order Status: ${order.status}`, {
+    //   x: startX,
+    //   y: yOffset,
+    //   size: fontSize,
+    //   font,
+    // });
+    // yOffset -= 40;
 
-  yOffset -= 20;
+    // Add Items section
+    page.drawText("Items:", { x: startX, y: yOffset, size: fontSize, font });
+    yOffset -= 20;
 
-  // Add footer (timestamps)
-  page.drawText(`Created At: ${new Date(order.createdAt).toLocaleString()}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
-  yOffset -= 20;
-  page.drawText(`Shipped At: ${new Date(order.updatedAt).toLocaleString()}`, {
-    x: startX,
-    y: yOffset,
-    size: fontSize,
-    font,
-  });
+    // Loop through items and add them to the invoice
+    if (order.items && order.items.length > 0) {
+      order.items.forEach((item) => {
+        const itemLine = `${item.name} - ${item.weight}, ${
+          item.quantity
+        } x ${item.price.toFixed(2)} = ${item.totalPrice.toFixed(2)}`;
+        page.drawText(itemLine, {
+          x: startX,
+          y: yOffset,
+          size: fontSize,
+          font,
+        });
+        yOffset -= 20;
+      });
+    } else {
+      page.drawText("No items in this order.", {
+        x: startX,
+        y: yOffset,
+        size: fontSize,
+        font,
+      });
+      yOffset -= 20;
+    }
 
-  // Serialize the document to bytes
-  const pdfBytes = await pdfDoc.save();
+    yOffset -= 20;
 
-  // Download the PDF
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(
-    new Blob([pdfBytes], { type: "application/pdf" })
-  );
-  link.download = `Invoice_${order._id}.pdf`;
-  link.click();
-};
+    // Add footer (timestamps)
+    page.drawText(`Created At: ${new Date(order.createdAt).toLocaleString()}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
+    yOffset -= 20;
+    page.drawText(`Shipped At: ${new Date(order.updatedAt).toLocaleString()}`, {
+      x: startX,
+      y: yOffset,
+      size: fontSize,
+      font,
+    });
 
+    // Serialize the document to bytes
+    const pdfBytes = await pdfDoc.save();
 
+    // Download the PDF
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(
+      new Blob([pdfBytes], { type: "application/pdf" })
+    );
+    link.download = `Invoice_${order._id}.pdf`;
+    link.click();
+  };
 
-
-
-
-  if (loading) return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-        <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+  if (loading)
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="p-6 mt-20">
-            <ToastContainer />
+      <ToastContainer />
       <h1 className="text-2xl font-bold mb-4">Processed Orders</h1>
       {orders.length === 0 ? (
         <p>No processed orders found.</p>
@@ -253,11 +245,8 @@ const downloadInvoice = async (order) => {
             <div
               key={order._id}
               className="p-6 border border-gray-300 rounded-lg shadow-lg bg-white cursor-pointer"
-              onClick={() => handleOrderClick(order)} // Add onClick to view order details
             >
-              <h3 className="text-lg font-semibold">
-                ID : {order.order_id}
-              </h3>
+              <h3 className="text-lg font-semibold">ID : {order.order_id}</h3>
 
               <p className="text-sm text-gray-700 mb-1">
                 <strong>Customer Name:</strong> {order.username || "Unknown"}
@@ -293,8 +282,7 @@ const downloadInvoice = async (order) => {
         </div>
       )}
 
-      {/* Show order details in a modal or expanded view */}
-      {selectedOrder && (
+      {/* {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-3/4 md:w-1/2">
             <h2 className="text-2xl font-bold mb-4">Order Details</h2>
@@ -375,7 +363,7 @@ const downloadInvoice = async (order) => {
             >
               Close
             </button>
-            {/* Add the Download Invoice button inside the modal */}
+            {/* Add the Download Invoice button inside the modal 
             <button
               onClick={() => downloadInvoice(selectedOrder)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
@@ -384,7 +372,7 @@ const downloadInvoice = async (order) => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, ShoppingBag, CheckCircle, Package, Loader2 } from "lucide-react"; // Importing Loader2 icon for "Processing"
+import { Home, ShoppingBag, CheckCircle, Package, Loader2 } from "lucide-react"; // Importing icons from lucide-react
 
 const BottomNavigation = () => {
   return (
@@ -15,6 +15,7 @@ const BottomNavigation = () => {
               isActive ? "text-orange-500" : "text-gray-500"
             }`
           }
+          aria-label="Home"
         >
           <Home className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">Home</span>
@@ -28,6 +29,7 @@ const BottomNavigation = () => {
               isActive ? "text-red-500" : "text-gray-500"
             }`
           }
+          aria-label="Products"
         >
           <ShoppingBag className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">
@@ -43,40 +45,43 @@ const BottomNavigation = () => {
               isActive ? "text-blue-500" : "text-gray-500"
             }`
           }
+          aria-label="Orders"
         >
           <Package className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">Orders</span>
         </NavLink>
 
         {/* Processing Button */}
-        <NavLink
+        {/* <NavLink
           to="/admin/processing"
           className={({ isActive }) =>
             `group flex flex-col items-center ${
               isActive ? "text-purple-500" : "text-gray-500"
             }`
           }
+          aria-label="Processing"
         >
           <Loader2 className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">
             Processing
           </span>
-        </NavLink>
+        </NavLink> */}
 
         {/* Processed Button */}
-        <NavLink
+        {/* <NavLink
           to="/admin/processed"
           className={({ isActive }) =>
             `group flex flex-col items-center ${
               isActive ? "text-green-500" : "text-gray-500"
             }`
           }
+          aria-label="Processed"
         >
           <CheckCircle className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">
             Processed
           </span>
-        </NavLink>
+        </NavLink> */}
       </div>
     </div>
   );

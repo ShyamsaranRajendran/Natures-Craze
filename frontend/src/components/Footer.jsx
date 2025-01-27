@@ -25,7 +25,7 @@ const BottomNavigation = () => {
   }, []);
 
   return (
-    <div className="relative mt-20">
+    <div className="relative mt-15">
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 w-full bg-white shadow-xl py-4 flex items-center justify-around z-10 border-t-2 border-gray-300">
         {/* Home Button */}

@@ -3,7 +3,7 @@ import {
   FaInstagram,
   FaWhatsapp,
   FaHeart,
-  FaEnvelope, // Import the email icon
+  FaEnvelope,
 } from "react-icons/fa";
 
 function Footer() {
