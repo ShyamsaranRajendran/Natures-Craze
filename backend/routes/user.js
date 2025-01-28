@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const passport = require("passport");
 const User = require("../models/user.js");
 const mailer = require("../utils/mailer.js");
 const jwt = require("jsonwebtoken");
@@ -94,10 +93,10 @@ router.post("/register", async function (req, res) {
 // Route for user login
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log(email, password)
   try {
     // Step 1: Find the user by username (or email, depending on your schema)
-    const user = await User.findOne({ email }); // Use email if you're validating by email
+    const user = await User.findOne({ email:email }); // Use email if you're validating by email
 
     // Step 2: Check if user exists
     if (!user) {
@@ -108,6 +107,7 @@ router.post("/login", async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      console.log(user)
       return res.status(400).json({ error: 'Invalid username or password' });
     }
 

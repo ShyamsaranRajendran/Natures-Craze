@@ -1,30 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {useNavigate} from "react-router-dom";
 function Terms() {
   const navigate = useNavigate();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  });
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-lg max-w-4xl mx-auto mt-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-gray-600 hover:text-gray-800 mr-4 p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300"
-          aria-label="Go Back"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+    <div className="bg-gray-50 p-6 rounded-lg shadow-md max-w-4xl mx-auto mt-10 relative">
+    {/* Back Button */}
+    <button
+      onClick={() => navigate(-1)}
+      className="fixed top-14 right-4 text-gray-600 bg-gray-100 hover:text-gray-800 p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300"
+      aria-label="Go Back"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </button> <h1 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+       
         Terms and Conditions
       </h1>
 

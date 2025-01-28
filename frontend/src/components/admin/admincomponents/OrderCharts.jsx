@@ -119,23 +119,30 @@ const OrderCharts = ({ orders }) => {
         </div>
       </div>
 
-      {/* Monthly Orders Data */}
-      <div className="w-full md:w-1/3 bg-white p-4 rounded-lg shadow-lg max-h-96">
-        <h3 className="text-center text-lg font-semibold mb-4">
-          Monthly Orders
-        </h3>
-        <div className="h-full flex flex-col items-center justify-center bg-gray-100 rounded-lg p-4">
-          {monthlyData.map((m, index) => (
-            <div
-              key={index}
-              className="w-full flex justify-between items-center p-2 mb-2 bg-white rounded shadow-md"
-            >
-              <span className="font-medium text-gray-600">{m.month}</span>
-              <span className="font-bold text-gray-800">{m.count}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+     {/* Monthly Orders Data */}
+<div className="p-4">
+  <h3 className="text-lg font-semibold mb-4">Monthly Orders</h3>
+  <div className="overflow-auto">
+    <table className="table-auto w-full border-collapse border border-gray-200">
+      <thead>
+        <tr className="bg-gray-100">
+          <th className="border border-gray-300 px-4 py-2 text-left">Month</th>
+          <th className="border border-gray-300 px-4 py-2 text-left">Orders</th>
+        </tr>
+      </thead>
+      <tbody>
+        {monthlyData.map((m, index) => (
+          <tr key={index} className="hover:bg-gray-50">
+            <td className="border border-gray-300 px-4 py-2">{m.month}</td>
+            <td className="border border-gray-300 px-4 py-2">{m.count}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
     </div>
   );
 };
