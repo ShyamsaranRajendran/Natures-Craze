@@ -19,7 +19,7 @@ router.post("/verify", async (req, res) => {
   console.log(razorpayPaymentId, razorpayOrderId, razorpaySignature);
   try {
     const generatedSignature = crypto
-      .createHmac("sha256", "tDGkmo8xCjbbEDG2kBSucvmB") // Replace with your Razorpay Key Secret
+      .createHmac("sha256", "lNbjKV8iTX89QnGBIjEFE323") // Replace with your Razorpay Key Secret
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest("hex");
 
