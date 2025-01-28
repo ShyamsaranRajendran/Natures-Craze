@@ -138,7 +138,7 @@ const handleDownload = (order) => {
     doc.text(`${index + 1}. ${item.name} (${item.weight})`, leftAlignX, y);
     doc.text(`${item.price}`, 100, y, { align: "center" });
     doc.text(`${item.quantity}`, 140, y, { align: "center" });
-    doc.text(`${item.totalPrice}`, rightAlignX, y, { align: "right" });
+    doc.text(`${item.price * item.quantity}`, rightAlignX, y, { align: "right" });
     y += lineSpacing; // Move to the next line for the next item
   });
 
@@ -147,7 +147,7 @@ const handleDownload = (order) => {
   // Add Total Amount
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text(`Total Amount: ₹${order.totalAmount}`, leftAlignX, y);
+  doc.text(`Total Amount: ${order.totalAmount}`, leftAlignX, y);
 
   // Save the PDF
   doc.save(`order-invoice-${order.order_id}.pdf`);

@@ -6,10 +6,10 @@ const router = express.Router();
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  key_id: "rzp_live_vniaz7V3nXYe0J",
-  key_secret: "lNbjKV8iTX89QnGBIjEFE323",
-  // key_id: "rzp_test_814EkXmD14BWDD",
-  // key_secret: "tDGkmo8xCjbbEDG2kBSucvmB",
+  // key_id: "rzp_live_vniaz7V3nXYe0J",
+  // key_secret: "lNbjKV8iTX89QnGBIjEFE323",
+  key_id: "rzp_test_814EkXmD14BWDD",
+  key_secret: "tDGkmo8xCjbbEDG2kBSucvmB",
 });
 
 
@@ -130,8 +130,8 @@ router.post('/create', async (req, res) => {
 
     // Prepare the payload for Razorpay Checkout
     const checkoutPayload = {
-      key: 'rzp_live_vniaz7V3nXYe0J',
-      // key: 'rzp_test_814EkXmD14BWDD',  
+      // key: 'rzp_live_vniaz7V3nXYe0J',
+      key: 'rzp_test_814EkXmD14BWDD',  
       amount: totalAmount * 100, // Amount in smallest currency sub-unit (paise)
       currency: 'INR', // Currency code
       name: 'Natures Craze', // Business name

@@ -307,8 +307,8 @@ const Cart = () => {
       const { razorpayOrderId, amount } = response.data;
       // Razorpay payment options
       const options = {
-        key: "rzp_live_vniaz7V3nXYe0J",
-        // key: "rzp_test_814EkXmD14BWDD",
+        // key: "rzp_live_vniaz7V3nXYe0J",
+        key: "rzp_test_814EkXmD14BWDD",
         amount: amount, // Amount from the backend
         currency: "INR",
         name: "Natures Craze",
