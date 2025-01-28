@@ -5,12 +5,10 @@ import { FaWhatsapp, FaPhoneAlt, FaInstagram } from "react-icons/fa"; // Using r
 const SocialMediaLinks = () => {
   return (
     <div className="flex flex-col justify-center items-center py-16 space-y-6">
-      {/* Title Section */}
       <h2 className="text-2xl font-bold text-center text-gray-800 animate-fadeIn">
         Follow Us
       </h2>
 
-      {/* Social Media Icons Container with animation */}
       <div className="flex justify-center items-center space-x-8">
         <Link
           to="/whatsapp"
