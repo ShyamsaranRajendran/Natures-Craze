@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Mail,
@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import Credits from "./Credits";
+
 const Contact = () => {
+  const [isMapLoading, setIsMapLoading] = useState(true); // State to manage map loading
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Hero Section */}
@@ -117,9 +120,7 @@ const Contact = () => {
                   className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
                 >
                   <div className="w-7 h-7 p-1 bg-green-500 rounded-full flex items-center justify-center">
-                    <FaWhatsapp
-                      className="w-5 h-5  text-white"
-                    />
+                    <FaWhatsapp className="w-5 h-5  text-white" />
                   </div>
                   <span className="text-green-700 font-medium">WhatsApp</span>
                 </a>
@@ -144,13 +145,20 @@ const Contact = () => {
             {/* Map */}
             <div className="bg-white rounded-xl p-8 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Find Us</h2>
-              <div className="rounded-lg overflow-hidden shadow-inner">
+              <div className="relative rounded-lg overflow-hidden shadow-inner">
+                {/* Loader */}
+                {isMapLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <div className="loader border-t-4 border-amber-500 rounded-full w-10 h-10 animate-spin"></div>
+                  </div>
+                )}
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d4906.632741494903!2d77.67110567504889!3d11.255685288923734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDE1JzIwLjUiTiA3N8KwNDAnMjUuMyJF!5e1!3m2!1sen!2sin!4v1737632699741!5m2!1sen!2sin"
                   className="w-full h-[400px]"
                   title="Location Map"
                   loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  onLoad={() => setIsMapLoading(false)}
                 ></iframe>
               </div>
             </div>
