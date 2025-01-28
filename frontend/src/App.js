@@ -156,7 +156,7 @@ function App() {
           <Route path="/policy/terms" element={<Terms />} />
           <Route path="/policy/refund" element={<Refund />} />
           <Route path="/policy/shipping" element={<Shipping />} />
-          <Route path="/payment/paymentFail" element={<PaymentFail />} />
+          <Route path="/payment/paymentFailed" element={<PaymentFail />} />
           <Route path="/payment/paymentSuccess" element={<PaymentSuccess />} />
           <Route path ="/developer" element={<Developer/>}/>
           {/* Protected Admin Routes */}
