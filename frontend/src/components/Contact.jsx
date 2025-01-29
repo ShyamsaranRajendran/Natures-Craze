@@ -108,36 +108,40 @@ const Contact = () => {
             </div>
 
             {/* Social Links */}
-            <div className="bg-white rounded-xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Connect With Us
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <a
-                  href="https://wa.me/+919361864257"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                >
-                  <div className="w-7 h-7 p-1 bg-green-500 rounded-full flex items-center justify-center">
-                    <FaWhatsapp className="w-5 h-5  text-white" />
-                  </div>
-                  <span className="text-green-700 font-medium">WhatsApp</span>
-                </a>
+            <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg">
+  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-center">
+    Connect With Us
+  </h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+    <a
+      href="https://wa.me/+919361864257"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+    >
+      <div className="w-6 h-6 sm:w-7 sm:h-7 p-1 bg-green-500 rounded-full flex items-center justify-center">
+        <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      </div>
+      <span className="text-green-700 text-sm sm:text-base font-medium">
+        WhatsApp
+      </span>
+    </a>
 
-                <a
-                  href="https://www.instagram.com/natures_craze_/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
-                >
-                  <div className="w-7 h-7 p-1 bg-pink-500 rounded-full flex items-center justify-center">
-                    <FaInstagram className="w-5 h-5  text-white" />
-                  </div>
-                  <span className="text-pink-700 font-medium">Instagram</span>
-                </a>
-              </div>
-            </div>
+    <a
+      href="https://www.instagram.com/natures_craze_/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
+    >
+      <div className="w-6 h-6 sm:w-7 sm:h-7 p-1 bg-pink-500 rounded-full flex items-center justify-center">
+        <FaInstagram className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      </div>
+      <span className="text-pink-700 text-sm sm:text-base font-medium">
+        Instagram
+      </span>
+    </a>
+  </div>
+</div>
           </div>
 
           {/* Map and Policies */}
