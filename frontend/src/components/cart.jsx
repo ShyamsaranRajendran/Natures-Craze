@@ -446,7 +446,6 @@ const Cart = () => {
         if (newQty === 0) {
           delete updatedQuantities[packSize];
           setTimeout(() => {
-            window.location.reload();
           }, 3000);
         } else {
           updatedQuantities[packSize] = newQty;
