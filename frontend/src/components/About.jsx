@@ -14,7 +14,6 @@ import {
   Shield,
   Sun,
 } from "lucide-react";
-import Credits from "./Credits";
 const About = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
@@ -168,7 +167,6 @@ const About = () => {
           </div>
         </div>
       </div>
-      <Credits />
     </div>
   );
 };

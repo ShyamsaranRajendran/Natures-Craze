@@ -157,7 +157,7 @@ function Orders() {
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-semibold text-indigo-600">
-                  ID : {order.order_id}
+                  ID : {order.ID}
                 </h3>
               </div>
 
@@ -168,7 +168,7 @@ function Orders() {
                 <strong>Total :</strong>{" "}
                 <span
                   className={`${
-                    order.paymentStatus === "paid"
+                    order.paymentStatus === "successful"
                       ? "text-green-600"
                       : order.paymentStatus === "unpaid"
                       ? "text-red-600"
@@ -176,7 +176,7 @@ function Orders() {
                   }`}
                 >
                   ₹
-                  {order.paymentStatus === "paid" ||
+                  {order.paymentStatus === "successful" ||
                   order.paymentStatus === "unpaid"
                     ? order.totalAmount // Show total amount if status is paid or unpaid
                     : order.paymentStatus}

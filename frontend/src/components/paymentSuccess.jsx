@@ -55,7 +55,8 @@ const PaymentSuccess = () => {
         y += 10;
       };
 
-      addText(`Order ID: ${order.order_id}`);
+      addText(`Order ID: ${order.ID}`);
+      console.log(order.ID);
       addText(`Customer Name: ${order.username}`);
       addText(`Phone Number: ${order.phoneNumber}`);
       addText(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`);
@@ -140,7 +141,7 @@ const PaymentSuccess = () => {
 
         {/* Order Details */}
         <div className="space-y-4">
-          <p className="font-medium text-gray-700">Order ID: {orderData.order_id}</p>
+          <p className="font-medium text-gray-700">Order ID: {orderData.ID}</p>
           <p className="font-medium text-gray-700">Customer: {orderData.username}</p>
           <p className="font-medium text-gray-700">Total Amount: ₹{orderData.totalAmount}</p>
           <p className="font-medium text-gray-700">Payment Status: {orderData.paymentStatus}</p>

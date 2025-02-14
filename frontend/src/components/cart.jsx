@@ -1,173 +1,205 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import Razorpay from "razorpay";
 import { ShoppingBag, Plus, Minus, Trash2, Package, X } from "lucide-react";
-import Credits from "./Credits";
-const backendURL = process.env.REACT_APP_BACKEND_URL;
+import "react-toastify/dist/ReactToastify.css";
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:5000",
+  timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 413) {
+      toast.error("Order data is too large. Please try reducing the cart size.");
+    } else if (error.code === "ERR_NETWORK") {
+      toast.error("Network error. Please check your connection.");
+    } else {
+      toast.error(error.response?.data?.message || "An error occurred");
+    }
+    return Promise.reject(error);
+  }
+);
+
 const Cart = () => {
   const navigate = useNavigate();
-    const [isClicked, setIsClicked] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [packSize, setPackSize] = useState(""); // State for selected pack size
-  const [quantity, setQuantity] = useState(1); // State for input quantity
   const [productQuantities, setProductQuantities] = useState({});
   const [userDetails, setUserDetails] = useState({
     username: "",
     phoneNumber: "",
     address: "",
-    alternatePhoneNumber: "", // Added alternate phone number
+    alternatePhoneNumber: "",
   });
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [cartImg, setCartImg] = useState([]);
 
-  useEffect(() => {
-    const fetchProductImages = async () => {
-      try {
-        // Retrieve cart from local storage
-        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-        setCart(storedCart);
+  // Memoized cart loading function
+  const loadCartAndImages = useCallback(async () => {
+    try {
+      const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+      setCart(storedCart);
 
-        const initialQuantities = {};
-        storedCart.forEach((item) => {
-          initialQuantities[item._id] = {
-            packSize: item.prices[0].packSize,
-            quantity: item.quantities[item.prices[0].packSize] || 1,
-          };
-        });
-        setProductQuantities(initialQuantities);
-               console.log(initialQuantities);
+      const initialQuantities = {};
+      storedCart.forEach((item) => {
+        initialQuantities[item._id] = {
+          packSize: item.prices[0]?.packSize || "",
+          quantity: 1,
+        };
+      });
+      setProductQuantities(initialQuantities);
 
-        // Extract product IDs from the stored cart
-        const prodIds = storedCart.map((item) => item._id);
-
-        if (prodIds.length === 0) {
-          console.warn("No product IDs found in the cart");
-          return;
-        }
-
-        // Fetch images from the backend
-        // const response = await fetch(`${backendURL}/prod/images`, {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ ids: prodIds }),
-        // });
-
-        // if (response.ok) {
-        //   const data = await response.json();
-        //   setCartImg(data.images);
-        // } else {
-        //   console.error(
-        //     "Error fetching product images:",
-        //     response.status,
-        //     response.statusText
-        //   );
-        // }
-      } catch (error) {
-        console.error("Error while fetching product images:", error);
+      if (storedCart.length > 0) {
+        await fetchImages(storedCart);
       }
-    };
-
-    fetchProductImages();
-  }, [backendURL]);
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      toast.error("Failed to load cart items");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Fetch images when the cart is updated
-    if (cart.length > 0) {
-      const fetchImages = async () => {
-        try {
-          const ids = cart.map((item) => item._id); // Extract product IDs
-          const response = await fetch(`${backendURL}/prod/images`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ids }), // Send product IDs to backend
-          });
+    loadCartAndImages();
+  }, [loadCartAndImages]);
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch images");
+  // Optimized image fetching with retry logic
+  const fetchImages = async (cartItems, retryCount = 3) => {
+    for (let attempt = 0; attempt < retryCount; attempt++) {
+      try {
+        const ids = cartItems.map((item) => item._id);
+        const response = await api.post("/prod/images", { ids });
+        
+        const imageMap = response.data.images.reduce((acc, item) => {
+          acc[item.id] = item.image;
+          return acc;
+        }, {});
+
+        setCartImg(cartItems.map((item) => imageMap[item._id] || null));
+        break;
+      } catch (error) {
+        if (attempt === retryCount - 1) {
+          console.error("Error fetching images:", error);
+          toast.error("Failed to load product images");
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  };
+
+  const handlePackSizeChange = useCallback((productId, packSize) => {
+    setProductQuantities((prev) => ({
+      ...prev,
+      [productId]: { ...prev[productId], packSize },
+    }));
+  }, []);
+
+  const handleAddToCart = useCallback((productId) => {
+    const productDetails = productQuantities[productId];
+    const product = cart.find((item) => item._id === productId);
+
+    if (!productDetails?.packSize) {
+      toast.warning("Please select a pack size");
+      return;
+    }
+
+    const price = product.prices.find(
+      (p) => p.packSize === productDetails.packSize
+    )?.price;
+    if (!price) {
+      toast.error("Price not found for selected pack size");
+      return;
+    }
+
+    setCart((prevCart) => {
+      const updatedCart = prevCart.map((item) => {
+        if (item._id === productId) {
+          const currentQuantity = item.quantities?.[productDetails.packSize] || 0;
+          return {
+            ...item,
+            quantities: {
+              ...item.quantities,
+              [productDetails.packSize]: currentQuantity + (productDetails.quantity || 1),
+            },
+          };
+        }
+        return item;
+      });
+
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+
+    toast.success(`${product.name} (${productDetails.packSize}) added to cart`);
+  }, [cart, productQuantities]);
+
+  const handleUpdateQuantity = useCallback((productId, packSize, change) => {
+    setCart((prevCart) => {
+      const updatedCart = prevCart.map((item) => {
+        if (item._id === productId) {
+          const currentQty = item.quantities[packSize] || 0;
+          const newQty = Math.max(0, currentQty + change);
+
+          const updatedQuantities = { ...item.quantities };
+          if (newQty === 0) {
+            delete updatedQuantities[packSize];
+          } else {
+            updatedQuantities[packSize] = newQty;
           }
 
-          const data = await response.json();
-
-          // Create a mapping of ID -> Image
-          const imageMap = data.images.reduce((acc, item) => {
-            acc[item.id] = item.image; // Map product ID to base64 image
-            return acc;
-          }, {});
-
-          // Set cartImg array in the order of the cart
-          const images = cart.map((item) => imageMap[item._id] || null); // Default to null if no image
-          setCartImg(images);
-        } catch (error) {
-          console.error("Error fetching images:", error);
-        } finally {
-          setIsLoading(false);
+          return { ...item, quantities: updatedQuantities };
         }
-      };
+        return item;
+      }).filter((item) => Object.keys(item.quantities || {}).length > 0);
 
-      fetchImages();
-    }
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+  }, []);
+
+  const handleRemoveItem = useCallback((productId) => {
+    setCart((prevCart) => {
+      const updatedCart = prevCart.filter((item) => item._id !== productId);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+    toast.success("Item removed from cart");
+  }, []);
+
+  const calculateTotal = useCallback(() => {
+    return cart.reduce((total, item) => {
+      return total + Object.entries(item.quantities || {}).reduce((sum, [volume, qty]) => {
+        const price = item.prices.find((p) => p.packSize === volume)?.price || 0;
+        return sum + price * qty;
+      }, 0);
+    }, 0);
   }, [cart]);
 
-  const handlePackSizeChange = (productId, packSize) => {
-    setProductQuantities((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        packSize,
-      },
-    }));
-  };
- const calculateItemTotal = (item, packSize, quantity) => {
-   const price = item.prices.find((p) => p.packSize === packSize)?.price || 0;
-   return price * quantity;
- };
-
-  const handleQuantityChange = (productId, change) => {
-    setProductQuantities((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        quantity: Math.max(1, (prev[productId]?.quantity || 1) + change),
-      },
-    }));
-
-    // const updatedCart = cart.map((item) => {
-    
-  };
-
-  
-
-  // const handleQuantityChange = (productId, volume, change) => {
-  //   const updatedCart = cart.map((item) => {
-  //     if (item._id === productId) {
-  //       const updatedQuantities = { ...item.quantities };
-  //       const newQuantity = (updatedQuantities[volume] || 0) + change;
-
-  //       if (newQuantity <= 0) {
-  //         delete updatedQuantities[volume];
-  //       } else {
-  //         updatedQuantities[volume] = newQuantity;
-  //       }
-
-  //       return { ...item, quantities: updatedQuantities };
-  //     }
-  //     return item;
-  //   });
-
-  //   updateCart(
-  //     updatedCart.filter(
-  //       (item) => Object.keys(item.quantities || {}).length > 0
-  //     )
-  //   );
-  // };
+  const handleCheckout = useCallback(() => {
+    if (cart.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+    setShowCheckoutModal(true);
+  }, [cart.length]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve(true);
@@ -176,601 +208,386 @@ const Cart = () => {
     });
   };
 
-  const updateCart = (updatedCart) => {
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-  };
-
- const handleAddToCart = (productId) => {
-   const productDetails = productQuantities[productId];
-   const product = cart.find((item) => item._id === productId);
-
-   if (!productDetails?.packSize) {
-     toast.warning("Please select a pack size");
-     return;
-   }
-
-   const price = product.prices.find(
-     (p) => p.packSize === productDetails.packSize
-   )?.price;
-   if (!price) {
-     toast.error("Price not found for selected pack size");
-     return;
-   }
-
-   const updatedCart = cart.map((item) => {
-     if (item._id === productId) {
-      console.log(productDetails)
-       const currentQuantity = item.quantities?.[productDetails.packSize] || 0;
-       return {
-         ...item,
-         quantities: {
-           ...item.quantities,
-           [productDetails.packSize]:
-             currentQuantity + (productDetails.quantity || 1),
-         },
-       };
-     }
-     return item;
-   });
-
-   updateCart(updatedCart);
-   toast.success(
-     `${productDetails.packSize} added to cart`
-   );
- };
-
-
-  const handleCheckout = async () => {
-    setShowCheckoutModal(true);
-  };
   const handleConfirmCheckout = async () => {
-
-
-     if (isClicked) return; // Prevent further clicks while already processing
-
-     setIsClicked(true); // Disable the button (start processing)
-
-     // Simulate a checkout process with a timeout
-     setTimeout(() => {
-       // Proceed with the actual checkout logic here
-
-       console.log("Checkout successful!");
-
-       // After checkout process is done, enable the button again if needed
-       setIsClicked(false); // Re-enable the button if necessary
-     }, 10000);
-
-
-    const { username, phoneNumber, alternatePhoneNumber, address } =
-      userDetails;
-    const phoneRegex = /^[0-9]{10}$/; // Regex to check 10 digits
-
-    if (!phoneRegex.test(userDetails.phoneNumber)) {
-      alert("Please enter a valid 10-digit phone number.");
-      return;
-    }
-
-    if (
-      userDetails.alternatePhoneNumber &&
-      !phoneRegex.test(userDetails.alternatePhoneNumber)
-    ) {
-      alert("Please enter a valid 10-digit alternate phone number.");
-      return;
-    }
-    // Check if required details are present
-    if (!username || !phoneNumber || !address) {
-      alert("Please fill in all the details!");
-      return;
-    }
-
-    // Load Razorpay script if not already loaded
-    const isScriptLoaded = await loadRazorpayScript();
-    if (!isScriptLoaded) {
-      toast.error("Failed to load Razorpay SDK.");
-      return;
-    }
-
+    if (isProcessing) return;
+    setIsProcessing(true);
+  
     try {
-      // Get cart items from localStorage
-      const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log(cartItems);
-      if (!Array.isArray(cartItems) || cartItems.length === 0) {
-        alert("Your cart is empty!");
-        return;
+      // Validate user details
+      const { username, phoneNumber, alternatePhoneNumber, address } = userDetails;
+      const phoneRegex = /^[0-9]{10}$/;
+  
+      if (!username || !phoneNumber || !address) {
+        throw new Error("Please fill in all required fields");
       }
-
-      // Prepare request data
-      const requestData = {
-        Items: cartItems,
-        username: username,
-        phoneNumber: phoneNumber,
-        alternatePhoneNumber: alternatePhoneNumber,
-        address: address,
-      };
-      console.log(requestData);
-      // Create order from backend
-      const response = await axios.post(
-        `${backendURL}/orders/create`,
-        requestData
-      );
-
-      // Ensure Razorpay order details are present
-      if (
-        !response.data ||
-        !response.data.razorpayOrderId ||
-        !response.data.amount
-      ) {
-        throw new Error("Failed to create order. Please try again.");
+  
+      if (!phoneRegex.test(phoneNumber)) {
+        throw new Error("Please enter a valid 10-digit phone number");
       }
-
+  
+      if (alternatePhoneNumber && !phoneRegex.test(alternatePhoneNumber)) {
+        throw new Error("Please enter a valid alternate phone number");
+      }
+  
+      // Ensure Razorpay script is loaded
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error("Failed to load payment gateway");
+      }
+  
+      const orderItems = cart.map(({ _id, name, quantities, prices, description }) => ({
+        _id, // Use _id instead of productId
+        name, // Include product name
+        quantities,
+        prices: prices.map(({ packSize, price }) => ({ packSize, price })),
+        description: description || "No description available", // Include description
+      }));
+      
+      // Validate order items
+      if (orderItems.length === 0) {
+        throw new Error("Your cart is empty. Please add items to proceed.");
+      }
+  
+  
+      // Send order data to backend
+      const response = await api.post("/orders/create", {
+        items: orderItems,
+        username,
+        phoneNumber,
+        alternatePhoneNumber,
+        address,
+      });
+  
       const { razorpayOrderId, amount } = response.data;
-      // Razorpay payment options
+  
+      if (!razorpayOrderId || !amount) {
+        throw new Error("Failed to create order");
+      }
+  
+      // Initialize Razorpay payment
       const options = {
         key: "rzp_live_vniaz7V3nXYe0J",
-        // key: "rzp_test_814EkXmD14BWDD",
-        amount: amount, // Amount from the backend
+        // key : "rzp_test_814EkXmD14BWDD",
+        amount,
         currency: "INR",
         name: "Natures Craze",
         description: "Order Payment",
-        order_id: razorpayOrderId, // Order ID from the backend
-        handler: async function (paymentResponse) {
-          toast.success("Payment successful!");
-
-          try {
-            // Send payment details to backend for verification
-            const paymentVerificationResponse = await axios.post(
-              `${backendURL}/orders/verify`,
-              {
-                razorpayPaymentId: paymentResponse.razorpay_payment_id,
-                razorpayOrderId: paymentResponse.razorpay_order_id,
-                razorpaySignature: paymentResponse.razorpay_signature,
-              },
-              {
-                headers: {
-                  "Content-Type": "application/json", // Ensure JSON data is sent
-                },
-              }
-            );
-
-            // Handle verification response from backend
-            if (paymentVerificationResponse.status === 200) {
-              toast.success("Payment verified successfully!");
-              setShowCheckoutModal(false);
-
-              // Navigate to paymentSuccess with data
-              navigate("/payment/paymentSuccess", {
-                state: {
-                  message: "Payment verified successfully!",
-                  paymentDetails: paymentResponse,
-                  razorpayOrderId: razorpayOrderId,
-                  orderDetails: amount, // Assuming backend returns order details
-                },
-              });
-            } else {
-              toast.error("Payment verification failed.");
-
-              // Navigate to paymentFailed with error data
-              navigate("/payment/paymentFailed", {
-                state: {
-                  message: "Payment verification failed.",
-                  paymentDetails: paymentResponse,
-                  error: paymentVerificationResponse.data.error, // Assuming backend provides error details
-                },
-              });
-            }
-          } catch (error) {
-            console.error("Error during payment verification:", error);
-            toast.error("An error occurred during payment verification.");
-            navigate("/payment/paymentFailed", {
-              state: {
-                message: "An error occurred during payment verification.",
-                error: error.message,
-              },
-            });
-          }
+        order_id: razorpayOrderId,
+        handler: async (paymentResponse) => {
+          await handlePaymentSuccess(paymentResponse, razorpayOrderId, amount);
         },
         prefill: {
-          name: username || "John Doe", // Replace with actual username
-          contact: phoneNumber || "9999999999", // Replace with actual phone number
+          name: username,
+          contact: phoneNumber,
         },
-        theme: {
-          color: "#F37254", // Customize with your brand color
-        },
+        theme: { color: "#F37254" },
         modal: {
           ondismiss: () => {
-            toast.warning("Payment cancelled.");
+            toast.warning("Payment cancelled");
+            setIsProcessing(false);
           },
         },
       };
-
-      // Open Razorpay payment gateway
+  
       const razorpay = new window.Razorpay(options);
-      // const razorpay = new Razorpay(options);
       razorpay.open();
     } catch (error) {
-      console.error("Checkout Error:", error);
-      toast.error(error.message || "Checkout failed.");
+      toast.error(error.message || "Checkout failed");
+      setIsProcessing(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserDetails((prevDetails) => ({
-      ...prevDetails,
-      [name]: value,
-    }));
-  };
+  const handlePaymentSuccess = async (paymentResponse, razorpayOrderId, amount) => {
+    try {
+      const verificationResponse = await api.post("/orders/verify", {
+        razorpayPaymentId: paymentResponse.razorpay_payment_id,
+        razorpayOrderId: paymentResponse.razorpay_order_id,
+        razorpaySignature: paymentResponse.razorpay_signature,
+      });
 
-  const handleRemoveItem = (productId) => {
-    const updatedCart = cart.filter((item) => item._id !== productId);
-    updateCart(updatedCart);
-    toast.success("Item removed from cart!");
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 3000);
-
-  };
-
-  // const handleQuantityChange = (productId, volume, change) => {
-  //   const updatedCart = cart.map((item) => {
-  //     if (item._id === productId) {
-  //       const updatedQuantities = { ...item.quantities };
-  //       const newQuantity = (updatedQuantities[volume] || 0) + change;
-
-  //       if (newQuantity <= 0) {
-  //         delete updatedQuantities[volume];
-  //       } else {
-  //         updatedQuantities[volume] = newQuantity;
-  //       }
-
-  //       return { ...item, quantities: updatedQuantities };
-  //     }
-  //     return item;
-  //   });
-
-  //   updateCart(
-  //     updatedCart.filter(
-  //       (item) => Object.keys(item.quantities || {}).length > 0
-  //     )
-  //   );
-  // };
-
-  const handleUpdateQuantity = (productId, packSize, change) => {
-    const updatedCart = cart.map((item) => {
-      if (item._id === productId) {
-        const currentQty = item.quantities[packSize] || 0;
-        const newQty = Math.max(0, currentQty + change);
-
-        const updatedQuantities = { ...item.quantities };
-        if (newQty === 0) {
-          delete updatedQuantities[packSize];
-          setTimeout(() => {
-          }, 3000);
-        } else {
-          updatedQuantities[packSize] = newQty;
-        }
-
-        return {
-          ...item,
-          quantities: updatedQuantities,
-        };
+      if (verificationResponse.status === 200) {
+        toast.success("Payment successful!");
+        setShowCheckoutModal(false);
+        setCart([]);
+        localStorage.removeItem("cart");
+        
+        navigate("/payment/paymentSuccess", {
+          state: {
+            message: "Payment verified successfully!",
+            paymentDetails: paymentResponse,
+            razorpayOrderId,
+            orderDetails: amount,
+          },
+        });
+      } else {
+        throw new Error("Payment verification failed");
       }
-      return item;
-    });
-
-    updateCart(updatedCart);
-  };
-
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => {
-      const itemTotal = Object.entries(item.quantities || {}).reduce(
-        (sum, [volume, qty]) => {
-          const price =
-            item.prices.find((price) => price.packSize === volume)?.price || 0;
-          return sum + price * qty;
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      navigate("/payment/paymentFailed", {
+        state: {
+          message: "Payment verification failed",
+          error: error.message,
         },
-        0
-      );
-      return total + itemTotal;
-    }, 0);
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setUserDetails((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
   return (
-    <div className="">
-      <ToastContainer position="top-right" theme="colored" />
-
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-3 mt-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center mb-8">
-            <ShoppingBag className="w-8 h-8 text-amber-600 mr-3" />
-            <h2 className="text-3xl font-bold text-gray-900">Your Cart</h2>
-          </div>
-
-          {cart.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-              <div className="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ShoppingBag className="w-12 h-12 text-amber-600" />
-              </div>
-              <p className="text-xl text-gray-600 mb-6">Your cart is empty</p>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 px-4 lg:px-8 mt-10">
+  <ToastContainer position="top-right" theme="colored" />
+  {isLoading ? (
+    <div className="flex justify-center items-center h-[60vh]">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  ) : cart.length === 0 ? (
+    <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+      <ShoppingBag className="w-12 h-12 text-gray-400" />
+      <h2 className="text-xl font-semibold text-gray-700">Your cart is empty</h2>
+      <p className="text-gray-500 text-center px-4">Add some items to your cart to continue shopping</p>
+      <button
+        onClick={() => navigate("/products")}
+        className="mt-4 px-6 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
+      >
+        Browse Products
+      </button>
+    </div>
+  ) : (
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6 px-4">Shopping Cart</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          {cart.map((item, index) => (
+            <div
+              key={item._id}
+              className="bg-white rounded-lg shadow-md p-4 relative"
+            >
               <button
-                onClick={() => navigate("/products")}
-                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                onClick={() => handleRemoveItem(item._id)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
               >
-                Continue Shopping
+                <Trash2 className="w-5 h-5" />
               </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {cart.map((item, index) => (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-2xl shadow-xl overflow-hidden"
-                >
-                  <div className="p-6 md:flex">
-                    {/* Product Image */}
-                    <div className="relative w-full md:w-48 h-48 md:h-auto md:aspect-square mb-6 md:mb-0 md:mr-6 flex-shrink-0">
-                      <div className="absolute inset-0  from-amber-100/50 to-amber-50/30 rounded-lg"></div>
-                      {isLoading ? (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="relative w-12 h-12">
-                            <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-                            <div className="absolute inset-2 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
-                          </div>
-                        </div>
-                      ) : (
-                        <img
-                          src={
-                            cartImg[index] ||
-                            "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&auto=format&fit=crop&q=80"
-                          }
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      )}
+              <div className="flex gap-4">
+                <div className="w-20 h-20 flex-shrink-0">
+                  {cartImg[index] ? (
+                    <img
+                      src={cartImg[index]}
+                      alt={item.name}
+                      className="w-full h-full object-cover rounded-md"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center">
+                      <Package className="w-6 h-6 text-gray-400" />
                     </div>
-
-                    {/* Product Details */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900">
-                            {item.name}
-                          </h3>
-                          <p className="text-gray-600 mt-1 line-clamp-2">
-                            {item.description}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleRemoveItem(item._id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {item.name}
+                  </h3>
+                  <div className="mt-2 space-y-2">
+                    {Object.entries(item.quantities || {}).map(([size, qty]) => {
+                      const price =
+                        item.prices.find((p) => p.packSize === size)?.price || 0;
+                      return (
+                        <div
+                          key={size}
+                          className="flex items-center justify-between"
                         >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-
-                      {/* Pack Size and Quantity Selection */}
-                      <div className="bg-amber-50 rounded-xl p-4 mb-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700 flex items-center">
-                              <Package className="w-4 h-4 mr-1" />
-                              Pack Size
-                            </label>
-                            <select
-                              value={
-                                productQuantities[item._id]?.packSize || ""
-                              }
-                              onChange={(e) =>
-                                handlePackSizeChange(item._id, e.target.value)
-                              }
-                              className="w-full px-3 py-2 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 bg-white"
-                            >
-                              <option value="">Select Size</option>
-                              {item.prices.map((price) => (
-                                <option key={price._id} value={price.packSize}>
-                                  {price.packSize} - ₹{price.price}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Quantity
-                          </label>
-                          <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-600">
+                            Pack Size: {size}
+                          </span>
+                          <div className="flex items-center gap-2">
                             <button
                               onClick={() =>
-                                setQuantity(Math.max(1, quantity - 1))
+                                handleUpdateQuantity(item._id, size, -1)
                               }
-                              className="p-2 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200"
+                              className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-12 text-center font-medium text-gray-900">
-                              {quantity}
-                            </span>
+                            <span className="w-8 text-center">{qty}</span>
                             <button
-                              onClick={() => setQuantity(quantity + 1)}
-                              className="p-2 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200"
+                              onClick={() =>
+                                handleUpdateQuantity(item._id, size, 1)
+                              }
+                              className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
+                            <span className="ml-2 text-gray-900 font-medium">
+                              ₹{price * qty}
+                            </span>
                           </div>
-                        </div> */}
                         </div>
-
-                        <div className="w-full flex justify-center mt-8">
-                          <button
-                            onClick={() => handleAddToCart(item._id)}
-                            className=" mt-4 px-6 py-1 bg-amber-500 text-white py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors flex flex-row items-center justify-center"
-                            //  className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add to Cart
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Current Quantities */}
-                      {Object.entries(item.quantities || {}).map(
-                        ([volume, qty]) => (
-                          <div
-                            key={volume}
-                            className="flex items-center justify-between py-2 border-b border-amber-100 last:border-0"
-                          >
-                            <div>
-                              <span className="font-medium text-gray-900">
-                                {volume}
-                              </span>
-                              <span className="text-gray-600"> × {qty}</span>
-                              <span className="ml-2 text-amber-600 font-medium">
-                                ₹
-                                {item.prices.find(
-                                  (price) => price.packSize === volume
-                                )?.price * qty || 0}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() =>
-                                  handleUpdateQuantity(item._id, volume, 1)
-                                }
-                                className="p-1 rounded-md bg-green-100 text-green-600 hover:bg-green-200"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleUpdateQuantity(item._id, volume, -1)
-                                }
-                                className="p-1 rounded-md bg-red-100 text-red-600 hover:bg-red-200"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
+                      );
+                    })}
                   </div>
-                </div>
-              ))}
-
-              {/* Cart Summary */}
-              <div className="bg-white rounded-2xl shadow-xl p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <p className="text-gray-600">Total Amount</p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      ₹{calculateTotal().toFixed(2)}
-                    </p>
+                  <div className="mt-2">
+                    <select
+                      value={productQuantities[item._id]?.packSize || ""}
+                      onChange={(e) =>
+                        handlePackSizeChange(item._id, e.target.value)
+                      }
+                      className="mr-2 p-1 border rounded-md text-sm"
+                    >
+                      <option value="">Select Pack Size</option>
+                      {item.prices.map((price) => (
+                        <option key={price.packSize} value={price.packSize}>
+                          {price.packSize} - ₹{price.price}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => handleAddToCart(item._id)}
+                      className="bg-amber-500 text-white px-2 py-1 rounded-md hover:bg-amber-600 text-sm"
+                    >
+                      Add Pack
+                    </button>
                   </div>
-                  <button
-                    onClick={handleCheckout}
-                    className="ml-2 px-8 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center"
-                  >
-                    Proceed to Checkout
-                  </button>
                 </div>
               </div>
             </div>
-          )}
+          ))}
+        </div>
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Order Summary
+            </h2>
+            <div className="space-y-2">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>₹{calculateTotal()}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
+              <div className="border-t pt-2 mt-2">
+                <div className="flex justify-between text-base font-semibold">
+                  <span>Total</span>
+                  <span>₹{calculateTotal()}</span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleCheckout}
+              className="w-full mt-4 bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 transition-colors"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+{showCheckoutModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg w-full max-w-lg p-6 relative shadow-lg">
+      {/* Close Button */}
+      <button
+        onClick={() => setShowCheckoutModal(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+        aria-label="Close"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      {/* Title */}
+      <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+        Checkout Details
+      </h2>
+
+      {/* Form */}
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+        {/* Full Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Full Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="username"
+            value={userDetails.username}
+            onChange={handleInputChange}
+            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500 text-gray-900"
+            placeholder="Enter your full name"
+            required
+          />
         </div>
 
-        {/* Checkout Modal */}
-        {showCheckoutModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-              <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Checkout Details
-                </h3>
-                <button
-                  onClick={() => setShowCheckoutModal(false)}
-                  className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        {/* Phone Number */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={userDetails.phoneNumber}
+            onChange={handleInputChange}
+            maxLength={10}
+            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500 text-gray-900"
+            placeholder="Enter your phone number"
+            required
+          />
+        </div>
 
-              <div className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={userDetails.username}
-                    onChange={handleInputChange}
-                    placeholder="Enter your full name"
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
-                  />
-                </div>
+        {/* Alternate Phone Number */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Alternate Phone Number
+          </label>
+          <input
+            type="tel"
+            name="alternatePhoneNumber"
+            value={userDetails.alternatePhoneNumber}
+            onChange={handleInputChange}
+            maxLength={10}
+            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500 text-gray-900"
+            placeholder="Optional alternate number"
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={userDetails.phoneNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter your phone number"
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
-                    maxLength={10}
-                  />
-                </div>
+        {/* Delivery Address */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Delivery Address <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="address"
+            value={userDetails.address}
+            onChange={handleInputChange}
+            rows={3}
+            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500 text-gray-900 resize-none"
+            placeholder="Enter your full address"
+            required
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Alternate Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="alternatePhoneNumber"
-                    value={userDetails.alternatePhoneNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter alternate phone number"
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
-                    maxLength={10}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Delivery Address
-                  </label>
-                  <textarea
-                    name="address"
-                    value={userDetails.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter your complete delivery address"
-                    rows={3}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="p-6 bg-gray-50 rounded-b-2xl">
-                <button
-                  onClick={handleConfirmCheckout}
-                  disabled={isClicked} // Disable the button if isClicked is true
-                  className={`w-full py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors flex items-center justify-center ${
-                    isClicked ? "cursor-not-allowed opacity-50" : ""
-                  }`}
-                >
-                  {isClicked ? "Processing..." : "Proceed to Payment"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      <Credits />
+        {/* Confirm Order Button */}
+        <button
+          onClick={handleConfirmCheckout}
+          disabled={isProcessing}
+          className="w-full bg-amber-500 text-white font-semibold py-2 rounded-lg hover:bg-amber-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isProcessing ? "Processing..." : "Confirm Order"}
+        </button>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };

@@ -19,6 +19,7 @@ import AdminOrder from "./components/admin/order/orders";
 import AdminOrderDetail from "./components/admin/order/orderDetail";
 import AdminProcessing from "./components/admin/order/ProcessingOrders";
 import AdminProcessed from "./components/admin/order/ProcessedOrder";
+import AdminFailedOrders from "./components/admin/order/failedOrders";
 import Privacy from "./components/policy/privacy";
 import Terms from "./components/policy/terms"; 
 import Refund from "./components/policy/refund";
@@ -27,6 +28,10 @@ import Cart from "./components/cart";
 import PaymentFail from "./components/paymentFail";
 import PaymentSuccess from "./components/paymentSuccess";
 import Developer from "./components/Developer";
+import Checkout from "./components/checkout";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen">
@@ -137,6 +142,8 @@ function App() {
   }, []);
 
   return (
+    <Provider store={store}>
+
     <Router>
       <Routes>
         {/* Main Layout */}
@@ -144,7 +151,7 @@ function App() {
           {/* Public Routes */}
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
-          <Route path="signup" element={<SignUp />} />
+          {/* <Route path="signup" element={<SignUp />} /> */}
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="contact" element={<Contact />} />
@@ -152,6 +159,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
+          {/* <Route path="/checkout" element={<Checkout />} /> */}
           <Route path="/policy/privacy" element={<Privacy />} />
           <Route path="/policy/terms" element={<Terms />} />
           <Route path="/policy/refund" element={<Refund />} />
@@ -173,6 +181,14 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["admin"]}>
                 <AdminProducts />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="admin/failedOrders"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <AdminFailedOrders />
               </PrivateRoute>
             }
           />
@@ -230,6 +246,8 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </Provider>
+
   );
 }
 

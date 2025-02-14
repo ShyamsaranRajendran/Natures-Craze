@@ -1,6 +1,8 @@
 const express = require("express");
 const Razorpay = require("razorpay");
 const Order = require("../../models/order");
+const PaidOrder = require("../../models/paidOrders");
+const UnPaidOrder = require("../../models/unpaidOrders");
 const Product = require("../../models/product"); // Assuming a Product model exists
 const router = express.Router();
 const crypto = require("crypto");
@@ -15,37 +17,74 @@ const razorpay = new Razorpay({
 
 router.post("/verify", async (req, res) => {
   const { razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
-  console.log(req.body);
-  console.log(razorpayPaymentId, razorpayOrderId, razorpaySignature);
+  
   try {
+    // Step 1: Find the existing order or create a new one
+    let order = await Order.findOne({ razorpayOrderId });
+
+    if (!order) {
+      order = new Order({
+        razorpayOrderId,
+        razorpayPaymentId: null,
+        razorpaySignature: null,
+        paymentStatus: "unpaid",
+        createdAt: new Date(),
+      });
+      await order.save();
+    }
+
+    // Step 2: Generate signature and validate payment
     const generatedSignature = crypto
-      .createHmac("sha256", "lNbjKV8iTX89QnGBIjEFE323") // Replace with your Razorpay Key Secret
+      .createHmac("sha256", "lNbjKV8iTX89QnGBIjEFE323")
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest("hex");
 
     if (generatedSignature !== razorpaySignature) {
+      // Step 3A: Update order as failed and move to UnPaidOrder collection
+      order.paymentStatus = "failed";
+      order.razorpayPaymentId = razorpayPaymentId;
+      order.razorpaySignature = razorpaySignature;
+      await order.save();
+
+      const unpaidOrder = new UnPaidOrder({
+        ...order.toObject(),
+        reason: "Invalid payment signature",
+        movedAt: new Date(),
+      });
+
+      await unpaidOrder.save();
+
       return res.status(400).json({ message: "Invalid payment signature" });
     }
 
-     const updatedOrder = await Order.findOneAndUpdate(
-      { "razorpayOrderId": razorpayOrderId },
-      {
-        $set: {
-          "razorpayPaymentId": razorpayPaymentId,
-          "razorpaySignature": razorpaySignature,
-          "paymentStatus": "paid",
-        },
-      },
-      { new: true }
-    );
+    // Step 3B: Update order as paid and move to PaidOrder collection
+    order.paymentStatus = "successful";
+    order.razorpayPaymentId = razorpayPaymentId;
+    order.razorpaySignature = razorpaySignature;
+    await order.save();
 
-    if (!updatedOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
+    const paidOrder = new PaidOrder({
+      ...order.toObject(),
+      verifiedAt: new Date(),
+    });
+
+    await paidOrder.save();
 
     res.status(200).json({ message: "Payment verified successfully" });
+
   } catch (error) {
     console.error("Payment verification error:", error);
+
+    // Step 4: Store in UnPaidOrder in case of an unexpected error
+    const unpaidOrder = new UnPaidOrder({
+      razorpayOrderId,
+      paymentStatus: "failed",
+      reason: error.message,
+      createdAt: new Date(),
+    });
+
+    await unpaidOrder.save();
+
     res.status(500).json({ message: "Error verifying payment", error: error.message });
   }
 });
@@ -53,8 +92,8 @@ router.post("/verify", async (req, res) => {
 
 router.post('/create', async (req, res) => {
   try {
-    const { Items, username, phoneNumber,alternatePhoneNumber, address } = req.body;
-
+    const { items, username, phoneNumber,alternatePhoneNumber, address } = req.body;
+    const Items = items;
     // Validate required fields
     if (!username || !phoneNumber || !address) {
       return res.status(400).json({ message: 'Username, phone number, and address are required.' });
@@ -122,7 +161,6 @@ router.post('/create', async (req, res) => {
       payment_capture: 1, // Enable auto capture of payment
     });
 
-    console.log('Razorpay Order ID:', razorpayOrder.id);
 
     // Save Razorpay order ID to the order document
     savedOrder.razorpayOrderId = razorpayOrder.id;
@@ -201,7 +239,7 @@ router.patch("/assign-ids", async (req, res) => {
 router.get("/charts", async (req, res) => {
     try {
         // Fetch all orders and only return the createdAt field
-        const orders = await Order.find({}, 'createdAt'); // You can also use projection to select specific fields
+        const orders = await PaidOrder.find({}, 'createdAt'); // You can also use projection to select specific fields
 
         res.json(orders);
     } catch (error) {
@@ -213,8 +251,8 @@ router.get("/charts", async (req, res) => {
 router.get("/id/:razorpay_order_id", async (req, res) => {
   try {
     const { razorpay_order_id } = req.params;
-    const order = await Order.findOne({ razorpayOrderId : razorpay_order_id });
-
+    const order = await PaidOrder.findOne({ razorpayOrderId : razorpay_order_id });
+  
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -227,8 +265,8 @@ router.get("/id/:razorpay_order_id", async (req, res) => {
 
 router.get("/all", async (req, res) => {
   try {
-    const orders = await Order.find({}).sort({ createdAt: -1 }); // Descending order
-    console.log(orders);
+    const orders = await PaidOrder.find().sort({ createdAt: -1 }); // Descending order
+   
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching orders", error });
@@ -237,7 +275,7 @@ router.get("/all", async (req, res) => {
 
 router.get("/processed", async (req, res) => {
   try {
-    const orders = await Order.find({ status: "processed" }).sort({ createdAt: -1 }); // Descending order
+    const orders = await PaidOrder.find({ status: "processed" }).sort({ createdAt: -1 }); // Descending order
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders" });
@@ -246,12 +284,41 @@ router.get("/processed", async (req, res) => {
 
 router.get("/processing", async (req, res) => {
   try {
-    const orders = await Order.find({ status: "processing" }).sort({ createdAt: -1 }); // Descending order
+    const orders = await PaidOrder.find({ status: "processing" }).sort({ createdAt: -1 }); // Descending order
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
+router.get("/failed", async (req, res) => {
+  try {
+    const orders = await Order.find({paymentStatus:"unpaid"}).sort({ createdAt: -1 }); // Descending order
+ 
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the order
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.status(200).json({ message: "Order deleted successfully", deletedOrder });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ error: "Failed to delete order" });
+  }
+});
+
 
 
 router.get("/:id", async (req, res) => {
@@ -310,8 +377,6 @@ router.patch("/edit/:id", async (req, res) => {
   const { id } = req.params; // Get the order ID from the request URL
   const { status } = req.body; // Get the new status from the request body
 
-  // Log the incoming data for debugging purposes
-  console.log(req.body);
 
   // Validate the status value
   const validStatuses = ["pending", "processed", "processing", "delivered", "cancelled"];

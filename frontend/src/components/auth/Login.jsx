@@ -1,52 +1,44 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
-const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Login = ({ onLoginSuccess, onClose }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
       const response = await axios.post(`${backendURL}/auth/login`, {
         email,
         password,
       });
-      localStorage.setItem("token", response.data.token);
 
+      localStorage.setItem("token", response.data.token);
       if (onLoginSuccess) onLoginSuccess(); // Close the modal
 
-      // Check if the user data is available before accessing role
-      console.log(response.data.user.email);  
+      console.log(response.data.user.email);
       if (response.data.user.email === "curcumin138@gmail.com") {
         navigate("/admin/dashboard");
-
-    window.location.reload();
       } else {
         navigate("/");
-
-    window.location.reload();
       }
+      window.location.reload();
     } catch (err) {
-      // Improved error handling to check if response data exists
-      const errorMessage =
-        err.response?.data?.message || "Invalid email or password";
-      setError(errorMessage);
+      setError(err.response?.data?.message || "Invalid email or password");
     } finally {
       setIsSubmitting(false);
     }
-
   };
 
   const togglePasswordVisibility = () => {
@@ -54,19 +46,29 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
   };
 
   return (
-    <div className="flex items-center justify-center fixed inset-0 bg-gray-500 bg-opacity-50  ">
-      <div className="bg-white shadow-lg rounded-lg   px-6 py-8 max-w-md w-full mx-3 relative">
+    <div className="flex items-center justify-center bg-gray-800 bg-opacity-50 h-screen w-full p-12">
+      <div className="bg-white shadow-lg rounded-lg px-6 py-8 max-w-md w-full mx-3 relative">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+        >
+          <FaTimes className="w-5 h-5" />
+        </button>
+
         <h1 className="text-2xl font-bold text-center text-orange-500">
           Log In
         </h1>
         <p className="text-center mt-2 text-gray-500">
           Welcome! Please log in to continue.
         </p>
+
         {error && (
           <div className="bg-red-100 text-red-600 border border-red-500 rounded-lg p-2 mt-4 text-center">
             {error}
           </div>
         )}
+
         <form className="mt-6" onSubmit={handleLogin}>
           <div className="mb-4">
             <label
@@ -85,6 +87,7 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
               required
             />
           </div>
+
           <div className="mb-4">
             <label
               htmlFor="password"
@@ -111,11 +114,13 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
               </button>
             </div>
           </div>
+
           <div className="text-right text-sm text-orange-500">
             <a href="/forgot-password" className="hover:underline">
               Forgot Password?
             </a>
           </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -128,13 +133,14 @@ const Login = ({ onLoginSuccess, onClose }) => { // Added onClose prop
             {isSubmitting ? "Logging In..." : "Log In"}
           </button>
         </form>
+
         <div className="mt-4 text-center text-sm text-gray-500">
           Don't have an account?{" "}
           <span
             className="text-orange-500 cursor-pointer hover:underline"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/contact")}
           >
-            Sign Up
+          Contact Admin
           </span>
         </div>
       </div>

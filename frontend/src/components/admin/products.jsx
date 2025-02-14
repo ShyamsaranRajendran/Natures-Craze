@@ -20,8 +20,8 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null); // New state to manage the selected image for enlarge modal
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -76,13 +76,11 @@ const Products = () => {
     navigate("/admin/products/add");
   };
 
-  // Function to handle image click and open the modal
   const handleImageClick = (image) => {
     setSelectedImage(image);
     setIsModalOpen(true);
   };
 
-  // Function to close the modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedImage(null);
@@ -92,7 +90,6 @@ const Products = () => {
     <div className="container mx-auto px-6 py-10 mt-10">
       <ToastContainer />
 
-      {/* Page Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Manage Products</h1>
         <button
@@ -104,7 +101,6 @@ const Products = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
       <div className="mb-6">
         <input
           type="text"
@@ -115,18 +111,26 @@ const Products = () => {
         />
       </div>
 
-      {/* Loading/Error States */}
       {loading ? (
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
-          <div className="relative w-16 h-16">
-            <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <div
+              key={index}
+              className="bg-white border rounded-lg shadow p-4 animate-pulse"
+            >
+              <div className="w-full h-40 bg-gray-300 rounded-lg mb-4"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+              <div className="mt-4 flex justify-between space-x-2">
+                <div className="h-8 bg-gray-300 rounded w-full"></div>
+                <div className="h-8 bg-gray-300 rounded w-full"></div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : error ? (
         <p className="text-red-500 text-center">{error}</p>
       ) : (
-        // Products Grid
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
             <div
@@ -137,15 +141,12 @@ const Products = () => {
                 src={product.image || DefaultImage}
                 alt={product.name}
                 className="w-full h-40 object-cover rounded-lg mb-4 cursor-pointer"
-                onClick={() => handleImageClick(product.image || DefaultImage)} // Open modal on image click
+                onClick={() => handleImageClick(product.image || DefaultImage)}
               />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   {product.name}
                 </h3>
-                {/* <p className="text-gray-600 text-sm">
-                  {product.description || "No description available"}
-                </p> */}
                 <p className="text-gray-600 text-sm line-clamp-2">
                   {product.description}
                 </p>
@@ -168,31 +169,6 @@ const Products = () => {
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Modal for Enlarged Image */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={closeModal} // Close modal when clicking outside of the image
-        >
-          <div
-            className="relative bg-white p-4 rounded-lg"
-            onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside the image
-          >
-            <button
-              className="absolute top-2 right-2 text-white bg-red-500 rounded-full px-3 py-1"
-              onClick={closeModal}
-            >
-              ✕
-            </button>
-            <img
-              src={selectedImage}
-              alt="Enlarged Product"
-              className="max-w-full max-h-[80vh] object-contain"
-            />
-          </div>
         </div>
       )}
     </div>

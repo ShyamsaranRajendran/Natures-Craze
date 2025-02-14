@@ -195,7 +195,6 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      <Credits />
     </div>
   );
 };

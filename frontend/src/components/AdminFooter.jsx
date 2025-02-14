@@ -49,9 +49,9 @@ const BottomNavigation = () => {
           <span className="text-xs transition-colors duration-300">Orders</span>
         </NavLink>
 
-        {/* Processing Button */}
-        {/* <NavLink
-          to="/admin/processing"
+        {/* Failed Orders Button */}
+        <NavLink
+          to="/admin/failedOrders"
           className={({ isActive }) =>
             `group flex flex-col items-center ${
               isActive ? "text-purple-500" : "text-gray-500"
@@ -61,9 +61,9 @@ const BottomNavigation = () => {
         >
           <Loader2 className="w-6 h-6 group-hover:transform group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300" />
           <span className="text-xs transition-colors duration-300">
-            Processing
+            Unpaid
           </span>
-        </NavLink> */}
+        </NavLink>
 
         {/* Processed Button */}
         {/* <NavLink

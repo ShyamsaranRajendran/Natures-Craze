@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Calendar, Search, Filter, RefreshCw,Download } from "lucide-react";
+import { Calendar, Search, Filter, RefreshCw,Download, Trash } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import * as XLSX from "xlsx"; // Import XLSX
 import { jsPDF } from "jspdf";
@@ -189,14 +189,14 @@ const handleDownload = (order) => {
     currentPage * ordersPerPage
   );
 
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-3 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin-slow"></div>
-        </div>
-      </div>
+      <div className="animate-pulse space-y-4">
+      {[...Array(5)].map((_, index) => (
+        <div key={index} className="h-10 bg-gray-200 rounded"></div>
+      ))}
+    </div>
     );
   }
 
@@ -308,6 +308,7 @@ const handleDownload = (order) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Download
               </th>
+              
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -318,7 +319,7 @@ const handleDownload = (order) => {
               currentOrders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.order_id}
+                    {order.ID}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {order.razorpayOrderId}
@@ -355,7 +356,7 @@ const handleDownload = (order) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.paymentStatus === "paid"
+                        order.paymentStatus === "successful"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
@@ -374,6 +375,7 @@ const handleDownload = (order) => {
                       <Download className="w-5 h-5" />
                     </button>
                   </td>
+                  
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() =>
