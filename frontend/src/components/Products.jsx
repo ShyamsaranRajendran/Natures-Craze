@@ -6,7 +6,7 @@ import { CartContext } from "../context/CartContext";
 import DefaultImage from "../assets/default-placeholder.png";
 import Credits from "./Credits";
 import "react-toastify/dist/ReactToastify.css";
-
+import ProductsLoader from "./ProductsLoader";
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const Products = () => {
@@ -55,9 +55,7 @@ const Products = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-      </div>
+      <ProductsLoader />
     );
   }
 
