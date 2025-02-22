@@ -39,7 +39,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-orange-50 to-orange-100 p-2 overflow-x-hidden">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-orange-50 to-orange-100 p-2 py-10 overflow-x-hidden">
       
       <div className="mt-10 flex justify-center">
   <div className="w-16 h-16 border-4 border-dashed rounded-full border-orange-500 animate-[spin_3s_linear_infinite]"></div>
