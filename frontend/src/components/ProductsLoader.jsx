@@ -40,6 +40,16 @@ const App = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-orange-50 to-orange-100 p-2 overflow-x-hidden">
+      
+      <div className="mt-10 flex justify-center">
+  <div className="w-16 h-16 border-4 border-dashed rounded-full border-orange-500 animate-[spin_3s_linear_infinite]"></div>
+</div>
+
+
+      <p className="text-center mt-4 text-sm text-gray-500 animate-pulse">
+        Please wait while we prepare the best turmeric products for you...
+      </p>
+
       <h1 className="text-2xl font-bold text-orange-600 mb-6 text-center">
         🌿 Turmeric Benefits 🌿
       </h1>
