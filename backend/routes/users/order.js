@@ -306,7 +306,7 @@ router.delete("/delete/:id", async (req, res) => {
     const { id } = req.params;
 
     // Find and delete the order
-    const deletedOrder = await Order.findByIdAndDelete(id);
+    const deletedOrder = await UnPaidOrder.findByIdAndDelete(id);
 
     if (!deletedOrder) {
       return res.status(404).json({ error: "Order not found" });
@@ -386,7 +386,7 @@ router.patch("/edit/:id", async (req, res) => {
 
   try {
     // Update the order status in the database
-    const updatedOrder = await Order.findByIdAndUpdate(
+    const updatedOrder = await PaidOrder.findByIdAndUpdate(
       id,
       { status }, // Set the new status
       { new: true } // Return the updated order
