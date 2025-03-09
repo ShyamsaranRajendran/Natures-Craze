@@ -68,7 +68,7 @@ const Products = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-12 px-2" ref={containerRef}>
+    <div className="min-h-screen bg-gray-50 pt-20 px-2" ref={containerRef}>
       <ToastContainer position="top-right" theme="colored" />
 
       <div className="max-w-6xl mx-auto p-4">

@@ -19,8 +19,8 @@ const Layout = ({ isAdmin }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-18" style={{paddingBottom: "4rem"}}>
-      <ToastContainer
+<div className="flex flex-col min-h-screen pt-18 pb-16 sm:pb-0">
+<ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

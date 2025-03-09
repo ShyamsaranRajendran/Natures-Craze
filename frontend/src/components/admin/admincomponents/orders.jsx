@@ -288,8 +288,8 @@ const handleDownload = (order) => {
                 Razorpay ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
-              </th>
+  Customer
+</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Contact
               </th>
@@ -328,12 +328,13 @@ const handleDownload = (order) => {
                     <div className="text-sm font-medium text-gray-900">
                       {order.username}
                     </div>
-                    <div className="text-sm text-gray-500 break-words">
+                    <div className="text-sm text-gray-500 break-words w-40">
                       {order.address}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.phoneNumber}
+                    <br />
                     {order.alternatePhoneNumber !== null &&
                       order.alternatePhoneNumber}
                   </td>

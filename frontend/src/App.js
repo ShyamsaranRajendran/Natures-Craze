@@ -24,7 +24,7 @@ import Privacy from "./components/policy/privacy";
 import Terms from "./components/policy/terms"; 
 import Refund from "./components/policy/refund";
 import Shipping from "./components/policy/shipping";
-import Cart from "./components/cart";
+import Cart from "./components/cart/cart";
 import PaymentFail from "./components/paymentFail";
 import PaymentSuccess from "./components/paymentSuccess";
 import Developer from "./components/Developer";

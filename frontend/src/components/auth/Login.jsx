@@ -46,15 +46,10 @@ const Login = ({ onLoginSuccess, onClose }) => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-800 bg-opacity-50 h-screen w-full p-12">
+    <div className="flex items-center justify-center bg-gray-800  h-screen w-full p-12">
       <div className="bg-white shadow-lg rounded-lg px-6 py-8 max-w-md w-full mx-3 relative">
         {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-        >
-          <FaTimes className="w-5 h-5" />
-        </button>
+        
 
         <h1 className="text-2xl font-bold text-center text-orange-500">
           Log In

@@ -100,7 +100,7 @@ router.post('/create', async (req, res) => {
     }
 
     if (!Items || !Array.isArray(Items) || Items.length === 0) {
-      return res.status(400).json({ message: 'Items must be a non-empty array.' });
+      return res.status(400).json({ message: 'No products in the cart' });
     }
 
     // Calculate total amount and process items
@@ -301,29 +301,27 @@ router.get("/failed", async (req, res) => {
   }
 });
 
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+// router.delete("/delete/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
 
-    // Find and delete the order
-    const deletedOrder = await UnPaidOrder.findByIdAndDelete(id);
+//     // Find and delete the order
+//     const deletedOrder = await UnPaidOrder.findByIdAndDelete(id);
 
-    if (!deletedOrder) {
-      return res.status(404).json({ error: "Order not found" });
-    }
+//     if (!deletedOrder) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
 
-    res.status(200).json({ message: "Order deleted successfully", deletedOrder });
-  } catch (error) {
-    console.error("Error deleting order:", error);
-    res.status(500).json({ error: "Failed to delete order" });
-  }
-});
-
-
+//     res.status(200).json({ message: "Order deleted successfully", deletedOrder });
+//   } catch (error) {
+//     console.error("Error deleting order:", error);
+//     res.status(500).json({ error: "Failed to delete order" });
+//   }
+// });
 
 router.get("/:id", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await PaidOrder.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -335,40 +333,40 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/order-status-count", async (req, res) => {
-  try {
-    const statusCounts = await Order.aggregate([
-      {
-        $group: {
-          _id: "$status", // Group by order status
-          count: { $sum: 1 } // Count orders for each status
-        }
-      },
-      {
-        $project: {
-          _id: 0, // Exclude the _id field from the response
-          status: "$_id", // Rename the status field
-          count: 1
-        }
-      }
-    ]);
+// router.get("/order-status-count", async (req, res) => {
+//   try {
+//     const statusCounts = await Order.aggregate([
+//       {
+//         $group: {
+//           _id: "$status", // Group by order status
+//           count: { $sum: 1 } // Count orders for each status
+//         }
+//       },
+//       {
+//         $project: {
+//           _id: 0, // Exclude the _id field from the response
+//           status: "$_id", // Rename the status field
+//           count: 1
+//         }
+//       }
+//     ]);
 
-    // Create a default response for missing statuses if there are no orders for them
-    const allStatuses = ["pending", "processed", "shipped", "delivered", "cancelled"];
-    const result = allStatuses.map(status => {
-      const statusCount = statusCounts.find(item => item.status === status);
-      return {
-        status,
-        count: statusCount ? statusCount.count : 0
-      };
-    });
+//     // Create a default response for missing statuses if there are no orders for them
+//     const allStatuses = ["pending", "processed", "shipped", "delivered", "cancelled"];
+//     const result = allStatuses.map(status => {
+//       const statusCount = statusCounts.find(item => item.status === status);
+//       return {
+//         status,
+//         count: statusCount ? statusCount.count : 0
+//       };
+//     });
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching order status counts:", error);
-    res.status(500).json({ error: "Failed to fetch order status counts" });
-  }
-});
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching order status counts:", error);
+//     res.status(500).json({ error: "Failed to fetch order status counts" });
+//   }
+// });
 
 
 
@@ -405,17 +403,6 @@ router.patch("/edit/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 });
-
-// Endpoint to get orders for a specific user
-router.get("/:userId", async (req, res) => {
-  try {
-    const orders = await Order.find({ userId: req.params.userId });
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching orders", error });
-  }
-});
-
 
 
 module.exports = router;
