@@ -35,9 +35,11 @@ app.use(express.urlencoded({ extended: true }));
 const user = require('./routes/user');
 const prod = require('./routes/users/products');
 const order = require('./routes/users/order');
+const chat = require('./routes/users/chatbot');
 app.use('/orders', order);
 app.use('/prod', prod);
 app.use('/auth', user);
+app.use('/chat', chat);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

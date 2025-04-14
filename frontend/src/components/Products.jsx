@@ -96,7 +96,7 @@ const Products = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <Link to={`/product/${product._id}`}>
+                {/* <Link to={`/product/${product._id}`}> */}
                   <div className="relative">
                     <img
                       src={product.image || DefaultImage}
@@ -113,7 +113,7 @@ const Products = () => {
                       <Heart className={`w-5 h-5 ${favorites.includes(product._id) ? "text-red-500" : "text-gray-400"}`} />
                     </button>
                   </div>
-                </Link>
+                {/* </Link> */}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold truncate">{product.name}</h3>
                   <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>

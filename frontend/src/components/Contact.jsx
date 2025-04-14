@@ -1,18 +1,99 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Clock,
-  ExternalLink,
-  ArrowRight,
-} from "lucide-react";
+import { Mail, Phone, MapPin, Clock, ExternalLink, ArrowRight } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-import Credits from "./Credits";
+
+const ContactSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      {/* Hero Section Skeleton */}
+      <div className="relative h-[40vh] bg-gray-200 animate-pulse">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <div className="h-12 w-48 bg-gray-300 rounded mb-4"></div>
+          <div className="h-6 w-80 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+
+      {/* Main Content Skeleton */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Contact Information Skeleton */}
+          <div className="space-y-8">
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                    <div>
+                      <div className="h-4 w-16 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-5 w-48 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Social Links Skeleton */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <div className="h-8 w-48 bg-gray-200 rounded mx-auto mb-6"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-3 p-4 bg-gray-100 rounded-lg">
+                    <div className="w-7 h-7 bg-gray-300 rounded-full"></div>
+                    <div className="h-5 w-24 bg-gray-300 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Map and Policies Skeleton */}
+          <div className="space-y-8">
+            {/* Map Skeleton */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="relative rounded-lg overflow-hidden bg-gray-200 h-[400px] flex items-center justify-center">
+                <div className="loader border-t-4 border-amber-500 rounded-full w-10 h-10 animate-spin"></div>
+              </div>
+            </div>
+
+            {/* Policies Skeleton */}
+            <div className="bg-white rounded-xl p-8 shadow-lg">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+                    <div className="h-5 w-32 bg-gray-300 rounded"></div>
+                    <div className="w-5 h-5 bg-gray-300 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Contact = () => {
-  const [isMapLoading, setIsMapLoading] = useState(true); // State to manage map loading
+  const [isMapLoading, setIsMapLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ContactSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">

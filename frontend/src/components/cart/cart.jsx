@@ -1,5 +1,4 @@
-// Cart.js
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { ShoppingBag } from "lucide-react";
@@ -8,11 +7,11 @@ import api from "./api.js";
 import CartItem from "./CartItem";
 import OrderSummary from "./OrderSummary";
 import CheckoutModal from "./CheckoutModal";
+import { CartContext } from "../../context/CartContext.jsx";
 
 const Cart = () => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [productQuantities, setProductQuantities] = useState({});
   const [userDetails, setUserDetails] = useState({
@@ -23,39 +22,45 @@ const Cart = () => {
   });
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [cartImg, setCartImg] = useState([]);
+  
+  const { 
+    cart, 
+    addToCart, 
+    removeFromCart,
+    updateCartItem,
+    clearCart
+  } = useContext(CartContext);
 
-  // Load cart and images on component mount
-  const loadCartAndImages = useCallback(async () => {
-    try {
-      const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-      setCart(storedCart);
-
-      const initialQuantities = {};
-      storedCart.forEach((item) => {
-        initialQuantities[item._id] = {
-          packSize: item.prices[0]?.packSize || "",
-          quantity: 1,
-        };
-      });
-      setProductQuantities(initialQuantities);
-
-      if (storedCart.length > 0) {
-        await fetchImages(storedCart);
-      }
-    } catch (error) {
-      console.error("Error loading cart:", error);
-      toast.error("Failed to load cart items");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Load images on component mount
   useEffect(() => {
-    loadCartAndImages();
-  }, [loadCartAndImages]);
+    const loadImages = async () => {
+      try {
+        if (cart.length > 0) {
+          await fetchImages(cart);
+        }
+      } catch (error) {
+        console.error("Error loading images:", error);
+        toast.error("Failed to load product images");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Initialize product quantities
+    const initialQuantities = {};
+    cart.forEach((item) => {
+      initialQuantities[item._id] = {
+        packSize: item.prices[0]?.packSize || "",
+        quantity: 1,
+      };
+    });
+    setProductQuantities(initialQuantities);
+
+    loadImages();
+  }, [cart]);
 
   // Fetch product images with retry logic
-  const fetchImages = async (cartItems, retryCount = 3) => {
+  const fetchImages = useCallback(async (cartItems, retryCount = 3) => {
     for (let attempt = 0; attempt < retryCount; attempt++) {
       try {
         const ids = cartItems.map((item) => item._id);
@@ -76,7 +81,7 @@ const Cart = () => {
         await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
       }
     }
-  };
+  }, []);
 
   // Handle pack size change
   const handlePackSizeChange = useCallback((productId, packSize) => {
@@ -89,95 +94,56 @@ const Cart = () => {
   // Handle adding a product to the cart
   const handleAddToCart = useCallback(
     (productId) => {
-      const productDetails = productQuantities[productId];
       const product = cart.find((item) => item._id === productId);
-
-      if (!productDetails?.packSize) {
+      
+      // If no product found, show error
+      if (!product) {
+        toast.error("Product not found");
+        return;
+      }
+  
+      // Get or initialize product details
+      const productDetails = productQuantities[productId] || {
+        packSize: product.prices[0]?.packSize || "", // Default to first pack size
+        quantity: 1 // Default quantity
+      };
+  
+      // Validate pack size is selected
+      if (!productDetails.packSize) {
         toast.warning("Please select a pack size");
         return;
       }
-
-      const price = product.prices.find(
-        (p) => p.packSize === productDetails.packSize
-      )?.price;
-      if (!price) {
+  
+      // Validate price exists for selected pack size
+      const priceObj = product.prices.find(p => p.packSize === productDetails.packSize);
+      if (!priceObj) {
         toast.error("Price not found for selected pack size");
         return;
       }
-
-      setCart((prevCart) => {
-        const updatedCart = prevCart.map((item) => {
-          if (item._id === productId) {
-            const currentQuantity = item.quantities?.[productDetails.packSize] || 0;
-            return {
-              ...item,
-              quantities: {
-                ...item.quantities,
-                [productDetails.packSize]: currentQuantity + (productDetails.quantity || 1),
-              },
-            };
-          }
-          return item;
-        });
-
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        return updatedCart;
+  
+      // Ensure quantity is valid number, default to 1
+      const quantity = Number(productDetails.quantity) > 0 
+        ? Number(productDetails.quantity) 
+        : 1;
+  
+      // Add to cart with validated data
+      addToCart({
+        ...product,
+        selectedPackSize: productDetails.packSize,
+        quantity: quantity,
+        price: priceObj.price // Include price for verification
       });
-
-      toast.success(`${product.name} (${productDetails.packSize}) added to cart`);
+  
+      // toast.success(`${product.name} (${productDetails.packSize}) added to cart`);
     },
-    [cart, productQuantities]
+    [cart, productQuantities, addToCart]
   );
-
   // Handle updating product quantity
   const handleUpdateQuantity = useCallback((productId, packSize, change) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart
-        .map((item) => {
-          if (item._id === productId) {
-            const currentQty = item.quantities[packSize] || 0;
-            const newQty = Math.max(0, currentQty + change);
-
-            const updatedQuantities = { ...item.quantities };
-            if (newQty === 0) {
-              delete updatedQuantities[packSize];
-            } else {
-              updatedQuantities[packSize] = newQty;
-            }
-
-            return { ...item, quantities: updatedQuantities };
-          }
-          return item;
-        })
-        .filter((item) => Object.keys(item.quantities || {}).length > 0);
-
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-  }, []);
-
-  // Handle removing an item from the cart
-  const handleRemoveItem = useCallback((productId) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter((item) => item._id !== productId);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-    toast.success("Item removed from cart");
-  }, []);
+    updateCartItem(productId, packSize, change);
+  }, [updateCartItem]);
 
   // Calculate the total price of the cart
-//   const calculateTotal = useCallback(() => {
-//     return cart.reduce((total, item) => {
-//       return (
-//         total +
-//         Object.entries(item.quantities || {}).reduce((sum, [volume, qty]) => {
-//           const price = item.prices.find((p) => p.packSize === volume)?.price || 0;
-//           return sum + price * qty;
-//         }, 0)
-//       );
-//     }, 0);
-//   }, [cart]);
   const calculateTotal = useCallback(() => {
     return cart.reduce((total, item) => {
       return (
@@ -200,7 +166,7 @@ const Cart = () => {
   }, [cart.length]);
 
   // Load Razorpay script dynamically
-  const loadRazorpayScript = () => {
+  const loadRazorpayScript = useCallback(() => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
         resolve(true);
@@ -212,10 +178,48 @@ const Cart = () => {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
-  };
+  }, []);
+
+  // Handle payment success
+  const handlePaymentSuccess = useCallback(async (paymentResponse, razorpayOrderId, amount) => {
+    try {
+      const verificationResponse = await api.post("/orders/verify", {
+        razorpayPaymentId: paymentResponse.razorpay_payment_id,
+        razorpayOrderId: paymentResponse.razorpay_order_id,
+        razorpaySignature: paymentResponse.razorpay_signature,
+      });
+
+      if (verificationResponse.status === 200) {
+        toast.success("Payment successful!");
+        setShowCheckoutModal(false);
+        clearCart();
+
+        navigate("/payment/paymentSuccess", {
+          state: {
+            message: "Payment verified successfully!",
+            paymentDetails: paymentResponse,
+            razorpayOrderId,
+            orderDetails: amount,
+          },
+        });
+      } else {
+        throw new Error("Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      navigate("/payment/paymentFailed", {
+        state: {
+          message: "Payment verification failed",
+          error: error.message,
+        },
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [navigate, clearCart]);
 
   // Handle confirming checkout and payment
-  const handleConfirmCheckout = async () => {
+  const handleConfirmCheckout = useCallback(async () => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -300,46 +304,7 @@ const Cart = () => {
       toast.error(error.message || "Checkout failed");
       setIsProcessing(false);
     }
-  };
-
-  // Handle payment success
-  const handlePaymentSuccess = async (paymentResponse, razorpayOrderId, amount) => {
-    try {
-      const verificationResponse = await api.post("/orders/verify", {
-        razorpayPaymentId: paymentResponse.razorpay_payment_id,
-        razorpayOrderId: paymentResponse.razorpay_order_id,
-        razorpaySignature: paymentResponse.razorpay_signature,
-      });
-
-      if (verificationResponse.status === 200) {
-        toast.success("Payment successful!");
-        setShowCheckoutModal(false);
-        setCart([]);
-        localStorage.removeItem("cart");
-
-        navigate("/payment/paymentSuccess", {
-          state: {
-            message: "Payment verified successfully!",
-            paymentDetails: paymentResponse,
-            razorpayOrderId,
-            orderDetails: amount,
-          },
-        });
-      } else {
-        throw new Error("Payment verification failed");
-      }
-    } catch (error) {
-      console.error("Payment verification error:", error);
-      navigate("/payment/paymentFailed", {
-        state: {
-          message: "Payment verification failed",
-          error: error.message,
-        },
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  }, [cart, handlePaymentSuccess, isProcessing, loadRazorpayScript, userDetails]);
 
   // Handle input changes in the checkout form
   const handleInputChange = useCallback((e) => {
@@ -371,35 +336,37 @@ const Cart = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-6 px-4">Shopping Cart</h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
-              {cart.map((item, index) => (
-                <CartItem
-                  key={item._id}
-                  item={item}
-                  index={index}
-                  cartImg={cartImg}
-                  productQuantities={productQuantities}
-                  handlePackSizeChange={handlePackSizeChange}
-                  handleAddToCart={handleAddToCart}
-                  handleUpdateQuantity={handleUpdateQuantity}
-                  handleRemoveItem={handleRemoveItem}
-                />
-              ))}
+{cart.map((item, index) => (
+  <CartItem
+    key={`${item._id}-${index}`}
+    item={item}
+    cartImg={cartImg[index]}
+    productQuantities={productQuantities}
+    onPackSizeChange={handlePackSizeChange}
+    onAddToCart={handleAddToCart}
+    onUpdateQuantity={updateCartItem} // Changed from handleUpdateQuantity to updateCartItem
+    onRemoveItem={removeFromCart}
+  />
+))}
             </div>
             <div className="lg:col-span-1">
-              <OrderSummary calculateTotal={calculateTotal} handleCheckout={handleCheckout} />
+<OrderSummary 
+  total={calculateTotal()}
+  onCheckout={handleCheckout} 
+/>
             </div>
           </div>
         </div>
       )}
-      <CheckoutModal
-        showCheckoutModal={showCheckoutModal}
-        setShowCheckoutModal={setShowCheckoutModal}
-        userDetails={userDetails}
-        handleInputChange={handleInputChange}
-        handleConfirmCheckout={handleConfirmCheckout}
-        isProcessing={isProcessing}
-        calculateTotal={calculateTotal}
-      />
+     <CheckoutModal
+  showCheckoutModal={showCheckoutModal}
+  setShowCheckoutModal={setShowCheckoutModal}
+  userDetails={userDetails}
+  handleInputChange={handleInputChange}
+  handleConfirmCheckout={handleConfirmCheckout}
+  isProcessing={isProcessing}
+  calculateTotal={calculateTotal}
+/>
     </div>
   );
 };

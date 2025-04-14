@@ -10,7 +10,7 @@ const benefits = [
   },
   {
     title: "Boosts Immunity",
-    description: "Strengthens the body’s defense system.",
+    description: "Strengthens the body's defense system.",
     icon: <ShieldCheck size={30} className="text-green-500" />,
     borderColor: "border-green-500",
   },
@@ -39,31 +39,33 @@ const App = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-orange-50 to-orange-100 p-2 py-10 overflow-x-hidden">
-      
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-orange-50 to-orange-100 p-4 py-10">
+      {/* Improved Loader */}
       <div className="mt-10 flex justify-center">
-  <div className="w-16 h-16 border-4 border-dashed rounded-full border-orange-500 animate-[spin_3s_linear_infinite]"></div>
-</div>
-
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-transparent border-t-orange-500 border-r-orange-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-1 border-4 border-transparent border-b-orange-400 border-l-orange-400 rounded-full animate-spin animation-delay-200"></div>
+        </div>
+      </div>
 
       <p className="text-center mt-4 text-sm text-gray-500 animate-pulse">
         Please wait while we prepare the best turmeric products for you...
       </p>
 
-      <h1 className="text-2xl font-bold text-orange-600 mb-6 text-center">
+      <h1 className="text-2xl md:text-3xl font-bold text-orange-600 mb-6 text-center">
         🌿 Turmeric Benefits 🌿
       </h1>
 
-      <div className="relative w-full max-w-6xl px-4 box-border overflow-hidden">
+      <div className="w-full max-w-6xl px-4">
         {/* Benefit Cards */}
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className={`w-full sm:w-72 p-4 bg-white border-2 rounded-xl shadow-md transition-all duration-500 ease-in-out transform hover:scale-105 ${
+              className={`w-full sm:w-72 p-4 bg-white border-2 rounded-xl shadow-md transition-all duration-300 ease-in-out ${
                 index === currentIndex
-                  ? `${benefit.borderColor} scale-105 opacity-100`
-                  : "border-gray-200 opacity-80"
+                  ? `${benefit.borderColor} ring-2 ring-offset-2 ${benefit.borderColor.replace('border', 'ring')} scale-[1.02]`
+                  : "border-gray-200 opacity-90 hover:opacity-100"
               }`}
             >
               <div className="flex justify-center mb-2">{benefit.icon}</div>

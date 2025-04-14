@@ -1,254 +1,191 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import axios from "axios";
-import Layout from "./components/Layout";
-import Home from "./components/Home";
-import Login from "./components/auth/Login";
-import SignUp from "./components/auth/SignUp";
-import ForgotPassword from "./components/auth/ForgotPassword";
-import ResetPassword from "./components/auth/ResetPassword";
-import Contact from "./components/Contact";
-import About from "./components/About";
-import Products from "./components/Products";
-import ProductDetails from "./components/ProductDetails";
-import AdminDashboard from "./components/admin/dashboard"; 
-import AdminProducts from "./components/admin/products";
-import AdminAddProducts from "./components/admin/Addproduct"
-import AdminEditProducts from "./components/admin/EditProduct"
-import AdminOrder from "./components/admin/order/orders";
-import AdminOrderDetail from "./components/admin/order/orderDetail";
-import AdminProcessing from "./components/admin/order/ProcessingOrders";
-import AdminProcessed from "./components/admin/order/ProcessedOrder";
-import AdminFailedOrders from "./components/admin/order/failedOrders";
-import Privacy from "./components/policy/privacy";
-import Terms from "./components/policy/terms"; 
-import Refund from "./components/policy/refund";
-import Shipping from "./components/policy/shipping";
-import Cart from "./components/cart/cart";
-import PaymentFail from "./components/paymentFail";
-import PaymentSuccess from "./components/paymentSuccess";
-import Developer from "./components/Developer";
-import Checkout from "./components/checkout";
 import { Provider } from "react-redux";
 import store from "./redux/store";
-
+import Layout from "./components/Layout";
+import LoadingSpinner from "./components/common/LoadingSpinner";
+import NotFound from "./components/common/NotFound";
+import ScrollToTop from "./components/common/ScrollTop";
+// Environment configuration
 const backendURL = process.env.REACT_APP_BACKEND_URL;
-const NotFound = () => (
-  <div className="flex flex-col items-center justify-center h-screen">
-    <h1 className="text-4xl font-bold text-red-500">404</h1>
-    <p className="text-lg">Page Not Found</p>
-    <a
-      href="/"
-      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-    >
-      Go to Home
-    </a>
-  </div>
-);
 
-const fetchUserRole = async () => {
-  try {
-    const token = localStorage.getItem("token"); // Retrieve the token from localStorage
-    if (!token) {
-      console.error("No token found in localStorage");
-      return null; // Return null if there's no token
-    }
+// Lazy-loaded components for better performance
+const Home = lazy(() => import("./components/Home"));
+const Login = lazy(() => import("./components/auth/Login"));
+const Register = lazy(() => import("./components/auth/SignUp"));
+const ForgotPassword = lazy(() => import("./components/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./components/auth/ResetPassword"));
+const Contact = lazy(() => import("./components/Contact"));
+const About = lazy(() => import("./components/About"));
+const Products = lazy(() => import("./components/Products"));
+// const ProductDetails = lazy(() => import("./components/ProductDetails"));
+const Cart = lazy(() => import("./components/cart/cart"));
+const CheckOut = lazy(() => import("./components/checkout-copy"));
+const Privacy = lazy(() => import("./components/policy/privacy"));
+const Terms = lazy(() => import("./components/policy/terms"));
+const Refund = lazy(() => import("./components/policy/refund"));
+const Shipping = lazy(() => import("./components/policy/shipping"));
+const PaymentFail = lazy(() => import("./components/paymentFail"));
+const PaymentSuccess = lazy(() => import("./components/paymentSuccess"));
+const Developer = lazy(() => import("./components/Developer"));
 
-    // Make the request with the token in the Authorization header
-    const response = await axios.get(`${backendURL}/auth/role`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-      },
-    });
-    console.log(response.data);
-    return response.data; // Return the role from backend response
-  } catch (error) {
-    if (error.response) {
-      // Handle different HTTP status codes (e.g., 401 Unauthorized or 403 Forbidden)
-      if (error.response.status === 401) {
-        console.error("Unauthorized: Token is missing or invalid");
-      } else if (error.response.status === 403) {
-        console.error("Forbidden: Access is denied");
-      } else {
-        console.error("An error occurred:", error.response.data);
+// Admin components with lazy loading
+const AdminDashboard = lazy(() => import("./components/admin/dashboard"));
+const AdminProducts = lazy(() => import("./components/admin/products"));
+const AdminAddProducts = lazy(() => import("./components/admin/Addproduct"));
+const AdminEditProducts = lazy(() => import("./components/admin/EditProduct"));
+const AdminOrder = lazy(() => import("./components/admin/order/orders"));
+const AdminOrderDetail = lazy(() => import("./components/admin/order/orderDetail"));
+const AdminProcessing = lazy(() => import("./components/admin/order/ProcessingOrders"));
+const AdminProcessed = lazy(() => import("./components/admin/order/ProcessedOrder"));
+const AdminFailedOrders = lazy(() => import("./components/admin/order/failedOrders"));
+
+// API service abstraction
+const authService = {
+  async fetchUserRole() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found");
+        return null;
       }
-    } else {
-      console.error("Error fetching user role:", error);
+
+      const response = await axios.get(`${backendURL}/auth/role`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        console.error("Auth error:", error.response.status, error.response.data);
+      } else {
+        console.error("Network error:", error.message);
+      }
+      return null;
     }
-    return null; // Default to no role if fetching fails
   }
 };
 
+// Route configuration
+const routes = {
+  public: [
+    { path: "/", element: <Home /> },
+    { path: "/login", element: <Login /> },
+    {path: "/register", element: <Register /> },
+    { path: "/forgot-password", element: <ForgotPassword /> },
+    { path: "/reset-password", element: <ResetPassword /> },
+    { path: "/contact", element: <Contact /> },
+    { path: "/about", element: <About /> },
+    { path: "/products", element: <Products /> },
+    // { path: "/product/:id", element: <ProductDetails /> },
+    { path: "/cart", element: <Cart /> },
+    {path: "/checkout", element: <CheckOut /> },
+    { path: "/policy/privacy", element: <Privacy /> },
+    { path: "/policy/terms", element: <Terms /> },
+    { path: "/policy/refund", element: <Refund /> },
+    { path: "/policy/shipping", element: <Shipping /> },
+    { path: "/payment/paymentFailed", element: <PaymentFail /> },
+    { path: "/payment/paymentSuccess", element: <PaymentSuccess /> },
+    { path: "/developer", element: <Developer /> }
+  ],
+  admin: [
+    { path: "/admin/dashboard", element: <AdminDashboard /> },
+    { path: "/admin/products", element: <AdminProducts /> },
+    { path: "/admin/failedOrders", element: <AdminFailedOrders /> },
+    { path: "/admin/products/add", element: <AdminAddProducts /> },
+    { path: "/admin/products/edit/:id", element: <AdminEditProducts /> },
+    { path: "/admin/orders", element: <AdminOrder /> },
+    { path: "/admin/processing", element: <AdminProcessing /> },
+    { path: "/admin/processed", element: <AdminProcessed /> },
+    { path: "/admin/orders/:id", element: <AdminOrderDetail /> }
+  ]
+};
 
-
-// PrivateRoute Component for Secure Role-Based Access
-const PrivateRoute = ({ children, allowedRoles }) => {
+// PrivateRoute Component with memoization
+const PrivateRoute = React.memo(({ children, allowedRoles }) => {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getRole = async () => {
-      const fetchedRole = await fetchUserRole();
-      console.log("Fetched Role:", fetchedRole); // Log the fetched role
+      const fetchedRole = await authService.fetchUserRole();
       setRole(fetchedRole);
       setLoading(false);
     };
     getRole();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div
-          className="border-4 border-gray-300 border-t-black rounded-full w-12 h-12 animate-spin"
-          aria-label="Loading..."
-        ></div>
-      </div>
-    );
-  }
-
-  if (!role) {
-    console.log("No role, redirecting to login");
-    return <Navigate to="/login" replace />;
-  }
-
-  console.log("Role in PrivateRoute:", role?.user?.role); // Debug log for the role
-
-  // Ensure the role comparison is strict and exact
-  if (!allowedRoles.includes(role?.user?.role)) {
-    console.log("Unauthorized role, redirecting to home");
-    return <Navigate to="/" replace />;
-  }
+  if (loading) return <LoadingSpinner />;
+  if (!role) return <Navigate to="/login" replace />;
+  if (!allowedRoles.includes(role?.user?.role)) return <Navigate to="/" replace />;
 
   return children;
-};
-
-
-
-
+});
 
 function App() {
-
   const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
-    const getRole = async () => {
-      const roleData = await fetchUserRole();
-      if (roleData?.user?.role === "admin") {
-        setIsAdmin(true);
-      }
+    const checkAdminStatus = async () => {
+      const roleData = await authService.fetchUserRole();
+      setIsAdmin(roleData?.user?.role === "admin");
     };
-    getRole();
+    checkAdminStatus();
   }, []);
+
+  // Memoize route rendering to prevent unnecessary re-renders
+  const renderedRoutes = useMemo(() => (
+    <Routes>
+      <Route path="/" element={<Layout isAdmin={isAdmin} />}>
+        {/* Public Routes */}
+        {routes.public.map((route) => (
+          <Route 
+            key={route.path} 
+            path={route.path} 
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                {route.element}
+              </Suspense>
+            } 
+          />
+        ))}
+        
+        {/* Admin Routes */}
+        {routes.admin.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Suspense fallback={<LoadingSpinner />}>
+                  {route.element}
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+        ))}
+        
+        {/* Fallback for unmatched routes */}
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  ), [isAdmin]);
 
   return (
     <Provider store={store}>
-
-    <Router>
-      <Routes>
-        {/* Main Layout */}
-        <Route path="/" element={<Layout  isAdmin={isAdmin}  />}>
-          {/* Public Routes */}
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          {/* <Route path="signup" element={<SignUp />} /> */}
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="reset-password" element={<ResetPassword />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="about" element={<About />} />
-          <Route path="products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          {/* <Route path="/checkout" element={<Checkout />} /> */}
-          <Route path="/policy/privacy" element={<Privacy />} />
-          <Route path="/policy/terms" element={<Terms />} />
-          <Route path="/policy/refund" element={<Refund />} />
-          <Route path="/policy/shipping" element={<Shipping />} />
-          <Route path="/payment/paymentFailed" element={<PaymentFail />} />
-          <Route path="/payment/paymentSuccess" element={<PaymentSuccess />} />
-          <Route path ="/developer" element={<Developer/>}/>
-          {/* Protected Admin Routes */}
-          <Route
-            path="admin/dashboard"
-            element={
-              <PrivateRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="admin/products"
-            element={
-              <PrivateRoute allowedRoles={["admin"]}>
-                <AdminProducts />
-              </PrivateRoute>
-            }
-          />
-           <Route
-            path="admin/failedOrders"
-            element={
-              <PrivateRoute allowedRoles={["admin"]}>
-                <AdminFailedOrders />
-              </PrivateRoute>
-            }
-          />
-          <Route 
-          path="admin/products/add"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminAddProducts/>
-            </PrivateRoute>
-          }
-          />
-          <Route 
-          path="admin/products/edit/:id"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminEditProducts/>
-            </PrivateRoute>
-          }
-          />
-           <Route 
-          path="admin/orders"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminOrder/>
-            </PrivateRoute>
-          }
-          />
-          <Route 
-          path="admin/processing"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminProcessing/>
-            </PrivateRoute>
-          }
-          />
-          <Route 
-          path="admin/processed"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminProcessed/>
-            </PrivateRoute>
-          }
-          />
-           <Route 
-          path="admin/orders/:id"
-          element={
-            <PrivateRoute allowedRoles={['admin']}>
-              <AdminOrderDetail/>
-            </PrivateRoute>
-          }
-          />
-
-          {/* Fallback for unmatched routes */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </Router>
+      
+      <Router>
+      <ScrollToTop />
+        <Suspense fallback={<LoadingSpinner fullPage />}>
+          {renderedRoutes}
+        </Suspense>
+      </Router>
     </Provider>
-
   );
 }
 
-export default App;
+export default React.memo(App);
+
+// AIzaSyDZGMyMQ5v2pERahxw0Z5qDNDtr89aoHjU

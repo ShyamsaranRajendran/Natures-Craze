@@ -40,8 +40,7 @@ function Orders() {
  const filteredOrders = orders.filter((order) => {
    const matchesSearch =
      !filters.search ||
-     order.username.toLowerCase().includes(filters.search.toLowerCase()) ||
-     order.order_id.slice(-4).includes(filters.search); // Search by last 4 digits of order ID
+     order.username.toLowerCase().includes(filters.search.toLowerCase()) 
 
    const matchesStatus = !filters.status || order.status === filters.status;
    const matchesPaymentMethod =
@@ -75,7 +74,7 @@ function Orders() {
   }
 
   return (
-    <div className="p-4 mt-10">
+    <div className="p-4 py-10 mt-10">
             <ToastContainer />
       <h1 className="text-2xl font-bold text-center mb-4">Orders</h1>
 
@@ -223,3 +222,5 @@ function Orders() {
 }
 
 export default Orders;
+
+

@@ -1,23 +1,94 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import {
-  Award,
-  Leaf,
-  Heart,
-  Truck,
-  Phone,
-  Mail,
-  MapPin,
-  ArrowRight,
-  Star,
-  Users,
-  Shield,
-  Sun,
-} from "lucide-react";
-const About = () => {
+import { Award, Leaf, Heart, Truck, Phone, Mail, MapPin, ArrowRight, Star, Users, Shield, Sun } from "lucide-react";
+
+const AboutSkeleton = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
+      {/* Hero Section Skeleton */}
+      <div className="relative h-[60vh] bg-gray-200 animate-pulse">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <div className="h-12 w-64 bg-gray-300 rounded mb-4"></div>
+          <div className="h-6 w-80 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+
+      {/* Mission Section Skeleton */}
+      <div className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="h-10 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((_, i) => (
+                  <div key={i} className="flex items-center">
+                    <div className="w-5 h-5 bg-gray-200 rounded-full mr-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
+              <div className="bg-gray-200 rounded-xl w-full h-64 animate-pulse"></div>
+              <div className="bg-gray-200 rounded-xl w-full h-64 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Values Section Skeleton */}
+      <div className="bg-amber-50 py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="h-10 w-48 bg-gray-200 rounded mx-auto mb-12"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl p-6 shadow-lg">
+                <div className="w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
+                <div className="h-6 w-32 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Process Section Skeleton */}
+      <div className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="h-10 w-48 bg-gray-200 rounded mx-auto mb-12"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((_, i) => (
+              <div key={i} className="text-center">
+                <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                <div className="h-5 w-24 bg-gray-200 rounded mx-auto mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const About = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <AboutSkeleton />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       <div className="relative h-[60vh]">
         <div className="absolute inset-0">
           <img

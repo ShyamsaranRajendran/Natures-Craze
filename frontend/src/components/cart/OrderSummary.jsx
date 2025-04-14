@@ -1,32 +1,35 @@
 // OrderSummary.js
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const OrderSummary = ({ calculateTotal, handleCheckout }) => {
+const OrderSummary = ({ total, onCheckout }) => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h2>
-      <div className="space-y-2">
-        <div className="flex justify-between text-gray-600">
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+      <div className="space-y-4">
+        <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>₹{calculateTotal()}</span>
+          <span>₹{total.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between">
           <span>Shipping</span>
           <span>Free</span>
         </div>
-        <div className="border-t pt-2 mt-2">
-          <div className="flex justify-between text-base font-semibold">
+        <div className="border-t pt-4">
+          <div className="flex justify-between font-bold">
             <span>Total</span>
-            <span>₹{calculateTotal()}</span>
+            <span>₹{total.toFixed(2)}</span>
           </div>
         </div>
+        <button
+          onClick={onCheckout}
+          // onClick={() =>navigate("/checkout")}
+          className="w-full py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
+        >
+          Proceed to Checkout
+        </button>
       </div>
-      <button
-        onClick={handleCheckout}
-        className="w-full mt-4 bg-amber-500 text-white py-2 rounded-md hover:bg-amber-600 transition-colors"
-      >
-        Proceed to Checkout
-      </button>
     </div>
   );
 };

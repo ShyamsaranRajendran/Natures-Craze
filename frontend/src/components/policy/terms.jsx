@@ -1,111 +1,149 @@
 import React, { useEffect } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, FileText, AlertCircle, Shield, Link, Copyright, Scale, Mail, Phone } from "lucide-react";
+
 function Terms() {
   const navigate = useNavigate();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
-  });
-  return (
-    <div className="bg-gray-50 p-6 rounded-lg shadow-md max-w-4xl mx-auto mt-10 relative">
-    {/* Back Button */}
-    <button
-      onClick={() => navigate(-1)}
-      className="fixed top-14 right-4 text-gray-600 bg-gray-100 hover:text-gray-800 p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300"
-      aria-label="Go Back"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M15 19l-7-7 7-7"
-        />
-      </svg>
-    </button> <h1 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-       
-        Terms and Conditions
-      </h1>
+  }, []);
 
-      <p className="text-gray-700 leading-relaxed mb-4">
-        For the purpose of these Terms and Conditions, the term{" "}
-        <span className="font-semibold">"we", "us", "our"</span> used anywhere
-        on this page shall mean
-        <span className="font-semibold"> MOUNESH RAJA V</span>, whose
-        registered/operational office is located at
-        <span className="italic">
-          {" "}
-          70, Pudurvellangattuvalasu, Kanagapuram (PO), Erode, Tamil Nadu,
-          638112
-        </span>
-        . The terms
-        <span className="font-semibold">
-          {" "}
-          "you", "your", "user", "visitor"
-        </span>{" "}
-        shall mean any natural or legal person visiting our website and/or
-        agreeing to purchase from us.
-      </p>
-      <p className="text-gray-700 leading-relaxed mb-4">
-        Your use of the website and/or purchase from us is governed by the
-        following Terms and Conditions:
-      </p>
-      <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
-        <li>
-          The content of the pages on this website is subject to change without
-          notice.
-        </li>
-        <li>
-          Neither we nor any third parties provide any warranty or guarantee as
-          to the accuracy, timeliness, performance, completeness, or suitability
-          of the information and materials found or offered on this website for
-          any particular purpose.
-        </li>
-        <li>
-          You acknowledge that such information and materials may contain
-          inaccuracies or errors, and we expressly exclude liability for any
-          such inaccuracies or errors to the fullest extent permitted by law.
-        </li>
-        <li>
-          Your use of any information or materials on our website and/or product
-          pages is entirely at your own risk, for which we shall not be liable.
-          It is your responsibility to ensure that any products, services, or
-          information available through our website and/or product pages meet
-          your specific requirements.
-        </li>
-        <li>
-          Our website contains material that is owned by or licensed to us. This
-          material includes, but is not limited to, the design, layout, look,
-          appearance, and graphics. Reproduction is prohibited other than in
-          accordance with the copyright notice, which forms part of these terms
-          and conditions.
-        </li>
-        <li>
-          Unauthorized use of information provided by us shall give rise to a
-          claim for damages and/or be a criminal offense.
-        </li>
-        <li>
-          From time to time, our website may include links to other websites.
-          These links are provided for your convenience to offer further
-          information. You may not create a link to our website from another
-          website or document without{" "}
-          <span className="font-semibold">MOUNESH RAJA V's</span> prior written
-          consent.
-        </li>
-      </ul>
-      <p className="text-gray-700 leading-relaxed mb-4">
-        Any dispute arising out of your use of our website, purchase with us, or
-        engagement with us is subject to the laws of India. We shall not be
-        liable for any loss or damage arising directly or indirectly from the
-        decline of authorization for any transaction on account of the
-        cardholder exceeding the preset limit mutually agreed by us with our
-        acquiring bank from time to time.
-      </p>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-20 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Header with back button */}
+        <div className="bg-purple-500 px-6 py-4 flex items-center justify-between">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-white hover:text-purple-100 transition-colors duration-200"
+          >
+            <ChevronLeft className="h-5 w-5" />
+            <span className="ml-1 font-medium">Back</span>
+          </button>
+          <h1 className="text-2xl text-center font-bold text-white">Terms and Conditions</h1>
+          <div className="w-6"></div> {/* Spacer for balance */}
+        </div>
+
+        {/* Content */}
+        <div className="p-6 sm:p-8">
+          <div className="prose prose-purple max-w-none">
+            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6 rounded-r-lg flex items-start">
+              <FileText className="h-5 w-5 text-purple-600 mr-3 mt-0.5 flex-shrink-0" />
+              <p className="text-gray-700">
+                Please read these terms carefully before using our services. By accessing or using our platform, you agree to be bound by these terms.
+              </p>
+            </div>
+
+            {/* Definitions Section */}
+            <section className="mb-8">
+              <div className="flex items-start mb-4">
+                <div className="bg-purple-100 rounded-full p-2 mr-4 flex-shrink-0">
+                  <Scale className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Definitions</h3>
+                  <p className="text-gray-700 mb-2">
+                    <span className="font-semibold">"We", "us", "our"</span> refers to <span className="font-semibold">MOUNESH RAJA V</span>, with office at:
+                  </p>
+                  <p className="text-gray-700 italic mb-2">
+                    70, Pudurvellangattuvalasu, Kanagapuram (PO), Erode, Tamil Nadu, 638112
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-semibold">"You", "your", "user"</span> refers to any visitor or purchaser on our platform.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Terms List */}
+            <section className="space-y-6">
+              <div className="flex items-start">
+                <div className="bg-purple-100 rounded-full p-2 mr-4 flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">Website Content</h3>
+                  <p className="text-gray-700">
+                    Content on this website may change without notice. We don't guarantee the accuracy, completeness, or suitability of information for any purpose.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-purple-100 rounded-full p-2 mr-4 flex-shrink-0">
+                  <Shield className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">User Responsibility</h3>
+                  <p className="text-gray-700">
+                    Your use of our website/products is at your own risk. You're responsible for ensuring any products/services meet your requirements.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-purple-100 rounded-full p-2 mr-4 flex-shrink-0">
+                  <Copyright className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">Intellectual Property</h3>
+                  <p className="text-gray-700">
+                    All website content (design, layout, graphics) is owned/licensed to us. Unauthorized reproduction is prohibited.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-purple-100 rounded-full p-2 mr-4 flex-shrink-0">
+                  <Link className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">External Links</h3>
+                  <p className="text-gray-700">
+                    We may include links to other sites for convenience. Creating links to our site requires prior written consent.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                  <span className="w-3 h-3 bg-purple-400 rounded-full mr-2"></span>
+                  Legal Jurisdiction
+                </h3>
+                <p className="text-gray-700">
+                  Any disputes are subject to Indian laws. We're not liable for transaction declines due to cardholder exceeding preset limits.
+                </p>
+              </div>
+            </section>
+
+            {/* Contact Info */}
+            <section className="mt-8 bg-purple-50 rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <span className="w-3 h-3 bg-purple-400 rounded-full mr-2"></span>
+                Questions About Our Terms?
+              </h2>
+              <p className="text-gray-700 mb-4">
+                If you have any questions about these terms and conditions, please contact us.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <Phone className="h-5 w-5 text-purple-600 mr-3 flex-shrink-0" />
+                  <a href="tel:+919361864257" className="text-gray-700 hover:text-purple-600">
+                    +91 9361864257
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-purple-600 mr-3 flex-shrink-0" />
+                  <a href="mailto:curcuimin138@gmail.com" className="text-gray-700 hover:text-purple-600">
+                    curcuimin138@gmail.com
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

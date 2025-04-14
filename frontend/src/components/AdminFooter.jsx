@@ -18,8 +18,8 @@ const BottomNavigation = () => {
   return (
     <>
       {/* Desktop Navigation (Hamburger Menu) */}
-      <div className="hidden lg:flex justify-between items-center px-6 py-4 bg-white shadow-md fixed top-0 w-full z-50 border-b-2 border-gray-300">
-        <h1 className="text-xl font-bold text-yellow-600">NaturesCraze</h1>
+      <div className="flex justify-between items-center px-4 md:px-6 py-3 md:py-4 bg-white shadow-md fixed top-0 w-full z-50 border-b-2 border-gray-300">
+      <h1 className="text-xl font-bold text-yellow-600">NaturesCraze</h1>
         <button onClick={() => setMenuOpen(!menuOpen)} className="ml-auto focus:outline-none">
           {menuOpen ? <X className="w-8 h-8 text-gray-600" /> : <Menu className="w-8 h-8 text-gray-600" />}
         </button>
@@ -27,7 +27,8 @@ const BottomNavigation = () => {
 
       {/* Dropdown Menu */}
       {menuOpen && (
-        <div className="hidden md:block fixed top-16 right-0 w-40 bg-white shadow-lg rounded-lg p-4 z-50">
+  <div className="hidden md:block fixed top-16 right-0 w-40 bg-white shadow-lg rounded-lg p-4 z-50">
+
           <nav className="flex flex-col space-y-3">
             <NavLink to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="flex items-center space-x-3 text-gray-700 hover:text-orange-500 transition">
               <Home className="w-5 h-5" />
@@ -73,26 +74,27 @@ const BottomNavigation = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 w-full bg-white shadow-xl py-4 flex items-center justify-around z-10 border-t-2 border-gray-300">
-        <NavLink to="/admin/dashboard" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-orange-500" : "text-gray-500"}`} aria-label="Home">
-          <Home className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
-          <span className="text-xs">Home</span>
-        </NavLink>
+  <NavLink to="/admin/dashboard" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-orange-500" : "text-gray-500"}`} aria-label="Home">
+    <Home className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
+    <span className="text-xs">Home</span>
+  </NavLink>
 
-        <NavLink to="/admin/products" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-red-500" : "text-gray-500"}`} aria-label="Products">
-          <ShoppingBag className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
-          <span className="text-xs">Products</span>
-        </NavLink>
+  <NavLink to="/admin/products" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-red-500" : "text-gray-500"}`} aria-label="Products">
+    <ShoppingBag className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
+    <span className="text-xs">Products</span>
+  </NavLink>
 
-        <NavLink to="/admin/orders" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-blue-500" : "text-gray-500"}`} aria-label="Orders">
-          <Package className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
-          <span className="text-xs">Orders</span>
-        </NavLink>
+  <NavLink to="/admin/orders" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-blue-500" : "text-gray-500"}`} aria-label="Orders">
+    <Package className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
+    <span className="text-xs">Orders</span>
+  </NavLink>
 
-        {/* <NavLink to="/admin/failedOrders" className={({ isActive }) => `group flex flex-col items-center ${isActive ? "text-purple-500" : "text-gray-500"}`} aria-label="Unpaid">
-          <Loader2 className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
-          <span className="text-xs">Unpaid</span>
-        </NavLink> */}
-      </div>
+  {/* Logout button for mobile */}
+  <button onClick={() => setShowLogoutConfirm(true)} className="group flex flex-col items-center text-gray-500 hover:text-red-500 transition-all duration-300" aria-label="Logout">
+    <LogOut className="w-6 h-6 group-hover:-translate-y-2 transition-all duration-300" />
+    <span className="text-xs">Logout</span>
+  </button>
+</div>
     </>
   );
 };

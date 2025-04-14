@@ -1,12 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "./Header";
 import Footer from "./Footer";
 import AdminFooter from "./AdminFooter"; // New footer for admin
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import ScrollToTop from "./common/ScrollTop";
+import ChatBot from "./ChatBot";
 const Layout = ({ isAdmin }) => {
   const pageVariants = {
     initial: { opacity: 0, scale: 0.95 },
@@ -20,6 +20,7 @@ const Layout = ({ isAdmin }) => {
 
   return (
 <div className="flex flex-col min-h-screen pt-18 pb-16 sm:pb-0">
+  <ScrollToTop/>
 <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -32,7 +33,7 @@ const Layout = ({ isAdmin }) => {
         pauseOnHover
         style={{ zIndex: 9999 }} // Bring ToastContainer to the top
       />
-      <Header />
+     
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
@@ -46,6 +47,7 @@ const Layout = ({ isAdmin }) => {
           </motion.div>
         </AnimatePresence>
       </main>
+      <ChatBot/>
       {isAdmin ? <AdminFooter /> : <Footer />}{" "}
       {/* Conditionally render footer */}
     </div>

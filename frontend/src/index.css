@@ -17,6 +17,20 @@
   }
 }
 
+@layer utilities {
+  .animate-fadeInUp {
+    @apply opacity-0 translate-y-4;
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 .animate-hero-section {
   animation: heroSlide 15s ease-in-out infinite;
 }

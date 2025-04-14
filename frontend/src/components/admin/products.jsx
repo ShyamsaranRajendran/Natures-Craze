@@ -132,43 +132,50 @@ const Products = () => {
         <p className="text-red-500 text-center">{error}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product._id}
-              className="bg-white border rounded-lg shadow hover:shadow-md transition-all p-4 flex flex-col"
-            >
-              <img
-                src={product.image || DefaultImage}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded-lg mb-4 cursor-pointer"
-                onClick={() => handleImageClick(product.image || DefaultImage)}
-              />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600 text-sm line-clamp-2">
-                  {product.description}
-                </p>
-              </div>
-              <div className="mt-4 flex justify-between space-x-2">
-                <button
-                  onClick={() => handleEdit(product)}
-                  className="flex-1 px-4 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-all flex items-center justify-center"
-                >
-                  <Edit size={18} className="mr-1" />
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product._id)}
-                  className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-all flex items-center justify-center"
-                >
-                  <Trash2 size={18} className="mr-1" />
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+      {filteredProducts.length === 0 ? (
+  <div className="text-center text-gray-500 col-span-full py-10 text-lg">
+    No products found.
+  </div>
+) : (
+  filteredProducts.map((product) => (
+    <div
+      key={product._id}
+      className="bg-white border rounded-lg shadow hover:shadow-md transition-all p-4 flex flex-col"
+    >
+      <img
+        src={product.image || DefaultImage}
+        alt={product.name}
+        className="w-full h-40 object-cover rounded-lg mb-4 cursor-pointer"
+        onClick={() => handleImageClick(product.image || DefaultImage)}
+      />
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          {product.name}
+        </h3>
+        <p className="text-gray-600 text-sm line-clamp-2">
+          {product.description}
+        </p>
+      </div>
+      <div className="mt-4 flex justify-between space-x-2">
+        <button
+          onClick={() => handleEdit(product)}
+          className="flex-1 px-4 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-all flex items-center justify-center"
+        >
+          <Edit size={18} className="mr-1" />
+          Edit
+        </button>
+        <button
+          onClick={() => handleDelete(product._id)}
+          className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-all flex items-center justify-center"
+        >
+          <Trash2 size={18} className="mr-1" />
+          Delete
+        </button>
+      </div>
+    </div>
+  ))
+)}
+
         </div>
       )}
     </div>
