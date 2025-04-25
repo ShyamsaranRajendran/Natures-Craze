@@ -7,8 +7,6 @@
 
 🔗 **Live Demo:** [www.natures-carze.com](http://www.natures-carze.com)
 
-![Natures Craze Screenshot](https://via.placeholder.com/800x400?text=Natures+Craze+Screenshot) 
-*(Consider adding actual screenshot here)*
 
 ## 🚀 Key Features
 
